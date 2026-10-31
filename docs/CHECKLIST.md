@@ -11,7 +11,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ## Backend
 
 ### B0 · Preparación del proyecto (~1 h 45 min)
-- [ ] **B0.1** Crear `server/` con `npm init`, TypeScript en modo estricto y `tsconfig.json` — 30 min
+- [x] **B0.1** Crear `server/` con `npm init`, TypeScript en modo estricto y `tsconfig.json` — 30 min
 - [ ] **B0.2** Scripts `dev` (nodemon), `build` y `start` — 15 min
 - [ ] **B0.3** ESLint + Prettier — 20 min
 - [ ] **B0.4** Husky + commitlint para forzar Conventional Commits — 20 min
