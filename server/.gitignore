@@ -1,0 +1,16 @@
+# Dependencias y compilado
+node_modules
+dist
+
+# Variables de entorno (se versiona solo el ejemplo)
+.env
+.env.*
+!.env.example
+
+# Logs y reportes de pruebas
+logs
+*.log
+coverage
+
+# Imágenes subidas en desarrollo
+uploads

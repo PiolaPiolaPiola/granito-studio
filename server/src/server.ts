@@ -1,0 +1,1 @@
+console.log(`Granito Studio API · Node ${process.version}`);
