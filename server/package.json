@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "rimraf dist && tsc",
-    "star": "node --enable.source-maps dist/server.ts",
+    "start": "node --enable-source-maps dist/server.js",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
