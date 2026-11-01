@@ -1,0 +1,20 @@
+# Servicios para desarrollo local. Uso: docker compose up -d
+services:
+  mongo:
+    image: mongo:8
+    container_name: granito-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_DATABASE: granito_studio
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-data:
