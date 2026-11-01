@@ -1,0 +1,3 @@
+npm --prefix server run lint
+npm --prefix server run format:check
+npm --prefix server run typecheck

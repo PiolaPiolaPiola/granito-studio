@@ -14,7 +14,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B0.1** Crear `server/` con `npm init`, TypeScript en modo estricto y `tsconfig.json` — 30 min
 - [x] **B0.2** Scripts `dev` (nodemon), `build` y `start` — 15 min
 - [x] **B0.3** ESLint + Prettier — 20 min
-- [ ] **B0.4** Husky + commitlint para forzar Conventional Commits — 20 min
+- [x] **B0.4** Husky + commitlint para forzar Conventional Commits — 20 min
 - [ ] **B0.5** MongoDB local con Docker Compose y `.env.example` — 20 min 🗄️
 
 ### B1 · Base del servidor (~2 h)

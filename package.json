@@ -1,0 +1,18 @@
+{
+  "name": "granito-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Configurador 3D de cocinas para una empresa de mármoles y granitos",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "husky": "^9.1.7"
+  }
+}
