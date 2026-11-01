@@ -1,0 +1,10 @@
+# Normaliza los saltos de línea a LF en todos los archivos de texto
+* text=auto eol=lf
+
+# Archivos binarios: nunca se modifican
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff2 binary

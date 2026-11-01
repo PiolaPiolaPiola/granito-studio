@@ -1,1 +1,1 @@
-console.log(`Granito Studio API · Node ${process.version}`);
+console.info(`Granito Studio API · Node ${process.version}`);
