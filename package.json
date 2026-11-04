@@ -5,7 +5,8 @@
   "description": "Configurador 3D de cocinas para una empresa de mármoles y granitos",
   "type": "module",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "check": "npm --prefix server run check"
   },
   "engines": {
     "node": ">=24"
@@ -13,6 +14,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0"
   }
 }

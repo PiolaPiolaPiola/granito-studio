@@ -1,0 +1,3 @@
+{
+  "server/**/*": "npm --prefix server exec -- prettier --write --ignore-unknown --ignore-path server/.prettierignore"
+}
