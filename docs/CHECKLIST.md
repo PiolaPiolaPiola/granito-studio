@@ -18,7 +18,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B0.5** MongoDB local con Docker Compose y `.env.example` — 20 min 🗄️
 
 ### B1 · Base del servidor (~2 h)
-- [ ] **B1.1** Variables de entorno validadas con zod (`config/env.ts`) — 20 min
+- [x] **B1.1** Variables de entorno validadas con zod (`config/env.ts`) — 20 min
 - [ ] **B1.2** Conexión a MongoDB con Mongoose — 20 min 🗄️
 - [ ] **B1.3** Separar `app.ts` (Express) de `server.ts` (arranque) + cors, helmet y JSON — 30 min 🏛️
 - [ ] **B1.4** Errores centralizados: `AppError`, middleware de errores y 404 — 30 min 🔌
