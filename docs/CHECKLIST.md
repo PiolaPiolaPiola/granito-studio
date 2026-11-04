@@ -21,8 +21,8 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B1.1** Variables de entorno validadas con zod (`config/env.ts`) — 20 min
 - [x] **B1.2** Conexión a MongoDB con Mongoose — 20 min 🗄️
 - [x] **B1.3** Separar `app.ts` (Express) de `server.ts` (arranque) + cors, helmet y JSON — 30 min 🏛️
-- [ ] **B1.4** Errores centralizados: `AppError`, middleware de errores y 404 — 30 min 🔌
-- [ ] **B1.5** Endpoint `GET /api/health` — 10 min 🔌
+- [x] **B1.4** Errores centralizados: `AppError`, middleware de errores y 404 — 30 min 🔌
+- [x] **B1.5** Endpoint `GET /api/health` — 10 min 🔌
 
 ### B2 · Modelos de dominio (~2 h) 🗄️
 - [ ] **B2.1** `Usuario`: email único, contraseña con hash, rol, `active`, `creationAt`/`updatedAt` — 20 min
