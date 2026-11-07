@@ -25,7 +25,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B1.5** Endpoint `GET /api/health` — 10 min 🔌
 
 ### B2 · Modelos de dominio (~2 h) 🗄️
-- [ ] **B2.1** `Usuario`: email único, contraseña con hash, rol, `active`, `creationAt`/`updatedAt` — 20 min
+- [x] **B2.1** `Usuario`: email único, contraseña con hash, rol, `active`, `creationAt`/`updatedAt` — 20 min
 - [ ] **B2.2** `Granito`: nombre, tipo, acabado, imagen, etiquetas, `active` — 30 min
 - [ ] **B2.3** `Mueble`: nombre, tipo, medidas en cm, miniatura, `active` — 30 min
 - [ ] **B2.4** `Diseno`: forma, medidas, muebles y materiales como subdocumentos con **ids** (no por nombre, como hacía Kimi) — 40 min
