@@ -19,6 +19,7 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.19.2",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
@@ -37,9 +38,11 @@
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.3.0",
     "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.4",
     "zod": "^4.6.7"
   }

@@ -31,7 +31,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B2.4** `Diseno`: forma, medidas, muebles y materiales como subdocumentos con **ids** (no por nombre, como hacía Kimi) — 40 min
 
 ### B3 · Autenticación (~2 h) 🔌
-- [ ] **B3.1** Login con bcrypt + JWT — 40 min
+- [x] **B3.1** Login con bcrypt + JWT — 40 min
 - [ ] **B3.2** Middleware `autenticar` y `autorizar(rol)` — 30 min 📐
 - [ ] **B3.3** `GET /api/auth/me` — 15 min
 - [ ] **B3.4** Script que crea el usuario del tío (sin registro público) — 20 min

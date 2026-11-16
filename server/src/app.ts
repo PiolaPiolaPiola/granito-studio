@@ -5,6 +5,7 @@ import { env } from './config/env.js';
 import { manejadorErrores } from './middlewares/manejadorErrores.js';
 import { noEncontrado } from './middlewares/noEncontrado.js';
 import { rutasSalud } from './routes/salud.routes.js';
+import { rutasAuth } from './routes/auth.routes.js';
 
 export const app = express();
 
@@ -13,6 +14,7 @@ app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/health', rutasSalud);
+app.use('/api/auth', rutasAuth);
 
 app.use(noEncontrado);
 app.use(manejadorErrores);
