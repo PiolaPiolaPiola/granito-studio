@@ -33,7 +33,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ### B3 · Autenticación (~2 h) 🔌
 - [x] **B3.1** Login con bcrypt + JWT — 40 min
 - [x] **B3.2** Middleware `autenticar` y `autorizar(rol)` — 30 min 📐
-- [ ] **B3.3** `GET /api/auth/me` — 15 min
+- [x] **B3.3** `GET /api/auth/me` — 15 min
 - [ ] **B3.4** Script que crea el usuario del tío (sin registro público) — 20 min
 - [ ] **B3.5** Límite de intentos en el login (rate limit) — 15 min
 

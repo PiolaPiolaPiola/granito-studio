@@ -20,7 +20,7 @@ export const login: RequestHandler = async (req, res) => {
 
 export const perfil: RequestHandler = async (req, res) => {
   if (!req.usuario) {
-    throw new AppError(401, 'Debe iniciar sesión');
+    throw new AppError(401, 'Debes iniciar sesión');
   }
 
   const usuario = await obtenerPerfil(req.usuario.sub);

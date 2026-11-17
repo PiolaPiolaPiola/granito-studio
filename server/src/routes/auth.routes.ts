@@ -5,4 +5,4 @@ import { autenticar } from '../middlewares/autenticar.js';
 export const rutasAuth = Router();
 
 rutasAuth.post('/login', login);
-rutasAuth.post('/me', autenticar, perfil);
+rutasAuth.get('/me', autenticar, perfil);
