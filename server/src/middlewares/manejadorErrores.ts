@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 import { AppError } from '../errors/AppError.js';
+import { ErrorValidacion } from '../errors/ErrorValidacion.js';
 
 function esErrorDeCliente(error: unknown): boolean {
   return (
@@ -14,6 +15,11 @@ function esErrorDeCliente(error: unknown): boolean {
 export const manejadorErrores: ErrorRequestHandler = (error: unknown, _req, res, next) => {
   if (res.headersSent) {
     next(error);
+    return;
+  }
+
+  if (error instanceof ErrorValidacion) {
+    res.status(error.statusCode).json({ mensaje: error.message, detalles: error.detalles });
     return;
   }
 

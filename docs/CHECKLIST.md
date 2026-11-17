@@ -38,7 +38,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [ ] **B3.5** Límite de intentos en el login (rate limit) — 15 min
 
 ### B4 · Validación de entrada (~1 h)
-- [ ] **B4.1** Esquemas zod por recurso + middleware `validar(schema)` — 1 h 🧩
+- [x] **B4.1** Esquemas zod por recurso + middleware `validar(schema)` — 1 h 🧩
 
 ### B5 · CRUD de granitos por capas (~3 h) 🏛️ 📐 🧩
 - [ ] **B5.1** Repository (acceso a datos) — 40 min 🧩 Repository

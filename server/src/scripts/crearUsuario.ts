@@ -1,3 +1,4 @@
+import '../config/zod.js';
 import { randomBytes } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import mongoose from 'mongoose';
@@ -5,11 +6,12 @@ import { z } from 'zod';
 import { conectarBaseDatos } from '../config/db.js';
 import { ROLES, UsuarioModelo } from '../models/usuario.model.js';
 import { hashearContrasena } from '../services/auth.service.js';
+import { emailNormalizado } from '../schemas/comunes.js';
 
 const USO = 'Uso: npm run usuario:crear -- --email correo@empresa.com --rol admin [--restablecer]';
 
 const esquemaArgumentos = z.object({
-  email: z.string().trim().toLowerCase().pipe(z.email()),
+  email: emailNormalizado,
   rol: z.enum(ROLES).default('vendedor'),
   restablecer: z.boolean().default(false),
 });
