@@ -34,7 +34,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B3.1** Login con bcrypt + JWT — 40 min
 - [x] **B3.2** Middleware `autenticar` y `autorizar(rol)` — 30 min 📐
 - [x] **B3.3** `GET /api/auth/me` — 15 min
-- [ ] **B3.4** Script que crea el usuario del tío (sin registro público) — 20 min
+- [x] **B3.4** Script que crea el usuario del tío (sin registro público) — 20 min
 - [ ] **B3.5** Límite de intentos en el login (rate limit) — 15 min
 
 ### B4 · Validación de entrada (~1 h)
