@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { env } from '../config/env.js';
 import { AppError } from '../errors/AppError.js';
 import { ROLES, UsuarioModelo, type Rol } from '../models/usuario.model.js';
+import { isValidObjectId } from 'mongoose';
 
 const COSTO_HASH = 12;
 const ALGORITMO_JWT = 'HS256';
@@ -49,4 +50,13 @@ export function verificarToken(token: string): PayloadToken {
   } catch {
     throw new AppError(401, 'Token inválido o expirado');
   }
+}
+
+export async function obtenerPerfil(id: string) {
+  const usuario = isValidObjectId(id) ? await UsuarioModelo.findById(id) : null;
+  if (!usuario?.active) {
+    throw new AppError(401, 'Debes iniciar sesión');
+  }
+
+  return usuario;
 }
