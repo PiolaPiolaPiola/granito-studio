@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import { RutaProtegida } from './auth/RutaProtegida'
 import { Layout } from './componentes/Layout'
 import { Disenos } from './paginas/disenos/Disenos'
@@ -15,6 +15,8 @@ const editor = () => import('./paginas/editor/EditorPagina').then((m) => ({ Comp
 const prototipo = () => import('./paginas/PrototipoMeson').then((m) => ({ Component: m.PrototipoMeson }))
 
 export const router = createBrowserRouter([
+  // Pública: landing de previsualización (sin sesión). Carga diferida por el 3D.
+  { path: '/', lazy: () => import('./paginas/landing/Landing').then((m) => ({ Component: m.Landing })) },
   { path: '/login', element: <Login /> },
   {
     element: <RutaProtegida />,
@@ -24,7 +26,6 @@ export const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { index: true, element: <Navigate to="/disenos" replace /> },
           { path: 'disenos', element: <Disenos /> },
           { path: 'disenos/nuevo', lazy: editor },
           { path: 'disenos/:id', lazy: editor },
