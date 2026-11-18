@@ -1,0 +1,206 @@
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined'
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import ButtonBase from '@mui/material/ButtonBase'
+import MenuItem from '@mui/material/MenuItem'
+import Paper from '@mui/material/Paper'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import TextField from '@mui/material/TextField'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Typography from '@mui/material/Typography'
+import { useCallback, useMemo, useState } from 'react'
+import { Controller, useFormContext, useWatch } from 'react-hook-form'
+import { sugerenciasApi } from '../../api'
+import { EstadoConsulta } from '../../componentes/EstadoConsulta'
+import { MuestraGranito } from '../../componentes/MuestraGranito'
+import {
+  asignarMaterial,
+  buscarMaterial,
+  ETIQUETA_FORMA,
+  FORMAS_COCINA,
+  quitarMaterial,
+  type EntradaDiseno,
+  type MaterialAsignado,
+  type Pieza,
+} from '../../dominio/diseno'
+import { ETIQUETA_TIPO_PIEDRA, TIPOS_PIEDRA, type Granito, type TipoPiedra } from '../../dominio/granito'
+import type { Mueble } from '../../dominio/mueble'
+import type { Sugerencia } from '../../dominio/sugerencia'
+import { useConsulta } from '../../hooks/useConsulta'
+
+export type Pestana = 'forma' | 'materiales' | 'sugerencias'
+
+interface Props {
+  granitos: Granito[]
+  catalogo: Map<string, Mueble>
+  pestana: Pestana
+  onPestana: (p: Pestana) => void
+  /** "meson" | "salpicadero" | "mueble:<idMuebleEnDiseno>" */
+  piezaElegida: string
+  onPieza: (clave: string) => void
+}
+
+export function PanelConfiguracion(props: Props) {
+  const { pestana, onPestana } = props
+  return (
+    <Paper component="section" aria-label="Configuración del diseño" variant="outlined" sx={{ overflow: 'hidden' }}>
+      <Tabs value={pestana} onChange={(_, v: Pestana) => onPestana(v)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tab value="forma" label="Forma" sx={{ minHeight: 48 }} />
+        <Tab value="materiales" label="Materiales" sx={{ minHeight: 48 }} />
+        <Tab value="sugerencias" label="Sugerencias" sx={{ minHeight: 48 }} />
+      </Tabs>
+      <Box sx={{ p: 2 }}>
+        {pestana === 'forma' && <TabForma />}
+        {pestana === 'materiales' && <TabMateriales {...props} />}
+        {pestana === 'sugerencias' && <TabSugerencias {...props} />}
+      </Box>
+    </Paper>
+  )
+}
+
+function TabForma() {
+  const { control, register, formState: { errors } } = useFormContext<EntradaDiseno>()
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Controller
+        control={control}
+        name="forma"
+        render={({ field }) => (
+          <ToggleButtonGroup exclusive fullWidth value={field.value} onChange={(_, v: EntradaDiseno['forma'] | null) => v !== null && field.onChange(v)} aria-label="Forma de la cocina">
+            {FORMAS_COCINA.map((f) => (
+              <ToggleButton key={f} value={f} sx={{ minHeight: 44, '&.Mui-selected': { bgcolor: 'rgba(143,112,66,0.16)', color: 'primary.dark' } }}>
+                {ETIQUETA_FORMA[f]}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        )}
+      />
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField label="Ancho (m)" type="number" slotProps={{ htmlInput: { step: 0.1, min: 0.5, max: 20 } }} error={errors.medidasM?.ancho !== undefined} helperText={errors.medidasM?.ancho?.message} {...register('medidasM.ancho', { valueAsNumber: true })} />
+        <TextField label="Fondo (m)" type="number" slotProps={{ htmlInput: { step: 0.1, min: 0.5, max: 20 } }} error={errors.medidasM?.fondo !== undefined} helperText={errors.medidasM?.fondo?.message} {...register('medidasM.fondo', { valueAsNumber: true })} />
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        La forma define la distribución base del espacio: los muebles se colocan por su posición, pared por pared.
+      </Typography>
+    </Box>
+  )
+}
+
+function interpretarPieza(clave: string): { pieza: Pieza; muebleEnDiseno?: string } {
+  if (clave.startsWith('mueble:')) return { pieza: 'mueble', muebleEnDiseno: clave.slice('mueble:'.length) }
+  return { pieza: clave === 'salpicadero' ? 'salpicadero' : 'meson' }
+}
+
+function TabMateriales({ granitos, catalogo, piezaElegida, onPieza }: Props) {
+  const { setValue, control } = useFormContext<EntradaDiseno>()
+  const muebles = useWatch({ control, name: 'muebles' })
+  const materiales = useWatch({ control, name: 'materiales' })
+  const [tipo, setTipo] = useState<TipoPiedra | ''>('')
+  const [etiqueta, setEtiqueta] = useState('')
+  const [colorLiso, setColorLiso] = useState('#f4f1ea')
+
+  const { pieza, muebleEnDiseno } = interpretarPieza(piezaElegida)
+  const actual = buscarMaterial(materiales, pieza, muebleEnDiseno)
+
+  const etiquetas = useMemo(() => [...new Set(granitos.flatMap((g) => g.etiquetas))].sort(), [granitos])
+  const visibles = granitos.filter((g) => (tipo === '' || g.tipo === tipo) && (etiqueta === '' || g.etiquetas.includes(etiqueta)))
+
+  const cambiar = (nuevos: MaterialAsignado[]) => setValue('materiales', nuevos, { shouldDirty: true })
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <TextField select label="Pieza" value={piezaElegida} onChange={(e) => onPieza(e.target.value)}>
+        <MenuItem value="meson">Mesón</MenuItem>
+        <MenuItem value="salpicadero">Salpicadero</MenuItem>
+        {[...muebles].sort((a, b) => a.posicion - b.posicion).map((m) => (
+          <MenuItem key={m._id} value={`mueble:${m._id}`}>{m.posicion}. {catalogo.get(m.mueble)?.nombre ?? 'Mueble'}</MenuItem>
+        ))}
+      </TextField>
+
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <TextField select label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value as TipoPiedra | '')}>
+          <MenuItem value="">Todos</MenuItem>
+          {TIPOS_PIEDRA.map((t) => <MenuItem key={t} value={t}>{ETIQUETA_TIPO_PIEDRA[t]}</MenuItem>)}
+        </TextField>
+        <TextField select label="Color / estilo" value={etiqueta} onChange={(e) => setEtiqueta(e.target.value)}>
+          <MenuItem value="">Todas</MenuItem>
+          {etiquetas.map((e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+        </TextField>
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.5 }}>
+        {visibles.map((g) => {
+          const activo = actual?.granito === g._id
+          return (
+            <ButtonBase
+              key={g._id}
+              aria-pressed={activo}
+              onClick={() => cambiar(asignarMaterial(materiales, pieza, muebleEnDiseno, { granito: g._id }))}
+              sx={{ flexDirection: 'column', gap: 0.5, p: 0.5, borderRadius: 2, minWidth: 0 }}
+            >
+              <MuestraGranito
+                imagenUrl={g.imagenUrl}
+                sx={{ width: '100%', aspectRatio: '1 / 1', borderRadius: '50%', ...(activo ? { border: 3, borderColor: 'primary.main', outline: '2px solid rgba(143,112,66,0.35)', outlineOffset: 2 } : {}) }}
+              />
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: '100%' }}>{g.nombre}</Typography>
+            </ButtonBase>
+          )
+        })}
+      </Box>
+      {visibles.length === 0 && <Typography variant="body2" color="text.secondary">Ningún granito coincide con el filtro.</Typography>}
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 14, flex: 1 }}>
+          Color liso
+          <input type="color" value={colorLiso} onChange={(e) => setColorLiso(e.target.value)} style={{ width: 44, height: 36, border: 0, padding: 0, background: 'none' }} />
+        </Box>
+        <Button variant="outlined" onClick={() => cambiar(asignarMaterial(materiales, pieza, muebleEnDiseno, { colorHex: colorLiso }))}>Aplicar color</Button>
+        <Button color="inherit" disabled={actual === undefined} onClick={() => cambiar(quitarMaterial(materiales, pieza, muebleEnDiseno))}>Quitar</Button>
+      </Box>
+    </Box>
+  )
+}
+
+function TabSugerencias({ granitos }: Props) {
+  const { setValue, control } = useFormContext<EntradaDiseno>()
+  const forma = useWatch({ control, name: 'forma' })
+  const muebles = useWatch({ control, name: 'muebles' })
+  const materiales = useWatch({ control, name: 'materiales' })
+  const granitoActualId = buscarMaterial(materiales, 'meson')?.granito
+
+  const consulta = useConsulta(useCallback(() => sugerenciasApi.sugerir({ forma, granitoActualId }), [forma, granitoActualId]))
+
+  const aplicar = (s: Sugerencia) => {
+    let nuevos = asignarMaterial(materiales, 'meson', undefined, { granito: s.granitoId })
+    nuevos = asignarMaterial(nuevos, 'salpicadero', undefined, { granito: s.granitoId })
+    for (const m of muebles) nuevos = asignarMaterial(nuevos, 'mueble', m._id, { colorHex: s.colorMueblesHex })
+    setValue('materiales', nuevos, { shouldDirty: true })
+  }
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <EstadoConsulta cargando={consulta.cargando && consulta.datos === undefined} error={consulta.error} onReintentar={consulta.recargar} />
+      {consulta.datos?.map((s) => {
+        const granito = granitos.find((g) => g._id === s.granitoId)
+        return (
+          <Paper key={s.granitoId} variant="outlined" sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main', mb: 0.5 }}>
+              <AutoAwesomeOutlined fontSize="small" />
+              <Typography sx={{ fontWeight: 600, color: 'text.primary' }}>{s.titulo}</Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{s.descripcion}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Typography variant="caption" sx={{ px: 1.25, py: 0.25, borderRadius: 3, bgcolor: '#EFEAE2' }}>{s.estilo}</Typography>
+              {granito && <MuestraGranito imagenUrl={granito.imagenUrl} sx={{ width: 20, height: 20, borderRadius: '50%' }} />}
+              <Box aria-hidden="true" sx={{ width: 20, height: 20, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: s.colorMueblesHex }} />
+            </Box>
+            <Button size="small" variant="contained" startIcon={<CheckCircleOutlined />} onClick={() => aplicar(s)}>Aplicar</Button>
+          </Paper>
+        )
+      })}
+    </Box>
+  )
+}
