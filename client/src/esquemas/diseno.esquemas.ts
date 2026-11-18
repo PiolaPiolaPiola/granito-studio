@@ -1,0 +1,71 @@
+import { z } from 'zod'
+import { FORMAS_COCINA, PIEZAS } from '../dominio/diseno'
+
+const idMongo = z.string().regex(/^[0-9a-f]{24}$/i, 'Debe ser un id válido')
+
+const medidaM = z
+  .number({ error: 'Escribe un número' })
+  .min(0.5, 'Mínimo 0.5 m')
+  .max(20, 'Máximo 20 m')
+
+const esquemaMuebleEnDiseno = z.object({
+  _id: idMongo,
+  mueble: idMongo,
+  posicion: z.int().min(1),
+})
+
+const esquemaMaterial = z
+  .object({
+    pieza: z.enum(PIEZAS),
+    muebleEnDiseno: idMongo.optional(),
+    granito: idMongo.optional(),
+    colorHex: z
+      .string()
+      .regex(/^#[0-9a-f]{6}$/i, 'Usa un color como #a1b2c3')
+      .optional(),
+  })
+  .refine((m) => (m.granito === undefined) !== (m.colorHex === undefined), {
+    message: 'Elige un granito o un color (solo uno de los dos)',
+    path: ['granito'],
+  })
+  .refine((m) => (m.pieza === 'mueble') === (m.muebleEnDiseno !== undefined), {
+    message: 'muebleEnDiseno es obligatorio solo cuando la pieza es mueble',
+    path: ['muebleEnDiseno'],
+  })
+
+/**
+ * Espejo de `server/src/schemas/diseno.schemas.ts`: validar en el cliente da
+ * errores inmediatos; el servidor sigue siendo la fuente de verdad.
+ * (Idea para después: moverlos a un paquete compartido y no duplicarlos.)
+ */
+export const esquemaDiseno = z
+  .object({
+    nombre: z.string().trim().min(1, 'El nombre es obligatorio').max(80, 'Máximo 80 caracteres'),
+    forma: z.enum(FORMAS_COCINA),
+    medidasM: z.object({ ancho: medidaM, fondo: medidaM }),
+    muebles: z.array(esquemaMuebleEnDiseno).max(50, 'Máximo 50 muebles'),
+    materiales: z.array(esquemaMaterial).max(100),
+  })
+  .superRefine((diseno, ctx) => {
+    const posiciones = new Set<number>()
+    diseno.muebles.forEach((m, i) => {
+      if (posiciones.has(m.posicion)) {
+        ctx.addIssue({ code: 'custom', message: 'Ya hay otro mueble en esta posición', path: ['muebles', i, 'posicion'] })
+      }
+      posiciones.add(m.posicion)
+    })
+
+    const ids = new Set(diseno.muebles.map((m) => m._id.toLowerCase()))
+    const usadas = new Set<string>()
+    diseno.materiales.forEach((m, i) => {
+      const id = m.muebleEnDiseno?.toLowerCase()
+      if (id !== undefined && !ids.has(id)) {
+        ctx.addIssue({ code: 'custom', message: 'No hay un mueble con ese _id en este diseño', path: ['materiales', i, 'muebleEnDiseno'] })
+      }
+      const clave = `${m.pieza}:${id ?? ''}`
+      if (usadas.has(clave)) {
+        ctx.addIssue({ code: 'custom', message: 'Esta pieza ya tiene un material asignado', path: ['materiales', i, 'pieza'] })
+      }
+      usadas.add(clave)
+    })
+  })
