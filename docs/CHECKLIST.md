@@ -67,7 +67,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ### B10 · Pruebas (~3 h)
 - [x] **B10.1** Vitest + supertest + mongodb-memory-server — 40 min
 - [x] **B10.2** Pruebas de auth (login, token inválido, rol sin permiso) — 1 h
-- [ ] **B10.3** Pruebas del CRUD de granitos — 1 h 20 min
+- [x] **B10.3** Pruebas del CRUD de granitos — 1 h 20 min
 
 ### B11 · Datos y documentación (~2 h 30 min) 🔌
 - [ ] **B11.1** Seed con granitos y muebles de ejemplo (los de Kimi) — 30 min
