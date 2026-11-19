@@ -212,3 +212,20 @@ describe('objetos de referencia y foto del espacio', () => {
     expect((await request(app).get(fondoUrl)).status).toBe(404);
   });
 });
+
+describe('colores del espacio', () => {
+  it('guarda pared, piso y techo y rechaza colores inválidos', async () => {
+    const entorno = { pared: '#c9d2c0', piso: '#7a5638', techo: '#fafafa' };
+    const ok = await request(app)
+      .post('/api/disenos')
+      .set(vendedor)
+      .send({ ...entrada, entorno });
+    expect((ok.body as { diseno: { entorno: object } }).diseno.entorno).toEqual(entorno);
+
+    const mal = await request(app)
+      .post('/api/disenos')
+      .set(vendedor)
+      .send({ ...entrada, entorno: { pared: 'verde' } });
+    expect(mal.status).toBe(400);
+  });
+});

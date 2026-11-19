@@ -130,6 +130,7 @@ export function Inicio() {
                 materiales={previa.vista.diseno.materiales}
                 granitos={previa.vista.granitos}
                 objetos={previa.vista.diseno.objetos}
+                entorno={previa.vista.diseno.entorno}
                 nombreArchivo={previa.vista.diseno.nombre}
                 zoomConRueda={false}
               />

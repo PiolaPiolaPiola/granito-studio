@@ -74,6 +74,13 @@ export interface AcabadosMeson {
   cascada: boolean;
 }
 
+/** Colores del cuarto, para ver si los muebles combinan con el entorno. */
+export interface Entorno {
+  pared?: string;
+  piso?: string;
+  techo?: string;
+}
+
 export interface Diseno {
   nombre: string;
   espacio: Espacio;
@@ -84,6 +91,7 @@ export interface Diseno {
   materiales: MaterialAsignado[];
   /** Puede faltar en diseños guardados antes de existir (las consultas `lean` no ponen defaults). */
   objetos?: ObjetoReferencia[];
+  entorno?: Entorno;
   /** Foto del espacio real del cliente sobre la que se diseña (privada: no sale en el enlace). */
   fondoUrl?: string;
   /** Código secreto del enlace público de solo lectura (no existe si no se ha compartido). */
@@ -163,6 +171,16 @@ const esquemaDiseno = new Schema<Diseno>(
     muebles: { type: [esquemaMuebleEnDiseno], default: [] },
     materiales: { type: [esquemaMaterial], default: [] },
     objetos: { type: [esquemaObjeto], default: [] },
+    entorno: {
+      type: new Schema<Entorno>(
+        {
+          pared: { type: String, match: /^#[0-9a-f]{6}$/i },
+          piso: { type: String, match: /^#[0-9a-f]{6}$/i },
+          techo: { type: String, match: /^#[0-9a-f]{6}$/i },
+        },
+        { _id: false },
+      ),
+    },
     fondoUrl: { type: String, trim: true },
     codigoPublico: { type: String },
     destacado: { type: Boolean, required: true, default: false },

@@ -84,6 +84,7 @@ export class ServicioDisenos {
       forma: original.forma,
       medidasM: { ancho: original.medidasM.ancho, fondo: original.medidasM.fondo },
       acabados: { ...original.acabados },
+      ...(original.entorno && { entorno: { ...original.entorno } }),
       objetos: (original.objetos ?? []).map(({ tipo, ubicacion }) => ({
         tipo,
         ubicacion: { ...ubicacion },

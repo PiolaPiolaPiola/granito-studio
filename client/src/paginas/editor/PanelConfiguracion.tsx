@@ -33,7 +33,7 @@ import {
 } from '../../dominio/diseno'
 import { ETIQUETA_TIPO_PIEDRA, TIPOS_PIEDRA, type Granito, type TipoPiedra } from '../../dominio/granito'
 import { ESPACIOS, ETIQUETA_ESPACIO, type Espacio, type Mueble } from '../../dominio/mueble'
-import { PALETA_MUEBLES, PALETA_PIEDRAS } from '../../dominio/paleta'
+import { PALETA_MUEBLES, PALETA_PAREDES, PALETA_PIEDRAS, PALETA_PISOS, PALETA_TECHOS } from '../../dominio/paleta'
 import type { Sugerencia } from '../../dominio/sugerencia'
 import { useConsulta } from '../../hooks/useConsulta'
 
@@ -136,6 +136,19 @@ function TabForma() {
           />
         )}
       />
+
+      <Typography component="h3" sx={{ fontWeight: 600, mt: 1 }}>Colores del espacio</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: -1.5 }}>
+        Para ver si los muebles y la piedra combinan con el entorno.
+      </Typography>
+      {([['entorno.pared', 'Pared', PALETA_PAREDES], ['entorno.piso', 'Piso', PALETA_PISOS], ['entorno.techo', 'Techo', PALETA_TECHOS]] as const).map(([campo, etiqueta, paleta]) => (
+        <Controller
+          key={campo}
+          control={control}
+          name={campo}
+          render={({ field }) => <SelectorColor etiqueta={etiqueta} paleta={paleta} valor={field.value} onCambiar={field.onChange} />}
+        />
+      ))}
     </Box>
   )
 }

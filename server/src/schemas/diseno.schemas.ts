@@ -7,7 +7,7 @@ import {
   TIPOS_OBJETO,
 } from '../models/diseno.model.js';
 import { ESPACIOS } from '../models/mueble.model.js';
-import { idMongo, nombre } from './comunes.js';
+import { colorHex, idMongo, nombre } from './comunes.js';
 
 const medidaM = z.number().min(0.5).max(20);
 const medidaCm = z.number().min(1).max(500);
@@ -82,6 +82,13 @@ export const esquemaDiseno = z
     muebles: z.array(esquemaMuebleEnDiseno).max(50).default([]),
     materiales: z.array(esquemaMaterial).max(100).default([]),
     objetos: z.array(esquemaObjeto).max(30).default([]),
+    entorno: z
+      .strictObject({
+        pared: colorHex.optional(),
+        piso: colorHex.optional(),
+        techo: colorHex.optional(),
+      })
+      .optional(),
   })
   .superRefine((diseno, ctx) => {
     const posiciones = new Set<number>();

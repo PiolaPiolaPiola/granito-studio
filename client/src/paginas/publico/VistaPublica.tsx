@@ -62,6 +62,7 @@ export function VistaPublica() {
             materiales={diseno.materiales}
             granitos={granitos}
             objetos={diseno.objetos}
+            entorno={diseno.entorno}
             nombreArchivo={diseno.nombre}
           />
         </Box>

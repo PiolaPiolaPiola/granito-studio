@@ -78,6 +78,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
   const mueblesDiseno = useWatch({ control, name: 'muebles' })
   const materiales = useWatch({ control, name: 'materiales' })
   const objetos = useWatch({ control, name: 'objetos' })
+  const entorno = useWatch({ control, name: 'entorno' })
 
   const catalogo = useMemo(() => new Map(catalogoLista.map((m) => [m._id, m])), [catalogoLista])
   const granitosPorId = useMemo(() => new Map(granitos.map((g) => [g._id, g])), [granitos])
@@ -232,6 +233,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               materiales={materiales}
               granitos={granitos}
               objetos={objetos}
+              entorno={entorno}
               fondoUrl={fondoUrl}
               key={fondoUrl ?? 'sin-foto'}
               nombreArchivo={nombre}

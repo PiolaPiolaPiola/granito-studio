@@ -35,5 +35,34 @@ export const PALETA_PIEDRAS: ColorPaleta[] = [
   { nombre: 'Moca', hex: '#9c8068' },
 ]
 
+/** Colores comunes de pintura para paredes. */
+export const PALETA_PAREDES: ColorPaleta[] = [
+  { nombre: 'Blanco hueso', hex: '#f3f0ea' },
+  { nombre: 'Blanco puro', hex: '#fafafa' },
+  { nombre: 'Gris perla', hex: '#d9d9d6' },
+  { nombre: 'Beige arena', hex: '#e8dccb' },
+  { nombre: 'Verde salvia', hex: '#c9d2c0' },
+  { nombre: 'Azul niebla', hex: '#c8d3db' },
+  { nombre: 'Terracota suave', hex: '#d9b8a3' },
+  { nombre: 'Gris carbón', hex: '#5c5f62' },
+]
+
+/** Pisos comunes (el color tiñe la textura de baldosas). */
+export const PALETA_PISOS: ColorPaleta[] = [
+  { nombre: 'Porcelanato beige', hex: '#e3ddd3' },
+  { nombre: 'Blanco mármol', hex: '#efefed' },
+  { nombre: 'Gris cemento', hex: '#a9a9a6' },
+  { nombre: 'Madera clara', hex: '#c8a77e' },
+  { nombre: 'Madera oscura', hex: '#7a5638' },
+  { nombre: 'Negro mate', hex: '#3a3a3c' },
+]
+
+export const PALETA_TECHOS: ColorPaleta[] = [
+  { nombre: 'Blanco', hex: '#fafafa' },
+  { nombre: 'Blanco hueso', hex: '#f3f0ea' },
+  { nombre: 'Gris claro', hex: '#e2e2e0' },
+  { nombre: 'Madera', hex: '#c8a77e' },
+]
+
 /** Color por defecto de los muebles nuevos: el roble claro, el acabado más común en las fotos. */
 export const COLOR_MUEBLE_POR_DEFECTO = PALETA_MUEBLES[0].hex

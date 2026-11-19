@@ -2,7 +2,7 @@ import { ContactShadows, Environment, Html, Lightformer, Line } from '@react-thr
 import type { ThreeEvent } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { Plane, Vector3 } from 'three'
-import type { AcabadosMeson, FormaCocina, MaterialAsignado, MedidasM } from '../dominio/diseno'
+import { ENTORNO_POR_DEFECTO, type AcabadosMeson, type Entorno, type FormaCocina, type MaterialAsignado, type MedidasM } from '../dominio/diseno'
 import type { Granito } from '../dominio/granito'
 import type { ObjetoReferencia } from '../dominio/objetos'
 import { ALTURA_PARED, type Colocacion } from './distribucion'
@@ -43,11 +43,13 @@ interface Props {
   mostrarCotas?: boolean
   /** Sobre la foto del cliente: sin piso ni paredes, solo los muebles y sus sombras. */
   sobreFoto?: boolean
+  /** Colores de pared, piso y techo. */
+  entorno?: Entorno
 }
 
 /** Todo lo que vive dentro del <Canvas>: luces, piso, paredes, muebles, objetos y cotas. */
 export function EscenaCocina(props: Props) {
-  const { forma, medidas, acabados, colocaciones, materiales, granitos, objetos = [], seleccionado, onSeleccionar, onMover, onArrastrando, mostrarCotas = false, sobreFoto = false } = props
+  const { forma, medidas, acabados, colocaciones, materiales, granitos, objetos = [], seleccionado, onSeleccionar, onMover, onArrastrando, mostrarCotas = false, sobreFoto = false, entorno = ENTORNO_POR_DEFECTO } = props
   const granitosPorId = useMemo(() => new Map(granitos.map((g) => [g._id, g])), [granitos])
   const meson = resolverMaterial(materiales, granitosPorId, 'meson')
   const salpicadero = resolverMaterial(materiales, granitosPorId, 'salpicadero')
@@ -129,9 +131,14 @@ export function EscenaCocina(props: Props) {
         <>
           <mesh rotation-x={-Math.PI / 2} receiveShadow>
             <planeGeometry args={[ancho + 1, fondo + 1]} />
-            <meshStandardMaterial map={pisoTextura} roughness={0.35} metalness={0.02} />
+            <meshStandardMaterial map={pisoTextura} color={entorno.piso} roughness={0.35} metalness={0.02} />
           </mesh>
-          <Paredes forma={forma} ancho={ancho} fondo={fondo} />
+          <Paredes forma={forma} ancho={ancho} fondo={fondo} color={entorno.pared} />
+          {/* Techo: mira hacia abajo, así desde arriba no se ve (no tapa la vista superior). */}
+          <mesh rotation-x={Math.PI / 2} position={[0, ALTURA_PARED, 0]}>
+            <planeGeometry args={[ancho, fondo]} />
+            <meshStandardMaterial color={entorno.techo} roughness={0.95} />
+          </mesh>
         </>
       )}
       {/* Sombra suave de contacto: "asienta" los muebles en el piso (también sobre la foto). */}
@@ -190,8 +197,7 @@ function Cotas({ ancho, fondo }: { ancho: number; fondo: number }) {
   )
 }
 
-function Paredes({ forma, ancho, fondo }: { forma: FormaCocina; ancho: number; fondo: number }) {
-  const color = '#f3f0ea'
+function Paredes({ forma, ancho, fondo, color }: { forma: FormaCocina; ancho: number; fondo: number; color: string }) {
   const laterales = forma === 'L' || forma === 'U' || forma === 'libre'
   return (
     <>

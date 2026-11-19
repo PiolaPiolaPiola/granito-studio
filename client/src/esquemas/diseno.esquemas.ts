@@ -65,6 +65,11 @@ export const esquemaDiseno = z
     }),
     muebles: z.array(esquemaMuebleEnDiseno).max(50, 'Máximo 50 muebles'),
     materiales: z.array(esquemaMaterial).max(100),
+    entorno: z.object({
+      pared: z.string().regex(/^#[0-9a-f]{6}$/i),
+      piso: z.string().regex(/^#[0-9a-f]{6}$/i),
+      techo: z.string().regex(/^#[0-9a-f]{6}$/i),
+    }),
     objetos: z
       .array(
         z.object({

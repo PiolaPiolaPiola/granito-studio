@@ -35,6 +35,15 @@ export interface AcabadosMeson {
   cascada: boolean
 }
 
+/** Colores del cuarto (pared, piso y techo). */
+export interface Entorno {
+  pared: string
+  piso: string
+  techo: string
+}
+
+export const ENTORNO_POR_DEFECTO: Entorno = { pared: '#f3f0ea', piso: '#e3ddd3', techo: '#fafafa' }
+
 export const ACABADOS_POR_DEFECTO: AcabadosMeson = { espesorCm: 3, salpicadero: 'bajo', cascada: false }
 
 /** Medidas propias de la pieza en este diseño; lo que falte sale del catálogo. */
@@ -87,10 +96,12 @@ export interface EntradaDiseno {
   materiales: MaterialAsignado[]
   /** Sofá, taza de baño, nevera…: dan escala, no se cotizan. */
   objetos: ObjetoReferencia[]
+  entorno: Entorno
 }
 
 /** Lo que devuelve la API. Los diseños viejos pueden no traer `espacio` ni `acabados`. */
-export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'acabados' | 'objetos'> {
+export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'acabados' | 'objetos' | 'entorno'> {
+  entorno?: Partial<Entorno>
   espacio?: Espacio
   objetos?: ObjetoReferencia[]
   /** Foto del espacio real del cliente (se muestra detrás del 3D). */
@@ -113,6 +124,7 @@ export function disenoVacio(espacio: Espacio = 'cocina'): EntradaDiseno {
     muebles: [],
     materiales: [],
     objetos: objetosPorDefecto(espacio, medidasM),
+    entorno: { ...ENTORNO_POR_DEFECTO },
   }
 }
 
@@ -189,6 +201,7 @@ export function clonarContenido(origen: EntradaDiseno): EntradaDiseno {
     ...origen,
     medidasM: { ...origen.medidasM },
     acabados: { ...origen.acabados },
+    entorno: { ...origen.entorno },
     objetos: origen.objetos.map((o) => ({ ...o, _id: generarObjectId(), ubicacion: { ...o.ubicacion } })),
     muebles: origen.muebles.map((m) => ({ ...copiarMueble(m), _id: nuevosIds.get(m._id) ?? m._id })),
     materiales: origen.materiales.map((m) => ({
@@ -210,6 +223,7 @@ export function aEntrada(diseno: Diseno): EntradaDiseno {
     muebles: diseno.muebles.map(copiarMueble),
     materiales: diseno.materiales.map((m) => ({ ...m })),
     objetos: (diseno.objetos ?? []).map((o) => ({ ...o, ubicacion: { ...o.ubicacion } })),
+    entorno: { ...ENTORNO_POR_DEFECTO, ...diseno.entorno },
   }
 }
 

@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography'
 import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { Scene } from 'three'
-import type { AcabadosMeson, FormaCocina, MaterialAsignado, MedidasM } from '../../dominio/diseno'
+import type { AcabadosMeson, Entorno, FormaCocina, MaterialAsignado, MedidasM } from '../../dominio/diseno'
 import type { Granito } from '../../dominio/granito'
 import type { ObjetoReferencia } from '../../dominio/objetos'
 import { puntoDeVista, type ComandoCamara, type Vista } from '../../escena/camara'
@@ -37,6 +37,7 @@ interface Props {
   materiales: MaterialAsignado[]
   granitos: Granito[]
   objetos?: ObjetoReferencia[]
+  entorno?: Entorno
   /** Foto del espacio real: se puede ver el diseño encima. */
   fondoUrl?: string
   nombreArchivo: string
@@ -51,7 +52,7 @@ interface Props {
 }
 
 export function VistaPrevia3D(props: Props) {
-  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl } = props
+  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl, entorno } = props
   const [cotas, setCotas] = useState(onMover !== undefined)
   const [sobreFoto, setSobreFoto] = useState(fondoUrl !== undefined)
   const verFoto = sobreFoto && fondoUrl !== undefined
@@ -112,6 +113,7 @@ export function VistaPrevia3D(props: Props) {
           objetos={objetos}
           mostrarCotas={cotas}
           sobreFoto={verFoto}
+          entorno={entorno}
         />
         <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} zoomConRueda={zoomConRueda} />
       </Canvas>
