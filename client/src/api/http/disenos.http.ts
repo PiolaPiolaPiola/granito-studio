@@ -10,23 +10,23 @@ export class DisenosApiHttp implements DisenosApi {
   }
 
   async listar(): Promise<Diseno[]> {
-    const { data } = await this.http.get<Diseno[]>('/disenos')
-    return data
+    const { data } = await this.http.get<{ disenos: Diseno[] }>('/disenos')
+    return data.disenos
   }
 
   async obtener(id: string): Promise<Diseno> {
-    const { data } = await this.http.get<Diseno>(`/disenos/${id}`)
-    return data
+    const { data } = await this.http.get<{ diseno: Diseno }>(`/disenos/${id}`)
+    return data.diseno
   }
 
   async crear(datos: EntradaDiseno): Promise<Diseno> {
-    const { data } = await this.http.post<Diseno>('/disenos', datos)
-    return data
+    const { data } = await this.http.post<{ diseno: Diseno }>('/disenos', datos)
+    return data.diseno
   }
 
   async reemplazar(id: string, datos: EntradaDiseno): Promise<Diseno> {
-    const { data } = await this.http.put<Diseno>(`/disenos/${id}`, datos)
-    return data
+    const { data } = await this.http.put<{ diseno: Diseno }>(`/disenos/${id}`, datos)
+    return data.diseno
   }
 
   async eliminar(id: string): Promise<void> {
@@ -34,7 +34,7 @@ export class DisenosApiHttp implements DisenosApi {
   }
 
   async duplicar(id: string): Promise<Diseno> {
-    const { data } = await this.http.post<Diseno>(`/disenos/${id}/duplicar`)
-    return data
+    const { data } = await this.http.post<{ diseno: Diseno }>(`/disenos/${id}/duplicar`)
+    return data.diseno
   }
 }

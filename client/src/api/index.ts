@@ -5,18 +5,13 @@ import { DisenosApiHttp } from './http/disenos.http'
 import { GranitosApiHttp } from './http/granitos.http'
 import { MueblesApiHttp } from './http/muebles.http'
 import { SugerenciasApiHttp } from './http/sugerencias.http'
-import { DisenosApiMock } from './mock/disenos.mock'
-import { GranitosApiMock } from './mock/granitos.mock'
-import { MueblesApiMock } from './mock/muebles.mock'
-import { SugerenciasApiMock } from './mock/sugerencias.mock'
 
 /**
  * RAÍZ DE COMPOSICIÓN: el único lugar donde se decide qué implementación usa
  * cada recurso. Las pantallas importan las constantes de abajo, tipadas con la
  * interfaz, y no saben si detrás hay un mock o Axios (inversión de dependencias).
  *
- * Para pasar un recurso a la API real, cambia UNA línea:
- *   export const granitosApi: GranitosApi = mock.granitos   →   real.granitos
+ * Cambiar la implementación de un recurso es cambiar UNA línea de abajo.
  */
 
 const real = {
@@ -27,19 +22,10 @@ const real = {
   sugerencias: new SugerenciasApiHttp(clienteHttp),
 }
 
-const mockGranitos = new GranitosApiMock()
-const mock = {
-  granitos: mockGranitos,
-  muebles: new MueblesApiMock(),
-  disenos: new DisenosApiMock(),
-  sugerencias: new SugerenciasApiMock(mockGranitos),
-}
-
-// ✅ Real: el backend ya tiene login y /auth/me.
+// ✅ Todo contra el backend real (F3). Los mocks siguen en `api/mock/` por si se necesita una demo
+// sin servidor: se importan aquí y se cambia `real.x` por la instancia del mock.
 export const authApi: AuthApi = real.auth
-
-// 🧪 Mock: el backend aún no tiene estos endpoints (B5–B9).
-export const granitosApi: GranitosApi = mock.granitos
-export const mueblesApi: MueblesApi = mock.muebles
-export const disenosApi: DisenosApi = mock.disenos
-export const sugerenciasApi: SugerenciasApi = mock.sugerencias
+export const granitosApi: GranitosApi = real.granitos
+export const mueblesApi: MueblesApi = real.muebles
+export const disenosApi: DisenosApi = real.disenos
+export const sugerenciasApi: SugerenciasApi = real.sugerencias

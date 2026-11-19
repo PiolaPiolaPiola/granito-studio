@@ -11,7 +11,9 @@ export class SugerenciasApiHttp implements SugerenciasApi {
   }
 
   async sugerir(contexto: ContextoSugerencia): Promise<Sugerencia[]> {
-    const { data } = await this.http.get<Sugerencia[]>('/sugerencias', { params: limpiarParametros(contexto) })
-    return data
+    const { data } = await this.http.get<{ sugerencias: Sugerencia[] }>('/sugerencias', {
+      params: limpiarParametros(contexto),
+    })
+    return data.sugerencias
   }
 }

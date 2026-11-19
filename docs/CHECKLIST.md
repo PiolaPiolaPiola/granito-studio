@@ -82,7 +82,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ## Frontend (se detalla al terminar el backend)
 - [ ] **F1** Integrar el código de Kimi en `client/` con los ajustes de la revisión
 - [ ] **F2** Prototipo 3D del mesón con textura (paso 1 original)
-- [ ] **F3** Conectar las pantallas a la API
+- [x] **F3** Conectar las pantallas a la API
 - [ ] **F4** Escena 3D completa: forma de cocina, muebles y materiales
 
 ## Cierre
