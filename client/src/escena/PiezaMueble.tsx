@@ -1,4 +1,5 @@
 import type { ThreeEvent } from '@react-three/fiber'
+import { ALTURA_SALPICADERO, CON_CASCADA, CON_MESON, CON_SALPICADERO, VUELO_MESON } from '../dominio/cotizacion'
 import type { AcabadosMeson } from '../dominio/diseno'
 import type { TipoMueble } from '../dominio/mueble'
 import type { Colocacion } from './distribucion'
@@ -6,18 +7,10 @@ import { Losa } from './Losa'
 import { FrenteConFoto, MaterialMueble } from './MaterialMueble'
 import type { MaterialResuelto } from './materiales'
 
-/** Tipos que llevan mesón de piedra encima. */
-const CON_MESON: readonly TipoMueble[] = ['inferior', 'isla', 'barra', 'lavamanos']
-/** Tipos que llevan salpicadero contra la pared (si el diseño lo pide). */
-const CON_SALPICADERO: readonly TipoMueble[] = ['inferior', 'lavamanos']
-/** Tipos que pueden llevar caída en cascada. */
-const CON_CASCADA: readonly TipoMueble[] = ['isla', 'barra']
+// Qué piezas llevan mesón, salpicadero o cascada: lo define `dominio/cotizacion.ts`
+// (así lo que se dibuja y lo que se cobra salen de la misma regla).
 const SIN_TIRADOR: readonly TipoMueble[] = ['repisa', 'biblioteca', 'barra']
-
-const ALTURA_SALPICADERO = { ninguno: 0, bajo: 0.1, completo: 0.6 } as const
 const GROSOR_SALPICADERO = 0.015
-/** El mesón sobresale un poco por el frente, como en las fotos. */
-const VUELO_MESON = 0.03
 
 interface Props {
   colocacion: Colocacion

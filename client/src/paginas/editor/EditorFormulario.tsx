@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import AddIcon from '@mui/icons-material/Add'
+import RequestQuoteOutlined from '@mui/icons-material/RequestQuoteOutlined'
 import SaveOutlined from '@mui/icons-material/SaveOutlined'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -25,6 +26,7 @@ import type { Mueble } from '../../dominio/mueble'
 import { distribuir, rotacionDe, type MuebleResuelto } from '../../escena/distribucion'
 import { esquemaDiseno } from '../../esquemas/diseno.esquemas'
 import { aplicarErroresApi, listarMensajes } from '../../formularios/erroresApi'
+import { DialogoCotizacion } from './DialogoCotizacion'
 import { PanelCatalogoMuebles } from './PanelCatalogoMuebles'
 import { PanelConfiguracion, type Pestana } from './PanelConfiguracion'
 import { PanelMueblesEnCocina } from './PanelMueblesEnCocina'
@@ -49,6 +51,8 @@ export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos
   const [pieza, setPieza] = useState('meson')
   const [seleccionado, setSeleccionado] = useState<string | null>(null)
   const lienzo = useRef<HTMLCanvasElement | null>(null)
+  /** Foto del lienzo al abrir la cotización (null = cerrada). */
+  const [cotizacion, setCotizacion] = useState<{ imagen: string | null } | null>(null)
 
   // React Hook Form guarda TODO el diseño; la escena 3D lee los mismos valores con useWatch.
   const metodos = useForm<EntradaDiseno>({ resolver: zodResolver(esquemaDiseno), defaultValues: inicial })
@@ -140,6 +144,13 @@ export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos
             {...register('nombre')}
           />
           <Box sx={{ flex: 1 }} />
+          <Button
+            variant="outlined"
+            startIcon={<RequestQuoteOutlined />}
+            onClick={() => setCotizacion({ imagen: lienzo.current?.toDataURL('image/png') ?? null })}
+          >
+            Cotización
+          </Button>
           <Button type="submit" variant="contained" startIcon={<SaveOutlined />} disabled={formState.isSubmitting}>
             {formState.isSubmitting ? 'Guardando…' : 'Guardar'}
           </Button>
@@ -204,6 +215,19 @@ export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos
           </Box>
         </Box>
       </Box>
+      <DialogoCotizacion
+        abierto={cotizacion !== null}
+        onCerrar={() => setCotizacion(null)}
+        imagen={cotizacion?.imagen ?? null}
+        nombre={nombre}
+        espacio={espacio}
+        forma={forma}
+        medidas={medidas}
+        acabados={acabados}
+        colocaciones={colocaciones}
+        materiales={materiales}
+        granitosPorId={granitosPorId}
+      />
     </FormProvider>
   )
 }
