@@ -10,6 +10,7 @@ import {
 } from '../repositories/granito.repository.js';
 import { MENSAJE_SIN_CAMPOS } from '../schemas/comunes.js';
 import { metadatosPagina } from '../utils/paginacion.js';
+import { conImagenGuardada, eliminarSinFallar } from './imagenes.js';
 import type {
   ActualizarGranito,
   CambiosGranito,
@@ -41,14 +42,9 @@ export class ServicioGranitos {
   async crear(datos: CrearGranito, imagen: ArchivoImagen) {
     await this.validarNombreLibre(datos.nombre);
 
-    const imagenUrl = await this.almacenamiento.guardar(imagen, CARPETA_IMAGENES);
-    try {
-      return await this.repositorio.crear({ ...datos, imagenUrl });
-    } catch (error) {
-      // Si la base rechaza el granito, la imagen quedaría huérfana: se borra (compensación).
-      await this.almacenamiento.eliminar(imagenUrl);
-      throw error;
-    }
+    return conImagenGuardada(this.almacenamiento, imagen, CARPETA_IMAGENES, (imagenUrl) =>
+      this.repositorio.crear({ ...datos, imagenUrl }),
+    );
   }
 
   async actualizar(id: string, cambios: ActualizarGranito, imagen?: ArchivoImagen) {
@@ -65,16 +61,13 @@ export class ServicioGranitos {
       return this.actualizarOFallar(id, cambios);
     }
 
-    const imagenUrl = await this.almacenamiento.guardar(imagen, CARPETA_IMAGENES);
-    let granito;
-    try {
-      granito = await this.actualizarOFallar(id, { ...cambios, imagenUrl });
-    } catch (error) {
-      await this.almacenamiento.eliminar(imagenUrl);
-      throw error;
-    }
-
-    await this.eliminarSinFallar(anterior.imagenUrl);
+    const granito = await conImagenGuardada(
+      this.almacenamiento,
+      imagen,
+      CARPETA_IMAGENES,
+      (imagenUrl) => this.actualizarOFallar(id, { ...cambios, imagenUrl }),
+    );
+    await eliminarSinFallar(this.almacenamiento, anterior.imagenUrl);
     return granito;
   }
 
@@ -84,15 +77,6 @@ export class ServicioGranitos {
 
   private async actualizarOFallar(id: string, cambios: CambiosGranito) {
     return existeOFallar(await this.repositorio.actualizar(id, cambios), NO_EXISTE);
-  }
-
-  /** La imagen vieja ya no se usa: si no se puede borrar, se registra y la petición sigue. */
-  private async eliminarSinFallar(url: string) {
-    try {
-      await this.almacenamiento.eliminar(url);
-    } catch (error) {
-      console.error(`No se pudo borrar la imagen anterior ${url}:`, error);
-    }
   }
 
   private async validarNombreLibre(nombre: string, excluirId?: string) {

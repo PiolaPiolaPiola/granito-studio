@@ -1,10 +1,13 @@
 import type { FormaCocina } from '../models/diseno.model.js';
 import type { Granito } from '../models/granito.model.js';
+import type { Espacio } from '../models/mueble.model.js';
 import type { ConId } from '../repositories/repositorio.js';
 
 /** Lo que se sabe del diseño cuando se piden sugerencias. */
 export interface ContextoSugerencia {
   forma: FormaCocina;
+  /** Cocina por defecto. */
+  espacio?: Espacio;
   /** Granito que hoy tiene el mesón: no se vuelve a sugerir. */
   granitoActualId?: string;
 }

@@ -1,13 +1,40 @@
 import { z } from 'zod';
-import { FORMAS_COCINA, PIEZAS } from '../models/diseno.model.js';
+import { FORMAS_COCINA, PIEZAS, ROTACIONES, SALPICADEROS } from '../models/diseno.model.js';
+import { ESPACIOS } from '../models/mueble.model.js';
 import { idMongo, nombre } from './comunes.js';
 
 const medidaM = z.number().min(0.5).max(20);
+const medidaCm = z.number().min(1).max(500);
+const coordenadaM = z.number().min(-20).max(20);
 
 const esquemaMuebleEnDiseno = z.strictObject({
   _id: idMongo.optional(),
   mueble: idMongo,
   posicion: z.int().min(1),
+  /** Medidas de esta pieza en el diseño (las que falten salen del catálogo). */
+  medidasCm: z
+    .strictObject({
+      ancho: medidaCm.optional(),
+      alto: medidaCm.optional(),
+      fondo: medidaCm.optional(),
+    })
+    .optional(),
+  /** Solo para la forma `libre`: centro del mueble en metros y giro en grados. */
+  ubicacion: z
+    .strictObject({
+      x: coordenadaM,
+      z: coordenadaM,
+      rotacion: z.union(ROTACIONES.map((r) => z.literal(r))).default(0),
+    })
+    .optional(),
+});
+
+export const ACABADOS_POR_DEFECTO = { espesorCm: 3, salpicadero: 'bajo', cascada: false } as const;
+
+const esquemaAcabados = z.strictObject({
+  espesorCm: z.number().min(1).max(10).default(ACABADOS_POR_DEFECTO.espesorCm),
+  salpicadero: z.enum(SALPICADEROS).default(ACABADOS_POR_DEFECTO.salpicadero),
+  cascada: z.boolean().default(ACABADOS_POR_DEFECTO.cascada),
 });
 
 const esquemaMaterial = z
@@ -32,8 +59,10 @@ const esquemaMaterial = z
 export const esquemaDiseno = z
   .strictObject({
     nombre,
+    espacio: z.enum(ESPACIOS).default('cocina'),
     forma: z.enum(FORMAS_COCINA),
     medidasM: z.strictObject({ ancho: medidaM, fondo: medidaM }),
+    acabados: esquemaAcabados.default({ ...ACABADOS_POR_DEFECTO }),
     muebles: z.array(esquemaMuebleEnDiseno).max(50).default([]),
     materiales: z.array(esquemaMaterial).max(100).default([]),
   })

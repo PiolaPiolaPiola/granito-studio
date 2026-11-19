@@ -10,7 +10,12 @@ export interface Granito {
   nombre: string;
   tipo: TipoPiedra;
   acabado: Acabado;
+  /** Textura que se pinta en 3D. */
   imagenUrl: string;
+  /** Foto de un trabajo real hecho con esta piedra (solo para mostrar en el catálogo). */
+  fotoUrl?: string;
+  /** Precio por metro cuadrado instalado, en pesos (para la cotización). */
+  precioM2?: number;
   etiquetas: string[];
   active: boolean;
   creationAt: Date;
@@ -23,6 +28,8 @@ const esquemaGranito = new Schema<Granito>(
     tipo: { type: String, enum: TIPOS_PIEDRA, required: true },
     acabado: { type: String, enum: ACABADOS, required: true },
     imagenUrl: { type: String, required: true, trim: true },
+    fotoUrl: { type: String, trim: true },
+    precioM2: { type: Number, min: 0 },
     etiquetas: { type: [{ type: String, trim: true, lowercase: true }], default: [] },
     active: { type: Boolean, required: true, default: true },
   },

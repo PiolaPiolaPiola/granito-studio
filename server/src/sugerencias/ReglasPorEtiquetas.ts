@@ -1,5 +1,6 @@
 import type { FormaCocina } from '../models/diseno.model.js';
 import type { Granito, TipoPiedra } from '../models/granito.model.js';
+import type { Espacio } from '../models/mueble.model.js';
 import type { ConId } from '../repositories/repositorio.js';
 import type { ContextoSugerencia, EstrategiaSugerencias, Sugerencia } from './estrategia.js';
 
@@ -65,7 +66,15 @@ const FORMA_EN_TEXTO: Record<FormaCocina, string> = {
   L: 'en L',
   U: 'en U',
   isla: 'con isla',
+  libre: 'a la medida',
 };
+
+/** "Para una cocina en L", "Para un baño", "Para una sala". */
+function describirEspacio(espacio: Espacio, forma: FormaCocina): string {
+  if (espacio === 'bano') return 'un baño';
+  if (espacio === 'sala') return 'una sala';
+  return `una cocina ${FORMA_EN_TEXTO[forma]}`;
+}
 
 /** "mármol Carrara Blanco", pero "Cuarzo Blanco Puro" (sin repetir "cuarzo" si ya está en el nombre). */
 function describirPiedra({ tipo, nombre }: Pick<Granito, 'tipo' | 'nombre'>): string {
@@ -92,7 +101,10 @@ function puntuar(granito: ConId<Granito>, regla: ReglaEstilo, forma: FormaCocina
 export class ReglasPorEtiquetas implements EstrategiaSugerencias {
   constructor(private readonly reglas: ReglaEstilo[] = REGLAS_ESTILO) {}
 
-  sugerir({ forma, granitoActualId }: ContextoSugerencia, catalogo: ConId<Granito>[]) {
+  sugerir(
+    { forma, espacio = 'cocina', granitoActualId }: ContextoSugerencia,
+    catalogo: ConId<Granito>[],
+  ) {
     const candidatos = catalogo.filter(
       ({ _id }) => _id.toString() !== granitoActualId?.toLowerCase(),
     );
@@ -115,7 +127,7 @@ export class ReglasPorEtiquetas implements EstrategiaSugerencias {
 
       usados.add(mejor.granito._id.toString());
       resultado.push({
-        sugerencia: this.armar(regla, mejor.granito, forma),
+        sugerencia: this.armar(regla, mejor.granito, espacio, forma),
         puntaje: mejor.puntaje,
       });
     }
@@ -133,10 +145,15 @@ export class ReglasPorEtiquetas implements EstrategiaSugerencias {
     return Promise.resolve(sugerencias);
   }
 
-  private armar(regla: ReglaEstilo, granito: ConId<Granito>, forma: FormaCocina): Sugerencia {
+  private armar(
+    regla: ReglaEstilo,
+    granito: ConId<Granito>,
+    espacio: Espacio,
+    forma: FormaCocina,
+  ): Sugerencia {
     return {
       titulo: `${regla.estilo}: ${granito.nombre} con muebles ${regla.nombreColor}`,
-      descripcion: `Para una cocina ${FORMA_EN_TEXTO[forma]}, el ${describirPiedra(granito)} (${granito.acabado}) combina con muebles ${regla.nombreColor} y da un estilo ${regla.estilo.toLowerCase()}.`,
+      descripcion: `Para ${describirEspacio(espacio, forma)}, el ${describirPiedra(granito)} (${granito.acabado}) combina con muebles ${regla.nombreColor} y da un estilo ${regla.estilo.toLowerCase()}.`,
       estilo: regla.estilo,
       granitoId: granito._id.toString(),
       colorMueblesHex: regla.colorMueblesHex,

@@ -51,10 +51,16 @@ export class ServicioDisenos {
     const original = await this.obtener(id);
 
     const idsNuevos = new Map<string, string>();
-    const muebles = original.muebles.map(({ _id, mueble, posicion }) => {
+    const muebles = original.muebles.map(({ _id, mueble, posicion, medidasCm, ubicacion }) => {
       const nuevoId = new Types.ObjectId().toString();
       idsNuevos.set(_id.toString(), nuevoId);
-      return { _id: nuevoId, mueble: mueble.toString(), posicion };
+      return {
+        _id: nuevoId,
+        mueble: mueble.toString(),
+        posicion,
+        ...(medidasCm && { medidasCm: { ...medidasCm } }),
+        ...(ubicacion && { ubicacion: { ...ubicacion } }),
+      };
     });
 
     const materiales = original.materiales.map(({ pieza, muebleEnDiseno, granito, colorHex }) => ({
@@ -66,8 +72,10 @@ export class ServicioDisenos {
 
     return this.repositorio.crear({
       nombre: nombreDeCopia(original.nombre),
+      espacio: original.espacio,
       forma: original.forma,
       medidasM: { ancho: original.medidasM.ancho, fondo: original.medidasM.fondo },
+      acabados: { ...original.acabados },
       muebles,
       materiales,
     });

@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import { imagenRecibida } from '../middlewares/recibirImagen.js';
 import type { ActualizarMueble, CrearMueble, ListarMuebles } from '../schemas/mueble.schemas.js';
 import { servicioMuebles } from '../services/mueble.service.js';
 
@@ -18,12 +19,16 @@ export const obtenerMueble: ConParamId = async (req, res) => {
 };
 
 export const crearMueble: RequestHandler = async (req, res) => {
-  const mueble = await servicioMuebles.crear(req.body as CrearMueble);
+  const mueble = await servicioMuebles.crear(req.body as CrearMueble, imagenRecibida(req));
   res.status(201).location(`/api/muebles/${mueble._id.toString()}`).json({ mueble });
 };
 
 export const actualizarMueble: ConParamId = async (req, res) => {
-  const mueble = await servicioMuebles.actualizar(req.params.id, req.body as ActualizarMueble);
+  const mueble = await servicioMuebles.actualizar(
+    req.params.id,
+    req.body as ActualizarMueble,
+    imagenRecibida(req),
+  );
   res.json({ mueble });
 };
 

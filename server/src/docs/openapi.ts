@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { FORMAS_COCINA, PIEZAS } from '../models/diseno.model.js';
+import { FORMAS_COCINA, PIEZAS, SALPICADEROS } from '../models/diseno.model.js';
 import { ACABADOS, TIPOS_PIEDRA } from '../models/granito.model.js';
-import { TIPOS_MUEBLE } from '../models/mueble.model.js';
+import { ESPACIOS, MATERIALES_MUEBLE, TIPOS_MUEBLE } from '../models/mueble.model.js';
 import { ROLES } from '../models/usuario.model.js';
 import { esquemaLogin } from '../schemas/auth.schemas.js';
 import { esquemaDiseno } from '../schemas/diseno.schemas.js';
@@ -177,6 +177,8 @@ export const documentoOpenApi = {
           tipo: { type: 'string', enum: TIPOS_PIEDRA },
           acabado: { type: 'string', enum: ACABADOS },
           imagenUrl: { type: 'string', example: '/uploads/granitos/3f2b….png' },
+          fotoUrl: { type: 'string', description: 'Foto de un trabajo real (opcional)' },
+          precioM2: { type: 'number', description: 'Pesos por m² instalado', example: 850000 },
           etiquetas: { type: 'array', items: { type: 'string' }, example: ['negro', 'moderno'] },
           active: { type: 'boolean' },
           creationAt: fecha,
@@ -188,11 +190,14 @@ export const documentoOpenApi = {
         properties: {
           _id: id,
           nombre: { type: 'string', example: 'Gabinete inferior 2 puertas' },
+          espacio: { type: 'string', enum: ESPACIOS },
           tipo: { type: 'string', enum: TIPOS_MUEBLE },
+          material: { type: 'string', enum: MATERIALES_MUEBLE },
+          colorHex: { type: 'string', example: '#c9b49a' },
           anchoCm: { type: 'number' },
           altoCm: { type: 'number' },
           fondoCm: { type: 'number' },
-          miniaturaUrl: { type: 'string' },
+          imagenUrl: { type: 'string', example: '/uploads/muebles/9a1c….jpg' },
           active: { type: 'boolean' },
           creationAt: fecha,
           updatedAt: fecha,
@@ -203,16 +208,45 @@ export const documentoOpenApi = {
         properties: {
           _id: id,
           nombre: { type: 'string' },
+          espacio: { type: 'string', enum: ESPACIOS },
           forma: { type: 'string', enum: FORMAS_COCINA },
           medidasM: {
             type: 'object',
             properties: { ancho: { type: 'number' }, fondo: { type: 'number' } },
           },
+          acabados: {
+            type: 'object',
+            properties: {
+              espesorCm: { type: 'number', example: 3 },
+              salpicadero: { type: 'string', enum: SALPICADEROS },
+              cascada: { type: 'boolean' },
+            },
+          },
           muebles: {
             type: 'array',
             items: {
               type: 'object',
-              properties: { _id: id, mueble: id, posicion: { type: 'integer' } },
+              properties: {
+                _id: id,
+                mueble: id,
+                posicion: { type: 'integer' },
+                medidasCm: {
+                  type: 'object',
+                  properties: {
+                    ancho: { type: 'number' },
+                    alto: { type: 'number' },
+                    fondo: { type: 'number' },
+                  },
+                },
+                ubicacion: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number' },
+                    z: { type: 'number' },
+                    rotacion: { type: 'integer', enum: [0, 90, 180, 270] },
+                  },
+                },
+              },
             },
           },
           materiales: {
@@ -350,7 +384,7 @@ export const documentoOpenApi = {
     '/api/muebles': {
       get: {
         tags: ['Muebles'],
-        summary: 'Lista paginada con búsqueda y filtro por tipo',
+        summary: 'Lista paginada con búsqueda y filtros por espacio, tipo y material',
         security: seguridad,
         parameters: parametrosDeConsulta(esquemaListarMuebles),
         responses: {
@@ -360,9 +394,13 @@ export const documentoOpenApi = {
       },
       post: {
         tags: ['Muebles'],
-        summary: 'Crea un mueble (admin)',
+        summary: 'Crea un mueble, con foto opcional (admin)',
+        description: 'El tipo debe corresponder al espacio (p. ej. `lavamanos` solo en `bano`).',
         security: seguridad,
-        requestBody: { required: true, content: json(ref('EntradaMueble')) },
+        requestBody: {
+          required: true,
+          content: { ...json(ref('EntradaMueble')), ...multipart(esquemaCrearMueble, false) },
+        },
         responses: {
           201: { description: 'Creado', content: json(envolver('mueble', 'Mueble')) },
           ...conErrores(400, 401, 403),
@@ -382,9 +420,13 @@ export const documentoOpenApi = {
       },
       patch: {
         tags: ['Muebles'],
-        summary: 'Cambia campos (admin)',
+        summary: 'Cambia campos y/o la foto (admin)',
+        description: '`quitarImagen: true` borra la foto actual.',
         security: seguridad,
-        requestBody: { required: true, content: json(ref('CambiosMueble')) },
+        requestBody: {
+          required: true,
+          content: { ...json(ref('CambiosMueble')), ...multipart(esquemaActualizarMueble, false) },
+        },
         responses: {
           200: { description: 'Actualizado', content: json(envolver('mueble', 'Mueble')) },
           ...conErrores(400, 401, 403, 404),

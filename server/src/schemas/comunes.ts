@@ -24,3 +24,8 @@ export const esquemaPaginacion = z.strictObject({
   pagina: z.coerce.number().int().min(1).default(1),
   porPagina: z.coerce.number().int().min(1).max(100).default(20),
 });
+
+export const colorHex = z.string().regex(/^#[0-9a-f]{6}$/i, 'Usa un color como #a1b2c3');
+
+/** En multipart todo llega como texto; en JSON llega como booleano. */
+export const booleanoFlexible = z.union([z.boolean(), z.stringbool()]);

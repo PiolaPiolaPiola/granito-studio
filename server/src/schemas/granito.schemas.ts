@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ACABADOS, TIPOS_PIEDRA } from '../models/granito.model.js';
-import { esquemaPaginacion, nombre } from './comunes.js';
+import { booleanoFlexible, esquemaPaginacion, nombre } from './comunes.js';
 
 /**
  * Con multipart/form-data, una etiqueta llega como texto y varias como arreglo
@@ -19,14 +19,13 @@ const etiquetas = z.preprocess(
     .transform((lista) => [...new Set(lista)]),
 );
 
-/** En multipart todo llega como texto; en JSON llega como booleano. */
-const booleanoFlexible = z.union([z.boolean(), z.stringbool()]);
-
 const camposGranito = {
   nombre,
   tipo: z.enum(TIPOS_PIEDRA),
   acabado: z.enum(ACABADOS),
   etiquetas,
+  /** Pesos por m². `coerce`: en multipart llega como texto. */
+  precioM2: z.coerce.number().min(0).max(1_000_000_000).optional(),
 };
 
 /** Cuerpo de `POST /api/granitos`. La imagen llega aparte, en el campo de archivo `imagen`. */
