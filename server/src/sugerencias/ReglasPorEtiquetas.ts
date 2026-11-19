@@ -55,6 +55,24 @@ function normalizar(texto: string): string {
   return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 
+const NOMBRE_TIPO: Record<TipoPiedra, string> = {
+  granito: 'granito',
+  marmol: 'mármol',
+  cuarzo: 'cuarzo',
+};
+const FORMA_EN_TEXTO: Record<FormaCocina, string> = {
+  lineal: 'lineal',
+  L: 'en L',
+  U: 'en U',
+  isla: 'con isla',
+};
+
+/** "mármol Carrara Blanco", pero "Cuarzo Blanco Puro" (sin repetir "cuarzo" si ya está en el nombre). */
+function describirPiedra({ tipo, nombre }: Pick<Granito, 'tipo' | 'nombre'>): string {
+  const tipoTexto = NOMBRE_TIPO[tipo];
+  return normalizar(nombre).startsWith(normalizar(tipoTexto)) ? nombre : `${tipoTexto} ${nombre}`;
+}
+
 /** Puntaje de un granito para un estilo: etiquetas en común + tipo + forma. */
 function puntuar(granito: ConId<Granito>, regla: ReglaEstilo, forma: FormaCocina): number {
   const coincidencias = granito.etiquetas.filter((etiqueta) =>
@@ -118,7 +136,7 @@ export class ReglasPorEtiquetas implements EstrategiaSugerencias {
   private armar(regla: ReglaEstilo, granito: ConId<Granito>, forma: FormaCocina): Sugerencia {
     return {
       titulo: `${regla.estilo}: ${granito.nombre} con muebles ${regla.nombreColor}`,
-      descripcion: `Para una cocina en ${forma}, el ${granito.tipo} ${granito.nombre} (${granito.acabado}) combina con muebles ${regla.nombreColor} y da un estilo ${regla.estilo.toLowerCase()}.`,
+      descripcion: `Para una cocina ${FORMA_EN_TEXTO[forma]}, el ${describirPiedra(granito)} (${granito.acabado}) combina con muebles ${regla.nombreColor} y da un estilo ${regla.estilo.toLowerCase()}.`,
       estilo: regla.estilo,
       granitoId: granito._id.toString(),
       colorMueblesHex: regla.colorMueblesHex,
