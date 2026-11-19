@@ -31,7 +31,7 @@ const esquemaEnv = z.object({
   // Los nombres de modelos cambian seguido: se pueden ajustar sin tocar código.
   IA_ORDEN: z.string().default('gemini,groq,openrouter'),
   IA_GEMINI_API_KEY: claveOpcional,
-  IA_GEMINI_MODELO: z.string().min(1).default('gemini-2.5-flash'),
+  IA_GEMINI_MODELO: z.string().min(1).default('gemini-3.5-flash'),
   IA_GROQ_API_KEY: claveOpcional,
   IA_GROQ_MODELO: z.string().min(1).default('meta-llama/llama-4-scout-17b-16e-instruct'),
   IA_GROQ_MODELO_AUDIO: z.string().min(1).default('whisper-large-v3-turbo'),

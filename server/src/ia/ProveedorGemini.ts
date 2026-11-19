@@ -31,20 +31,25 @@ export class ProveedorGemini implements ProveedorIa {
       });
     }
 
-    const respuesta = await pedirConLimite(`${URL_BASE}/${this.modelo}:generateContent`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': this.apiKey },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: instrucciones }] },
-        contents: [{ role: 'user', parts: partes }],
-        // Respuesta corta y en JSON: menos tokens gastados.
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-          maxOutputTokens: 500,
-        },
-      }),
-    });
+    const respuesta = await pedirConLimite(
+      `${URL_BASE}/${this.modelo}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': this.apiKey },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: instrucciones }] },
+          contents: [{ role: 'user', parts: partes }],
+          // Respuesta corta y en JSON: menos tokens gastados.
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+            // Incluye el razonamiento interno del modelo; las acciones de una foto pueden ser largas.
+            maxOutputTokens: 4096,
+          },
+        }),
+      },
+      60_000,
+    );
 
     if (!respuesta.ok) {
       throw new ErrorProveedorIa(

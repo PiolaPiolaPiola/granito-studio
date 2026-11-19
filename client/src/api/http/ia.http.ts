@@ -10,7 +10,7 @@ import type {
 import type { IaApi } from '../contratos'
 
 /** Las llamadas de IA pueden tardar (modelos gratuitos): más margen que el resto. */
-const LIMITE_MS = 60_000
+const LIMITE_MS = 90_000
 
 export class IaApiHttp implements IaApi {
   private readonly http: AxiosInstance

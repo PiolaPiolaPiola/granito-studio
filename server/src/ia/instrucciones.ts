@@ -11,7 +11,7 @@ import { ESPACIOS, MATERIALES_MUEBLE, TIPOS_MUEBLE } from '../models/mueble.mode
  */
 
 /** Sube este número si cambias una instrucción: así no se reutilizan respuestas viejas. */
-export const VERSION_INSTRUCCIONES = 2;
+export const VERSION_INSTRUCCIONES = 3;
 
 const opcional = <T extends z.ZodType>(esquema: T) => esquema.optional().catch(undefined);
 const medidaCm = opcional(z.coerce.number().min(1).max(500).transform(Math.round));
@@ -121,7 +121,7 @@ export function instruccionesEspacio(contexto: {
   return `${instruccionesComando(contexto)}
 TAREA: mira la FOTO de un espacio real (cocina, baño o sala) y devuelve las acciones para reconstruirlo:
 1) {"tipo":"espacio"} y {"tipo":"forma"} que mejor lo describan;
-2) {"tipo":"medidas"} con ancho y fondo aproximados en metros;
+2) {"tipo":"medidas"} con el ancho y el fondo del CUARTO completo en metros (no del mesón; el fondo suele ser de 2 a 4 m);
 3) un {"tipo":"agregar"} por cada mueble visible (de izquierda a derecha, primero los de piso y luego los de pared), con el nombre del catálogo más parecido y su anchoCm estimado;
 4) {"tipo":"piedra","pieza":"ambos"} con la piedra del catálogo más parecida al mesón, y {"tipo":"salpicadero"} si se ve;
 5) {"tipo":"colorMuebles"} con el color de los muebles en #rrggbb;

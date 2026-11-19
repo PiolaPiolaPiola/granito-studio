@@ -54,7 +54,8 @@ interface Props {
 export function VistaPrevia3D(props: Props) {
   const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl, entorno } = props
   const [cotas, setCotas] = useState(onMover !== undefined)
-  const [sobreFoto, setSobreFoto] = useState(fondoUrl !== undefined)
+  // Arranca en el modelo 3D; la foto de fondo se activa con su botón.
+  const [sobreFoto, setSobreFoto] = useState(false)
   const verFoto = sobreFoto && fondoUrl !== undefined
   const [vista, setVista] = useState<Vista>('frontal')
   const [comando, setComando] = useState<ComandoCamara | null>(null)

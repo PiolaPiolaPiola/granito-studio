@@ -63,10 +63,11 @@ export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, 
       const estado = await iaApi.estado().catch(() => null)
 
       if (estado?.disponible === true) {
-        const delEspacio = catalogo.filter((m) => espacioDe(m) === actual.espacio)
+        // Todo el catálogo (de todos los espacios): la foto puede ser de otro espacio que el actual.
+        const ordenado = [...catalogo].sort((a, b) => Number(espacioDe(b) === actual.espacio) - Number(espacioDe(a) === actual.espacio))
         const { acciones, proveedor } = await iaApi.analizarEspacio(await reducirImagen(blob), {
           espacio: actual.espacio,
-          muebles: (delEspacio.length > 0 ? delEspacio : catalogo).map((m) => m.nombre).slice(0, 80),
+          muebles: ordenado.map((m) => m.nombre).slice(0, 80),
           piedras: granitos.map((g) => g.nombre).slice(0, 60),
         })
         // Se arma desde cero: los muebles, materiales y objetos los pone la foto.

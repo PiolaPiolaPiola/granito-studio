@@ -104,10 +104,14 @@ export function aplicarAcciones(
         d = { ...d, espacio: accion.espacio }
         hechas.push(`Espacio: ${ETIQUETA_ESPACIO[accion.espacio]}`)
         break
-      case 'medidas':
-        d = { ...d, medidasM: { ancho: accion.ancho ?? d.medidasM.ancho, fondo: accion.fondo ?? d.medidasM.fondo } }
+      case 'medidas': {
+        // Un cuarto de menos de 1,5 m de fondo no cabe ni un mueble con paso: se corrige.
+        const ancho = Math.max(1.2, accion.ancho ?? d.medidasM.ancho)
+        const fondo = Math.max(1.5, accion.fondo ?? d.medidasM.fondo)
+        d = { ...d, medidasM: { ancho, fondo } }
         hechas.push(`Medidas: ${String(d.medidasM.ancho)} × ${String(d.medidasM.fondo)} m`)
         break
+      }
       case 'piedra': {
         const granito = buscarPorNombre(granitos, accion.piedra)
         if (granito === undefined) {
