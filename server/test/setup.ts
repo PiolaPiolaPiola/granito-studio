@@ -16,6 +16,11 @@ process.env.JWT_SECRET = 'secreto-de-pruebas-con-al-menos-32-caracteres';
 process.env.JWT_EXPIRES_IN = '1h';
 process.env.CORS_ORIGIN = 'http://localhost:5173';
 process.env.UPLOADS_DIR = dirUploads;
+// Las pruebas nunca llaman a una IA real (no gastan la cuota de las claves del .env):
+// vacías cuentan como "no configuradas" y `process.loadEnvFile` no pisa lo que ya existe.
+process.env.IA_GEMINI_API_KEY = '';
+process.env.IA_GROQ_API_KEY = '';
+process.env.IA_OPENROUTER_API_KEY = '';
 
 const { default: mongoose } = await import('mongoose');
 
