@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 import { AppError } from '../errors/AppError.js';
 import { imagenRecibida } from '../middlewares/recibirImagen.js';
-import type { Interpretar, TipoAnalisis } from '../schemas/ia.schemas.js';
+import type { ContextoComando, Interpretar, TipoAnalisis } from '../schemas/ia.schemas.js';
 import { servicioIa } from '../services/ia.service.js';
 
 export const estadoIa: RequestHandler = (_req, res) => {
@@ -14,6 +14,14 @@ export const analizarFoto: RequestHandler = async (req, res) => {
   const { tipo } = req.body as { tipo: TipoAnalisis };
   const { datos, proveedor, desdeCache } = await servicioIa.analizarFoto(tipo, imagen);
   res.json({ sugerencia: datos, proveedor, desdeCache });
+};
+
+export const analizarEspacio: RequestHandler = async (req, res) => {
+  const imagen = imagenRecibida(req);
+  if (!imagen) throw new AppError(400, 'Adjunta la foto en el campo "imagen"');
+  const { contexto } = req.body as { contexto: ContextoComando };
+  const { datos, proveedor, desdeCache } = await servicioIa.analizarEspacio(imagen, contexto);
+  res.json({ acciones: datos.acciones, proveedor, desdeCache });
 };
 
 export const interpretarComando: RequestHandler = async (req, res) => {

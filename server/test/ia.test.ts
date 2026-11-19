@@ -154,3 +154,41 @@ describe('/api/ia sin claves configuradas', () => {
     expect((await request(app).get('/api/ia/estado')).status).toBe(401);
   });
 });
+
+describe('analizar la foto de un espacio', () => {
+  it('devuelve acciones válidas para reconstruirlo (muebles, piedra, colores y objetos)', async () => {
+    const gemini = proveedorFalso('Gemini', () => ({
+      acciones: [
+        { tipo: 'forma', forma: 'L' },
+        { tipo: 'agregar', mueble: 'Gabinete inferior 2 puertas', cantidad: 3, anchoCm: 60 },
+        { tipo: 'piedra', piedra: 'Negro Estelar', pieza: 'ambos' },
+        { tipo: 'entorno', parte: 'pared', color: '#f3f0ea' },
+        { tipo: 'objeto', objeto: 'nevera' },
+        { tipo: 'objeto', objeto: 'cohete' },
+      ],
+    }));
+    const servicio = new ServicioIa(new CadenaProveedores([gemini]), cacheEnMemoria(), null);
+    const { datos } = await servicio.analizarEspacio(
+      { contenido: PNG, tipo: 'image/png' },
+      { espacio: 'cocina', muebles: ['Gabinete inferior 2 puertas'], piedras: ['Negro Estelar'] },
+    );
+    expect(datos.acciones).toHaveLength(5);
+    expect(datos.acciones.map((a) => a.tipo)).toEqual([
+      'forma',
+      'agregar',
+      'piedra',
+      'entorno',
+      'objeto',
+    ]);
+  });
+
+  it('sin claves responde 503 (la app usa solo los colores de la foto)', async () => {
+    const vendedor = await autorizacion('vendedor');
+    const respuesta = await request(app)
+      .post('/api/ia/analizar-espacio')
+      .set(vendedor)
+      .field('contexto', JSON.stringify({ espacio: 'cocina', muebles: [], piedras: [] }))
+      .attach('imagen', PNG, { filename: 'cocina.png', contentType: 'image/png' });
+    expect(respuesta.status).toBe(503);
+  });
+});

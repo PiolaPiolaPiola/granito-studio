@@ -101,6 +101,11 @@ Errores: siempre `{ "mensaje": "…" }`; los de validación (400) traen además
 - **Página de inicio pública (`/`):** lo primero que ve un visitante. Muestra en 3D los diseños que un
   admin marca con *Mostrar en la página de inicio* (en *Compartir*), el catálogo de piedras con fotos de
   trabajos reales y el botón *Ingresar*. No muestra precios. El equipo entra por `/login`.
+- **Foto del espacio:** se sube una foto del lugar real y el diseño 3D se ve encima. *Generar el diseño
+  desde la foto* reconoce muebles, mesón, colores y objetos con la IA (si hay una clave configurada) y
+  arma el diseño con el catálogo; sin IA solo toma los colores de pared y piso.
+- **Colores del espacio y objetos de referencia:** pared, piso y techo, y objetos como sofá, taza de baño
+  o nevera para dar escala (no se cotizan).
 - **Compartir con el cliente:** enlace de solo lectura `/ver/<código>` (copiar, WhatsApp, dejar de compartir).
 - **Exportar:** imagen PNG y modelo 3D `.glb` (se abre en el Visor 3D de Windows, Blender o SketchUp).
 - **Llenar desde la foto:** los colores se calculan en el navegador, sin IA. Con IA configurada,

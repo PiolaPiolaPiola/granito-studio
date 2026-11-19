@@ -11,6 +11,7 @@ import {
   INSTRUCCIONES_GRANITO,
   INSTRUCCIONES_MUEBLE,
   instruccionesComando,
+  instruccionesEspacio,
   VERSION_INSTRUCCIONES,
 } from '../ia/instrucciones.js';
 import { ProveedorCompatibleOpenAi } from '../ia/ProveedorCompatibleOpenAi.js';
@@ -58,6 +59,16 @@ export class ServicioIa {
       esquemaRespuestaComando,
       { instrucciones: instruccionesComando(contexto), texto: normalizado },
     );
+  }
+
+  /** Foto de un espacio real → acciones para reconstruirlo en el editor. */
+  analizarEspacio(imagen: ArchivoImagen, contexto: ContextoComando) {
+    const huella = createHash('sha256').update(imagen.contenido).digest('hex');
+    return this.conCache(`espacio:${huella}:${JSON.stringify(contexto)}`, esquemaRespuestaComando, {
+      instrucciones: instruccionesEspacio(contexto),
+      texto: 'Reconstruye este espacio con el catálogo.',
+      imagen,
+    });
   }
 
   async transcribir(audio: { contenido: Buffer; tipo: string; nombre: string }) {

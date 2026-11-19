@@ -109,6 +109,26 @@ export const esquemaRespuestaComando = z.object({
 
 export type AccionVoz = z.infer<typeof esquemaAccion>;
 
+/**
+ * Foto de un espacio real → acciones para armarlo en 3D. Se le pide al modelo que nombre
+ * los muebles y la piedra con los nombres del catálogo, así el editor los encuentra.
+ */
+export function instruccionesEspacio(contexto: {
+  espacio: string;
+  muebles: string[];
+  piedras: string[];
+}): string {
+  return `${instruccionesComando(contexto)}
+TAREA: mira la FOTO de un espacio real (cocina, baño o sala) y devuelve las acciones para reconstruirlo:
+1) {"tipo":"espacio"} y {"tipo":"forma"} que mejor lo describan;
+2) {"tipo":"medidas"} con ancho y fondo aproximados en metros;
+3) un {"tipo":"agregar"} por cada mueble visible (de izquierda a derecha, primero los de piso y luego los de pared), con el nombre del catálogo más parecido y su anchoCm estimado;
+4) {"tipo":"piedra","pieza":"ambos"} con la piedra del catálogo más parecida al mesón, y {"tipo":"salpicadero"} si se ve;
+5) {"tipo":"colorMuebles"} con el color de los muebles en #rrggbb;
+6) {"tipo":"entorno"} para pared, piso y techo en #rrggbb;
+7) {"tipo":"objeto"} por cada objeto de referencia visible (nevera, taza de baño, ducha, sofá…).`;
+}
+
 export function instruccionesComando(contexto: {
   espacio: string;
   muebles: string[];

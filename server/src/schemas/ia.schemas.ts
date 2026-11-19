@@ -16,6 +16,21 @@ export const esquemaContextoComando = z.strictObject({
   piedras: nombres(60),
 });
 
+/**
+ * Cuerpo de `POST /api/ia/analizar-espacio` (multipart): el contexto llega como texto JSON
+ * en el campo `contexto`, junto al archivo `imagen`.
+ */
+export const esquemaAnalizarEspacio = z.strictObject({
+  contexto: z.preprocess((valor) => {
+    if (typeof valor !== 'string') return valor;
+    try {
+      return JSON.parse(valor) as unknown;
+    } catch {
+      return valor;
+    }
+  }, esquemaContextoComando),
+});
+
 /** Cuerpo de `POST /api/ia/interpretar`. */
 export const esquemaInterpretar = z.strictObject({
   texto: z.string().trim().min(2).max(500),

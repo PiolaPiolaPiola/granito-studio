@@ -53,6 +53,14 @@ export class IaApiHttp implements IaApi {
     return data
   }
 
+  async analizarEspacio(imagen: Blob, contexto: ContextoComando) {
+    const form = new FormData()
+    form.append('contexto', JSON.stringify(contexto))
+    form.append('imagen', imagen, 'espacio.jpg')
+    const { data } = await this.http.post<RespuestaIa & { acciones: AccionVoz[] }>('/ia/analizar-espacio', form, { timeout: LIMITE_MS })
+    return data
+  }
+
   async transcribir(audio: Blob, nombre: string) {
     const form = new FormData()
     form.append('audio', audio, nombre)

@@ -138,6 +138,20 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
     [metodos, colocaciones, cambiarMuebles, medidas, setValue, aviso],
   )
 
+  /** Copia al formulario un diseño armado por voz o desde una foto. */
+  const aplicarDiseno = (nuevo: EntradaDiseno) => {
+    const opciones = { shouldDirty: true }
+    setValue('espacio', nuevo.espacio, opciones)
+    setValue('forma', nuevo.forma, opciones)
+    setValue('medidasM', nuevo.medidasM, opciones)
+    setValue('acabados', nuevo.acabados, opciones)
+    setValue('muebles', nuevo.muebles, opciones)
+    setValue('materiales', nuevo.materiales, opciones)
+    setValue('objetos', nuevo.objetos, opciones)
+    setValue('entorno', nuevo.entorno, opciones)
+    setSeleccionado(null)
+  }
+
   const quitar = (idMueble: string) => {
     const resultado = quitarMuebleDeDiseno(mueblesDiseno, materiales, idMueble)
     cambiarMuebles(resultado.muebles)
@@ -186,17 +200,17 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
             obtenerDiseno={() => metodos.getValues()}
             catalogo={catalogoLista}
             granitos={granitos}
-            onAplicar={(nuevo) => {
-              const opciones = { shouldDirty: true }
-              setValue('espacio', nuevo.espacio, opciones)
-              setValue('forma', nuevo.forma, opciones)
-              setValue('medidasM', nuevo.medidasM, opciones)
-              setValue('acabados', nuevo.acabados, opciones)
-              setValue('muebles', nuevo.muebles, opciones)
-              setValue('materiales', nuevo.materiales, opciones)
-            }}
+            onAplicar={aplicarDiseno}
           />
-          <BotonFotoEspacio idDiseno={id} fondoUrl={fondoUrl} onCambio={setFondoUrl} />
+          <BotonFotoEspacio
+            idDiseno={id}
+            fondoUrl={fondoUrl}
+            onCambio={setFondoUrl}
+            obtenerDiseno={() => metodos.getValues()}
+            catalogo={catalogoLista}
+            granitos={granitos}
+            onAplicar={aplicarDiseno}
+          />
           {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} destacadoInicial={destacado} />}
           <Button
             variant="outlined"

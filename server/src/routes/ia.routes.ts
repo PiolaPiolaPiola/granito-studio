@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import {
+  analizarEspacio,
   analizarFoto,
   estadoIa,
   interpretarComando,
@@ -10,7 +11,11 @@ import { autenticar } from '../middlewares/autenticar.js';
 import { recibirAudio } from '../middlewares/recibirAudio.js';
 import { recibirImagen } from '../middlewares/recibirImagen.js';
 import { validar } from '../middlewares/validar.js';
-import { esquemaAnalizarFoto, esquemaInterpretar } from '../schemas/ia.schemas.js';
+import {
+  esquemaAnalizarEspacio,
+  esquemaAnalizarFoto,
+  esquemaInterpretar,
+} from '../schemas/ia.schemas.js';
 
 export const rutasIa = Router();
 
@@ -33,6 +38,13 @@ rutasIa.post(
   recibirImagen('imagen'),
   validar({ body: esquemaAnalizarFoto }),
   analizarFoto,
+);
+rutasIa.post(
+  '/analizar-espacio',
+  limitarIa,
+  recibirImagen('imagen'),
+  validar({ body: esquemaAnalizarEspacio }),
+  analizarEspacio,
 );
 rutasIa.post('/interpretar', limitarIa, validar({ body: esquemaInterpretar }), interpretarComando);
 rutasIa.post('/transcribir', limitarIa, recibirAudio('audio'), transcribirAudio);

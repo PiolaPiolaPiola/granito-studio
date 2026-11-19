@@ -67,6 +67,31 @@ export function coloresDominantes(imagen: CanvasImageSource & { width: number; h
   return resultado
 }
 
+/**
+ * Color promedio de una franja horizontal de la imagen (de `desde` a `hasta`, 0–1 del alto).
+ * Sin IA, la parte alta de una foto de un cuarto suele ser pared y la de abajo, piso.
+ */
+export function colorDeFranja(imagen: CanvasImageSource & { width: number; height: number }, desde: number, hasta: number): string {
+  const canvas = document.createElement('canvas')
+  canvas.width = 32
+  canvas.height = 32
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (ctx === null) return '#cccccc'
+  const y = imagen.height * desde
+  ctx.drawImage(imagen, imagen.width * 0.15, y, imagen.width * 0.7, imagen.height * (hasta - desde), 0, 0, 32, 32)
+  const { data } = ctx.getImageData(0, 0, 32, 32)
+  let r = 0
+  let g = 0
+  let b = 0
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i]
+    g += data[i + 1]
+    b += data[i + 2]
+  }
+  const n = data.length / 4
+  return aHex(r / n, g / n, b / n)
+}
+
 /** El color de la paleta más parecido (distancia en RGB, suficiente para sugerir). */
 export function masCercano(hex: string, paleta: ColorPaleta[]): ColorPaleta {
   return paleta.reduce((mejor, c) => (distancia(c.hex, hex) < distancia(mejor.hex, hex) ? c : mejor))

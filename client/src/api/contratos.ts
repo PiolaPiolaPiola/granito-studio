@@ -107,5 +107,7 @@ export interface IaApi {
     imagen: Blob,
   ): Promise<RespuestaIa & { sugerencia: T extends 'mueble' ? SugerenciaMueble : SugerenciaGranito }>
   interpretar(texto: string, contexto: ContextoComando): Promise<RespuestaIa & { acciones: AccionVoz[] }>
+  /** Foto de un espacio real → acciones para reconstruirlo (muebles, piedra, colores…). */
+  analizarEspacio(imagen: Blob, contexto: ContextoComando): Promise<RespuestaIa & { acciones: AccionVoz[] }>
   transcribir(audio: Blob, nombre: string): Promise<{ texto: string; proveedor: string }>
 }
