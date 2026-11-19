@@ -38,12 +38,14 @@ interface Props {
   seleccionado?: string | null
   onSeleccionar?: (id: string) => void
   onMover?: (id: string, x: number, z: number) => void
+  /** false en la página de inicio: la rueda mueve la página (el zoom queda en los botones). */
+  zoomConRueda?: boolean
   /** El lienzo, para que la cotización pueda incluir una foto del diseño. */
   onLienzo?: (lienzo: HTMLCanvasElement) => void
 }
 
 export function VistaPrevia3D(props: Props) {
-  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo } = props
+  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true } = props
   const [vista, setVista] = useState<Vista>('frontal')
   const [comando, setComando] = useState<ComandoCamara | null>(null)
   const [autoRotar, setAutoRotar] = useState(false)
@@ -96,7 +98,7 @@ export function VistaPrevia3D(props: Props) {
           onMover={onMover}
           onArrastrando={setArrastrando}
         />
-        <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} />
+        <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} zoomConRueda={zoomConRueda} />
       </Canvas>
 
       <Typography

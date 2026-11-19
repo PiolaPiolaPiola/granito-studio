@@ -92,6 +92,8 @@ export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'aca
   acabados?: Partial<AcabadosMeson>
   /** Código del enlace público de solo lectura, si el diseño está compartido. */
   codigoPublico?: string
+  /** Se muestra en la página de inicio pública. */
+  destacado?: boolean
 }
 
 export function disenoVacio(espacio: Espacio = 'cocina'): EntradaDiseno {

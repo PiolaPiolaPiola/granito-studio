@@ -8,15 +8,19 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import { disenosApi } from '../../api'
 import { aErrorApi } from '../../api/errores'
+import { useEsAdmin } from '../../auth/useAuth'
 import { useAviso } from '../../componentes/aviso/AvisoContext'
 
 interface Props {
   idDiseno: string
   codigoInicial?: string
+  destacadoInicial: boolean
 }
 
 const enlaceDe = (codigo: string) => `${window.location.origin}/ver/${codigo}`
@@ -26,8 +30,10 @@ const enlaceDe = (codigo: string) => `${window.location.origin}/ver/${codigo}`
  * sesión (sin precios). Se puede copiar, mandar por WhatsApp o dejar de compartir.
  * El diseño que ve el cliente es el GUARDADO: los cambios sin guardar no se ven.
  */
-export function BotonCompartir({ idDiseno, codigoInicial }: Props) {
+export function BotonCompartir({ idDiseno, codigoInicial, destacadoInicial }: Props) {
   const aviso = useAviso()
+  const esAdmin = useEsAdmin()
+  const [destacado, setDestacado] = useState(destacadoInicial)
   const [abierto, setAbierto] = useState(false)
   const [codigo, setCodigo] = useState<string | undefined>(codigoInicial)
   const [trabajando, setTrabajando] = useState(false)
@@ -44,10 +50,18 @@ export function BotonCompartir({ idDiseno, codigoInicial }: Props) {
   }
 
   const crear = () => ejecutar(async () => setCodigo(await disenosApi.compartir(idDiseno)))
+  const cambiarDestacado = (valor: boolean) =>
+    ejecutar(async () => {
+      const r = await disenosApi.destacar(idDiseno, valor)
+      setDestacado(r.destacado)
+      if (r.codigoPublico !== undefined) setCodigo(r.codigoPublico)
+      aviso.mostrar(valor ? 'Se muestra en la página de inicio' : 'Ya no se muestra en la página de inicio')
+    })
   const quitar = () =>
     ejecutar(async () => {
       await disenosApi.dejarDeCompartir(idDiseno)
       setCodigo(undefined)
+      setDestacado(false)
       aviso.mostrar('El enlace ya no funciona')
     })
   const copiar = async (enlace: string) => {
@@ -100,6 +114,12 @@ export function BotonCompartir({ idDiseno, codigoInicial }: Props) {
                 </Button>
               </Box>
             </>
+          )}
+          {esAdmin && (
+            <FormControlLabel
+              control={<Switch checked={destacado} disabled={trabajando} onChange={(e) => void cambiarDestacado(e.target.checked)} />}
+              label="Mostrar en la página de inicio (para cualquier visitante)"
+            />
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

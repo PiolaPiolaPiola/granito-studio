@@ -1,4 +1,5 @@
 import '../config/zod.js';
+import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -425,6 +426,9 @@ async function sembrarDisenos(
       forma: diseno.forma,
       medidasM: diseno.medidasM,
       acabados: diseno.acabados,
+      // Los diseños de ejemplo se muestran en la página de inicio pública.
+      codigoPublico: randomBytes(16).toString('base64url'),
+      destacado: true,
       muebles: mueblesEnDiseno,
       materiales: [
         { pieza: 'meson', granito },

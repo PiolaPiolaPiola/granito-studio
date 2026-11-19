@@ -13,6 +13,9 @@ export interface RepositorioDisenos extends Repositorio<Diseno, EntradaDiseno, E
   buscarPorCodigo(codigo: string): Promise<ConId<Diseno> | null>;
   /** Pone o quita (`null`) el código del enlace público. */
   cambiarCodigo(id: string, codigo: string | null): Promise<ConId<Diseno> | null>;
+  cambiarDestacado(id: string, destacado: boolean): Promise<ConId<Diseno> | null>;
+  /** Diseños destacados que además tienen enlace público, en el orden en que se crearon. */
+  listarDestacados(limite: number): Promise<ConId<Diseno>[]>;
 }
 
 class RepositorioDisenosMongoose
@@ -37,6 +40,30 @@ class RepositorioDisenosMongoose
       .findByIdAndUpdate(id, cambios, { returnDocument: 'after', timestamps: false })
       .lean<ConId<Diseno>>()
       .exec();
+  }
+
+  async cambiarDestacado(id: string, destacado: boolean): Promise<ConId<Diseno> | null> {
+    if (!isValidObjectId(id)) return null;
+    return this.modelo
+      .findByIdAndUpdate(
+        id,
+        { $set: { destacado } },
+        { returnDocument: 'after', timestamps: false },
+      )
+      .lean<ConId<Diseno>>()
+      .exec();
+  }
+
+  listarDestacados(limite: number): Promise<ConId<Diseno>[]> {
+    return (
+      this.modelo
+        .find({ destacado: true, codigoPublico: { $exists: true } })
+        // Orden estable: en el que se crearon (editar un diseño no lo cambia de lugar).
+        .sort({ creationAt: 1, _id: 1 })
+        .limit(limite)
+        .lean<ConId<Diseno>[]>()
+        .exec()
+    );
   }
 
   async eliminar(id: string): Promise<boolean> {

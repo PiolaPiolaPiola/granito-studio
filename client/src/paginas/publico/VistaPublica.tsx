@@ -2,18 +2,15 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
-import { useCallback, useMemo } from 'react'
-import { useParams } from 'react-router'
-import { disenosApi } from '../../api'
+import { Link as EnlaceRouter, useParams } from 'react-router'
 import { EstadoConsulta } from '../../componentes/EstadoConsulta'
 import { MiniaturaMueble } from '../../componentes/MiniaturaMueble'
 import { MuestraGranito } from '../../componentes/MuestraGranito'
-import { aEntrada, buscarMaterial, ETIQUETA_FORMA, ETIQUETA_SALPICADERO } from '../../dominio/diseno'
+import { buscarMaterial, ETIQUETA_FORMA, ETIQUETA_SALPICADERO } from '../../dominio/diseno'
 import { ETIQUETA_TIPO_PIEDRA } from '../../dominio/granito'
 import { ETIQUETA_ESPACIO, ETIQUETA_TIPO_MUEBLE } from '../../dominio/mueble'
-import { distribuir, type MuebleResuelto } from '../../escena/distribucion'
-import { useConsulta } from '../../hooks/useConsulta'
 import { VistaPrevia3D } from '../editor/VistaPrevia3D'
+import { useDisenoPublico } from './useDisenoPublico'
 
 /**
  * Página PÚBLICA (sin sesión) de un diseño compartido: `/ver/:codigo`.
@@ -22,32 +19,20 @@ import { VistaPrevia3D } from '../editor/VistaPrevia3D'
  */
 export function VistaPublica() {
   const { codigo = '' } = useParams()
-  const consulta = useConsulta(useCallback(() => disenosApi.verPublico(codigo), [codigo]))
-  const datos = consulta.datos
+  const { vista, cargando, error, recargar } = useDisenoPublico(codigo)
 
-  const vista = useMemo(() => {
-    if (datos === undefined) return null
-    const diseno = aEntrada(datos.diseno)
-    const catalogo = new Map(datos.muebles.map((m) => [m._id, m]))
-    const resueltos: MuebleResuelto[] = diseno.muebles.flatMap((m) => {
-      const mueble = catalogo.get(m.mueble)
-      return mueble === undefined ? [] : [{ _id: m._id, posicion: m.posicion, mueble, medidasCm: m.medidasCm, ubicacion: m.ubicacion }]
-    })
-    return { diseno, resueltos, ...distribuir(diseno.forma, diseno.medidasM, resueltos) }
-  }, [datos])
-
-  if (datos === undefined || vista === null) {
+  if (vista === null) {
     return (
       <Box sx={{ p: 4, maxWidth: 520, mx: 'auto' }}>
-        <EstadoConsulta cargando={consulta.cargando} error={consulta.error} onReintentar={consulta.recargar} />
+        <EstadoConsulta cargando={cargando} error={error} onReintentar={recargar} />
       </Box>
     )
   }
 
-  const { diseno } = vista
+  const { diseno, granitos } = vista
   const piedra = (pieza: 'meson' | 'salpicadero') => {
     const id = buscarMaterial(diseno.materiales, pieza)?.granito
-    return datos.granitos.find((g) => g._id === id)
+    return granitos.find((g) => g._id === id)
   }
   const piezasDePiedra = [
     { titulo: 'Mesón', granito: piedra('meson') },
@@ -57,7 +42,7 @@ export function VistaPublica() {
   return (
     <Box sx={{ minHeight: '100dvh', bgcolor: 'background.default' }}>
       <Box component="header" sx={{ px: { xs: 2, md: 4 }, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
-        <Typography sx={{ fontWeight: 700, color: 'primary.main' }}>Granito Studio</Typography>
+        <Typography component={EnlaceRouter} to="/" sx={{ fontWeight: 700, color: 'primary.main', textDecoration: 'none' }}>Granito Studio</Typography>
       </Box>
 
       <Box component="main" sx={{ p: { xs: 2, md: 4 }, display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 340px' }, alignItems: 'start' }}>
@@ -75,7 +60,7 @@ export function VistaPublica() {
             colocaciones={vista.colocaciones}
             desbordados={[]}
             materiales={diseno.materiales}
-            granitos={datos.granitos}
+            granitos={granitos}
             nombreArchivo={diseno.nombre}
           />
         </Box>
@@ -111,7 +96,7 @@ export function VistaPublica() {
           </Paper>
 
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography component="h2" variant="h2" sx={{ mb: 1 }}>Muebles ({vista.resueltos.length})</Typography>
+            <Typography component="h2" variant="h2" sx={{ mb: 1 }}>Muebles ({vista.colocaciones.length})</Typography>
             {vista.colocaciones.map((c) => (
               <Box key={c.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75 }}>
                 <MiniaturaMueble mueble={c.mueble} sx={{ width: 36, height: 36, borderRadius: 1.5, flexShrink: 0 }} />

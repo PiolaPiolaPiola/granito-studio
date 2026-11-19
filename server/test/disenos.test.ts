@@ -139,3 +139,41 @@ describe('enlace público de un diseño', () => {
     expect((await request(app).get('/api/publico/disenos/abc')).status).toBe(400);
   });
 });
+
+describe('página de inicio pública', () => {
+  it('un admin destaca un diseño y aparece sin sesión; al dejar de compartir, desaparece', async () => {
+    const admin = await autorizacion('admin');
+    const diseno = await crearDiseno();
+
+    const prohibido = await request(app)
+      .post(`/api/disenos/${diseno._id}/destacar`)
+      .set(vendedor)
+      .send({ destacado: true });
+    expect(prohibido.status).toBe(403);
+
+    const destacado = await request(app)
+      .post(`/api/disenos/${diseno._id}/destacar`)
+      .set(admin)
+      .send({ destacado: true });
+    const { codigoPublico } = destacado.body as { codigoPublico: string };
+    expect(destacado.status).toBe(200);
+    expect(codigoPublico).toBeTruthy(); // destacar también lo comparte
+
+    const lista = await request(app).get('/api/publico/destacados');
+    expect(lista.body).toMatchObject({
+      disenos: [{ nombre: 'Cocina Pérez', codigoPublico, cantidadMuebles: 1 }],
+    });
+
+    await request(app).delete(`/api/disenos/${diseno._id}/compartir`).set(vendedor);
+    expect((await request(app).get('/api/publico/destacados')).body).toEqual({ disenos: [] });
+  });
+
+  it('publica el catálogo de piedras sin precios', async () => {
+    await GranitoModelo.updateMany({}, { precioM2: 900000 });
+    const respuesta = await request(app).get('/api/publico/piedras');
+    const { piedras } = respuesta.body as { piedras: Record<string, unknown>[] };
+    expect(respuesta.status).toBe(200);
+    expect(piedras).toHaveLength(1);
+    expect(piedras[0]).not.toHaveProperty('precioM2');
+  });
+});

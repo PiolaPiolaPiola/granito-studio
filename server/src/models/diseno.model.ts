@@ -61,6 +61,8 @@ export interface Diseno {
   materiales: MaterialAsignado[];
   /** Código secreto del enlace público de solo lectura (no existe si no se ha compartido). */
   codigoPublico?: string;
+  /** Se muestra en la página de inicio pública (lo decide un admin). */
+  destacado: boolean;
   creationAt: Date;
   updatedAt: Date;
 }
@@ -120,6 +122,7 @@ const esquemaDiseno = new Schema<Diseno>(
     muebles: { type: [esquemaMuebleEnDiseno], default: [] },
     materiales: { type: [esquemaMaterial], default: [] },
     codigoPublico: { type: String },
+    destacado: { type: Boolean, required: true, default: false },
   },
   {
     timestamps: { createdAt: 'creationAt', updatedAt: 'updatedAt' },
@@ -130,5 +133,6 @@ const esquemaDiseno = new Schema<Diseno>(
 esquemaDiseno.index({ updatedAt: -1 });
 // `sparse`: muchos diseños no tienen código y no chocan entre sí.
 esquemaDiseno.index({ codigoPublico: 1 }, { unique: true, sparse: true });
+esquemaDiseno.index({ destacado: 1, updatedAt: -1 });
 
 export const DisenoModelo = model<Diseno>('Diseno', esquemaDiseno);

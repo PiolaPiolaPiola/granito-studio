@@ -78,7 +78,8 @@ npm --prefix server run usuario:crear -- --email correo@empresa.com --rol admin
 | Muebles | `GET /api/muebles` (filtros por espacio, tipo y material) · `GET /:id` | Con sesión |
 | | `POST` · `PATCH /:id` (JSON o multipart con foto opcional) · `DELETE /:id` (inactiva) | Admin |
 | Diseños | `GET` · `POST` · `GET /:id` · `PUT /:id` · `DELETE /:id` · `POST /:id/duplicar` · `POST`/`DELETE /:id/compartir` | Con sesión |
-| Diseño compartido | `GET /api/publico/disenos/:codigo` (la página es `/ver/:codigo`) | Público, sin precios |
+| Portada destacada | `POST /api/disenos/:id/destacar` | Admin |
+| Público | `GET /api/publico/destacados` · `GET /api/publico/piedras` · `GET /api/publico/disenos/:codigo` | Sin sesión, sin precios |
 | Sugerencias | `GET /api/sugerencias?forma=L&espacio=cocina&granitoActualId=…` | Con sesión |
 | IA (opcional) | `GET /api/ia/estado` · `POST /analizar-foto` · `POST /interpretar` · `POST /transcribir` | Con sesión |
 | Imágenes | `GET /uploads/granitos/<uuid>.png` | Público |
@@ -97,6 +98,10 @@ Errores: siempre `{ "mensaje": "…" }`; los de validación (400) traen además
 - **Mesón:** espesor, salpicadero (sin, bajo o completo) y caída en cascada en islas y barras.
 - **Cotización:** m² de piedra por pieza, canto pulido, perforaciones y total con el precio por m²
   de cada piedra; se imprime o se guarda como PDF desde el navegador.
+- **Página de inicio pública (`/`):** lo primero que ve un visitante. Muestra en 3D los diseños que un
+  admin marca con *Mostrar en la página de inicio* (en *Compartir*), el catálogo de piedras con fotos de
+  trabajos reales y el botón *Ingresar*. No muestra precios. El equipo entra por `/login`.
+- **Compartir con el cliente:** enlace de solo lectura `/ver/<código>` (copiar, WhatsApp, dejar de compartir).
 - **Exportar:** imagen PNG y modelo 3D `.glb` (se abre en el Visor 3D de Windows, Blender o SketchUp).
 - **Llenar desde la foto:** los colores se calculan en el navegador, sin IA. Con IA configurada,
   también se reconoce el tipo, el material y las medidas.

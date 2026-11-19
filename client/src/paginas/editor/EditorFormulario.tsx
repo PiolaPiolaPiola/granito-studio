@@ -40,6 +40,8 @@ interface Props {
   inicial: EntradaDiseno
   /** Si el diseño guardado ya está compartido. */
   codigoPublico?: string
+  /** Si se muestra en la página de inicio. */
+  destacado?: boolean
   muebles: Mueble[]
   granitos: Granito[]
 }
@@ -48,7 +50,7 @@ interface Props {
 const medidaSegura = (valor: number) => (Number.isFinite(valor) ? Math.min(20, Math.max(0.5, valor)) : 3)
 const espesorSeguro = (valor: number) => (Number.isFinite(valor) ? Math.min(10, Math.max(1, valor)) : 3)
 
-export function EditorFormulario({ id, inicial, codigoPublico, muebles: catalogoLista, granitos }: Props) {
+export function EditorFormulario({ id, inicial, codigoPublico, destacado = false, muebles: catalogoLista, granitos }: Props) {
   const navegar = useNavigate()
   const aviso = useAviso()
   const [pestana, setPestana] = useState<Pestana>('materiales')
@@ -162,7 +164,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, muebles: catalogo
               setValue('materiales', nuevo.materiales, opciones)
             }}
           />
-          {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} />}
+          {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} destacadoInicial={destacado} />}
           <Button
             variant="outlined"
             startIcon={<RequestQuoteOutlined />}

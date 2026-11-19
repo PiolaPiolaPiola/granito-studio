@@ -10,10 +10,12 @@ interface Props {
   autoRotar: boolean
   /** Mientras se arrastra un mueble la cámara no debe girar. */
   bloqueada?: boolean
+  /** false en páginas largas: la rueda del mouse debe mover la página, no la cámara. */
+  zoomConRueda?: boolean
 }
 
 /** Cámara orbital + ejecución de las órdenes de la barra (vista, zoom, reiniciar). */
-export function ControlCamara({ comando, medidas, autoRotar, bloqueada = false }: Props) {
+export function ControlCamara({ comando, medidas, autoRotar, bloqueada = false, zoomConRueda = true }: Props) {
   const controles = useRef<ComponentRef<typeof OrbitControls>>(null)
   const { camera, invalidate } = useThree()
 
@@ -39,6 +41,7 @@ export function ControlCamara({ comando, medidas, autoRotar, bloqueada = false }
       ref={controles}
       makeDefault
       enabled={!bloqueada}
+      enableZoom={zoomConRueda}
       autoRotate={autoRotar && !bloqueada}
       autoRotateSpeed={1.2}
       target={puntoDeVista('inicial', medidas).objetivo}

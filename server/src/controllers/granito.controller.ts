@@ -18,6 +18,11 @@ export const listarGranitos: RequestHandler = async (req, res) => {
   res.json(resultado);
 };
 
+/** Público, sin sesión: `GET /api/publico/piedras` (catálogo activo, sin precios). */
+export const listarPiedrasPublicas: RequestHandler = async (_req, res) => {
+  res.json({ piedras: await servicioGranitos.listarPublicas() });
+};
+
 export const obtenerGranito: ConParamId = async (req, res) => {
   const granito = await servicioGranitos.obtener(req.params.id);
   res.json({ granito });

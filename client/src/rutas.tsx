@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import { RutaProtegida } from './auth/RutaProtegida'
 import { Layout } from './componentes/Layout'
 import { Disenos } from './paginas/disenos/Disenos'
@@ -14,8 +14,11 @@ import { NoEncontrada } from './paginas/NoEncontrada'
 const editor = () => import('./paginas/editor/EditorPagina').then((m) => ({ Component: m.EditorPagina }))
 const prototipo = () => import('./paginas/PrototipoMeson').then((m) => ({ Component: m.PrototipoMeson }))
 const vistaPublica = () => import('./paginas/publico/VistaPublica').then((m) => ({ Component: m.VistaPublica }))
+const inicio = () => import('./paginas/publico/Inicio').then((m) => ({ Component: m.Inicio }))
 
 export const router = createBrowserRouter([
+  // Página de inicio PÚBLICA: lo primero que ve un visitante (no el login).
+  { path: '/', lazy: inicio, hydrateFallbackElement: <></> },
   { path: '/login', element: <Login /> },
   // Pública, sin sesión: el cliente abre el diseño que le compartió el vendedor.
   { path: '/ver/:codigo', lazy: vistaPublica, hydrateFallbackElement: <></> },
@@ -27,7 +30,6 @@ export const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { index: true, element: <Navigate to="/disenos" replace /> },
           { path: 'disenos', element: <Disenos /> },
           { path: 'disenos/nuevo', lazy: editor },
           { path: 'disenos/:id', lazy: editor },

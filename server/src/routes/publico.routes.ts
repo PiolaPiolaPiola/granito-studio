@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
-import { verDisenoPublico } from '../controllers/diseno.controller.js';
+import { listarDestacados, verDisenoPublico } from '../controllers/diseno.controller.js';
+import { listarPiedrasPublicas } from '../controllers/granito.controller.js';
 import { validar } from '../middlewares/validar.js';
 
 /**
@@ -22,6 +23,8 @@ const esquemaCodigo = z.strictObject({
   codigo: z.string().regex(/^[\w-]{16,64}$/, 'Código de enlace inválido'),
 });
 
+rutasPublicas.get('/destacados', limitarPublico, listarDestacados);
+rutasPublicas.get('/piedras', limitarPublico, listarPiedrasPublicas);
 rutasPublicas.get(
   '/disenos/:codigo',
   limitarPublico,

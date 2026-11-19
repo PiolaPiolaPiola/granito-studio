@@ -43,6 +43,7 @@ export function EditorPagina() {
       id={id}
       inicial={inicial}
       codigoPublico={diseno.datos?.codigoPublico}
+      destacado={diseno.datos?.destacado ?? false}
       muebles={muebles.datos.items}
       granitos={granitos.datos.items}
     />

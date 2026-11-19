@@ -39,6 +39,16 @@ export const dejarDeCompartirDiseno: ConParamId = async (req, res) => {
   res.status(204).end();
 };
 
+export const destacarDiseno: ConParamId = async (req, res) => {
+  const { destacado } = req.body as { destacado: boolean };
+  res.json(await servicioDisenos.destacar(req.params.id, destacado));
+};
+
+/** Público, sin sesión: `GET /api/publico/destacados`. */
+export const listarDestacados: RequestHandler = async (_req, res) => {
+  res.json({ disenos: await servicioDisenos.listarDestacados() });
+};
+
 /** Público, sin sesión: `GET /api/publico/disenos/:codigo`. */
 export const verDisenoPublico: RequestHandler<{ codigo: string }> = async (req, res) => {
   res.json(await servicioDisenos.obtenerPublico(req.params.codigo));

@@ -56,6 +56,11 @@ export class DisenosApiHttp implements DisenosApi {
     }
   }
 
+  async destacar(id: string, destacado: boolean) {
+    const { data } = await this.http.post<{ destacado: boolean; codigoPublico?: string }>(`/disenos/${id}/destacar`, { destacado })
+    return data
+  }
+
   async duplicar(id: string): Promise<Diseno> {
     const { data } = await this.http.post<{ diseno: Diseno }>(`/disenos/${id}/duplicar`)
     return data.diseno

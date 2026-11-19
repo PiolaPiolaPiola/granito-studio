@@ -1,7 +1,7 @@
 import type { Pagina } from '../dominio/comun'
-import type { Diseno, EntradaDiseno } from '../dominio/diseno'
+import type { Diseno, EntradaDiseno, FormaCocina, MedidasM } from '../dominio/diseno'
 import type { EntradaGranito, FiltrosGranitos, Granito } from '../dominio/granito'
-import type { EntradaMueble, FiltrosMuebles, Mueble } from '../dominio/mueble'
+import type { EntradaMueble, Espacio, FiltrosMuebles, Mueble } from '../dominio/mueble'
 import type { ContextoSugerencia, Sugerencia } from '../dominio/sugerencia'
 import type { SesionIniciada, Usuario } from '../dominio/usuario'
 import type {
@@ -64,6 +64,25 @@ export interface DisenosApi {
   dejarDeCompartir(id: string): Promise<void>
   /** Sin sesión: lo que ve el cliente con el enlace. */
   verPublico(codigo: string): Promise<DisenoPublico>
+  /** Solo admin: mostrar (o no) el diseño en la página de inicio. Destacar también lo comparte. */
+  destacar(id: string, destacado: boolean): Promise<{ destacado: boolean; codigoPublico?: string }>
+}
+
+/** Un diseño de la página de inicio: lo mínimo para listarlo. */
+export interface DisenoDestacado {
+  nombre: string
+  espacio: Espacio
+  forma: FormaCocina
+  medidasM: MedidasM
+  cantidadMuebles: number
+  codigoPublico: string
+}
+
+/** Lo que ve cualquiera sin iniciar sesión. */
+export interface PublicoApi {
+  destacados(): Promise<DisenoDestacado[]>
+  /** Catálogo activo, sin precios. */
+  piedras(): Promise<Granito[]>
 }
 
 /** Un diseño compartido con lo justo para dibujarlo (sin precios ni datos internos). */

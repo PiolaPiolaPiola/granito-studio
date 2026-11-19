@@ -94,9 +94,33 @@ export class ServicioDisenos {
     return codigo;
   }
 
-  /** El enlace anterior deja de funcionar. Si se vuelve a compartir, el código es otro. */
+  /**
+   * El enlace anterior deja de funcionar (si se vuelve a compartir, el código es otro) y el
+   * diseño sale de la página de inicio: lo destacado tiene que poder abrirse.
+   */
   async dejarDeCompartir(id: string) {
     existeOFallar(await this.repositorio.cambiarCodigo(id, null), NO_EXISTE);
+    await this.repositorio.cambiarDestacado(id, false);
+  }
+
+  /** Mostrar (o no) el diseño en la página de inicio. Destacar también lo comparte. */
+  async destacar(id: string, destacado: boolean) {
+    const codigoPublico = destacado ? await this.compartir(id) : undefined;
+    existeOFallar(await this.repositorio.cambiarDestacado(id, destacado), NO_EXISTE);
+    return { destacado, codigoPublico };
+  }
+
+  /** Para la página de inicio: lo mínimo de cada diseño destacado. */
+  async listarDestacados() {
+    const disenos = await this.repositorio.listarDestacados(6);
+    return disenos.map(({ nombre, espacio, forma, medidasM, muebles, codigoPublico }) => ({
+      nombre,
+      espacio,
+      forma,
+      medidasM,
+      cantidadMuebles: muebles.length,
+      codigoPublico,
+    }));
   }
 
   /**

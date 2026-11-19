@@ -539,6 +539,44 @@ export const documentoOpenApi = {
         responses: { 204: { description: 'Ya no se comparte' }, ...conErrores(400, 401, 404) },
       },
     },
+    '/api/disenos/{id}/destacar': {
+      parameters: [parametroId],
+      post: {
+        tags: ['Diseños'],
+        summary: 'Muestra (o quita) el diseño en la página de inicio pública (admin)',
+        description: 'Destacar también lo comparte. Dejar de compartir lo quita de la portada.',
+        security: seguridad,
+        requestBody: {
+          required: true,
+          content: json({
+            type: 'object',
+            required: ['destacado'],
+            properties: { destacado: { type: 'boolean' } },
+          }),
+        },
+        responses: {
+          200: { description: '`{ destacado, codigoPublico? }`' },
+          ...conErrores(400, 401, 403, 404),
+        },
+      },
+    },
+    '/api/publico/destacados': {
+      get: {
+        tags: ['Diseños'],
+        summary: 'Diseños de la página de inicio, SIN sesión',
+        responses: {
+          200: { description: '`{ disenos: [...] }` con su código público' },
+          ...conErrores(429),
+        },
+      },
+    },
+    '/api/publico/piedras': {
+      get: {
+        tags: ['Granitos'],
+        summary: 'Catálogo de piedras activas, SIN sesión y sin precios',
+        responses: { 200: { description: '`{ piedras: [...] }`' }, ...conErrores(429) },
+      },
+    },
     '/api/publico/disenos/{codigo}': {
       parameters: [{ name: 'codigo', in: 'path', required: true, schema: { type: 'string' } }],
       get: {

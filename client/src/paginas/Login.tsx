@@ -26,7 +26,8 @@ export function Login() {
     formState: { errors, isSubmitting },
   } = useForm<EntradaLogin>({ resolver: zodResolver(esquemaLogin), defaultValues: { email: '', contrasena: '' } })
 
-  const destino = (ubicacion.state as { desde?: string } | null)?.desde ?? '/'
+  // Sin una página pedida antes, después de entrar se va a los diseños (no a la portada pública).
+  const destino = (ubicacion.state as { desde?: string } | null)?.desde ?? '/disenos'
   if (usuario !== null) return <Navigate to={destino} replace />
 
   const enviar = handleSubmit(async (datos) => {

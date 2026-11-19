@@ -35,6 +35,23 @@ export class ServicioGranitos {
     return { granitos: elementos, ...metadatosPagina(total, { pagina, porPagina }) };
   }
 
+  /** Catálogo para la página de inicio: solo activos y sin precios. */
+  async listarPublicas() {
+    const { elementos } = await this.repositorio.buscar(
+      { incluirInactivos: false },
+      { pagina: 1, porPagina: 100 },
+    );
+    return elementos.map(({ _id, nombre, tipo, acabado, imagenUrl, fotoUrl, etiquetas }) => ({
+      _id,
+      nombre,
+      tipo,
+      acabado,
+      imagenUrl,
+      fotoUrl,
+      etiquetas,
+    }));
+  }
+
   async obtener(id: string) {
     return existeOFallar(await this.repositorio.buscarPorId(id), NO_EXISTE);
   }
