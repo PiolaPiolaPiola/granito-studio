@@ -26,6 +26,7 @@ import type { Mueble } from '../../dominio/mueble'
 import { distribuir, rotacionDe, type MuebleResuelto } from '../../escena/distribucion'
 import { esquemaDiseno } from '../../esquemas/diseno.esquemas'
 import { aplicarErroresApi, listarMensajes } from '../../formularios/erroresApi'
+import { BotonVoz } from '../../voz/BotonVoz'
 import { DialogoCotizacion } from './DialogoCotizacion'
 import { PanelCatalogoMuebles } from './PanelCatalogoMuebles'
 import { PanelConfiguracion, type Pestana } from './PanelConfiguracion'
@@ -144,6 +145,20 @@ export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos
             {...register('nombre')}
           />
           <Box sx={{ flex: 1 }} />
+          <BotonVoz
+            obtenerDiseno={() => metodos.getValues()}
+            catalogo={catalogoLista}
+            granitos={granitos}
+            onAplicar={(nuevo) => {
+              const opciones = { shouldDirty: true }
+              setValue('espacio', nuevo.espacio, opciones)
+              setValue('forma', nuevo.forma, opciones)
+              setValue('medidasM', nuevo.medidasM, opciones)
+              setValue('acabados', nuevo.acabados, opciones)
+              setValue('muebles', nuevo.muebles, opciones)
+              setValue('materiales', nuevo.materiales, opciones)
+            }}
+          />
           <Button
             variant="outlined"
             startIcon={<RequestQuoteOutlined />}
