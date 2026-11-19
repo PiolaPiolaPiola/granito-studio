@@ -28,3 +28,8 @@ export const eliminarDiseno: ConParamId = async (req, res) => {
   await servicioDisenos.eliminar(req.params.id);
   res.status(204).end();
 };
+
+export const duplicarDiseno: ConParamId = async (req, res) => {
+  const diseno = await servicioDisenos.duplicar(req.params.id);
+  res.status(201).location(`/api/disenos/${diseno._id.toString()}`).json({ diseno });
+};

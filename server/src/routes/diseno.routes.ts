@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   crearDiseno,
+  duplicarDiseno,
   eliminarDiseno,
   listarDisenos,
   obtenerDiseno,
@@ -24,4 +25,5 @@ rutasDisenos.put(
   validar({ params: esquemaParamsId, body: esquemaDiseno }),
   reemplazarDiseno,
 );
+rutasDisenos.post('/:id/duplicar', validar({ params: esquemaParamsId }), duplicarDiseno);
 rutasDisenos.delete('/:id', validar({ params: esquemaParamsId }), eliminarDiseno);

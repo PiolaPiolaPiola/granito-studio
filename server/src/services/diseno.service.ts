@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { AppError, existeOFallar } from '../errors/AppError.js';
 import { ErrorValidacion, type DetalleValidacion } from '../errors/ErrorValidacion.js';
 import { repositorioDisenos, type RepositorioDisenos } from '../repositories/diseno.repository.js';
@@ -9,6 +10,12 @@ import { repositorioMuebles, type RepositorioMuebles } from '../repositories/mue
 import type { EntradaDiseno } from '../schemas/diseno.schemas.js';
 
 const NO_EXISTE = 'No existe un diseño con ese id';
+const SUFIJO_COPIA = ' (copia)';
+const LARGO_MAXIMO_NOMBRE = 80;
+
+function nombreDeCopia(nombre: string): string {
+  return nombre.slice(0, LARGO_MAXIMO_NOMBRE - SUFIJO_COPIA.length) + SUFIJO_COPIA;
+}
 
 export class ServicioDisenos {
   constructor(
@@ -34,6 +41,36 @@ export class ServicioDisenos {
     await this.obtener(id);
     await this.validarReferencias(datos);
     return existeOFallar(await this.repositorio.actualizar(id, datos), NO_EXISTE);
+  }
+
+  /**
+   * Copia un diseño. Cada mueble recibe un `_id` nuevo y los materiales que lo
+   * referencian (`muebleEnDiseno`) se reapuntan a ese id nuevo.
+   */
+  async duplicar(id: string) {
+    const original = await this.obtener(id);
+
+    const idsNuevos = new Map<string, string>();
+    const muebles = original.muebles.map(({ _id, mueble, posicion }) => {
+      const nuevoId = new Types.ObjectId().toString();
+      idsNuevos.set(_id.toString(), nuevoId);
+      return { _id: nuevoId, mueble: mueble.toString(), posicion };
+    });
+
+    const materiales = original.materiales.map(({ pieza, muebleEnDiseno, granito, colorHex }) => ({
+      pieza,
+      ...(muebleEnDiseno && { muebleEnDiseno: idsNuevos.get(muebleEnDiseno.toString()) }),
+      ...(granito && { granito: granito.toString() }),
+      ...(colorHex && { colorHex }),
+    }));
+
+    return this.repositorio.crear({
+      nombre: nombreDeCopia(original.nombre),
+      forma: original.forma,
+      medidasM: { ancho: original.medidasM.ancho, fondo: original.medidasM.fondo },
+      muebles,
+      materiales,
+    });
   }
 
   async eliminar(id: string) {
