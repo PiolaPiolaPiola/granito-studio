@@ -58,7 +58,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 
 ### B8 · CRUD de diseños (~2 h 30 min) 🗄️
 - [x] **B8.1** Crear, listar, ver, actualizar y eliminar — 1 h 30 min
-- [ ] **B8.2** Validar que los ids de muebles y granitos existan — 30 min
+- [x] **B8.2** Validar que los ids de muebles y granitos existan — 30 min
 - [ ] **B8.3** `POST /api/disenos/:id/duplicar` — 30 min
 
 ### B9 · Sugerencias de combinación (~1 h)

@@ -1,4 +1,4 @@
-import { isValidObjectId, type Model, type QueryFilter } from 'mongoose';
+import { isValidObjectId, type Model, type QueryFilter, type Types } from 'mongoose';
 import type { ConId, Pagina, Paginacion, Repositorio } from './repositorio.js';
 
 /**
@@ -43,6 +43,18 @@ export class RepositorioMongoose<
       .findByIdAndUpdate(id, { active: false }, { returnDocument: 'after' })
       .lean<ConId<T>>()
       .exec();
+  }
+
+  async idsExistentes(ids: string[]): Promise<Set<string>> {
+    const validos = [...new Set(ids.map((id) => id.toLowerCase()))].filter(isValidObjectId);
+    if (validos.length === 0) return new Set();
+
+    const encontrados = await this.modelo
+      .find({ _id: { $in: validos } })
+      .select('_id')
+      .lean<{ _id: Types.ObjectId }[]>()
+      .exec();
+    return new Set(encontrados.map(({ _id }) => _id.toString()));
   }
 
   /** Página de resultados (más recientes primero) y total de coincidencias, en paralelo. */

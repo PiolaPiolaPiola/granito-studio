@@ -8,6 +8,8 @@ export interface Repositorio<T, TCrear, TActualizar> {
   crear(datos: TCrear): Promise<ConId<T>>;
   actualizar(id: string, cambiosActualizar: TActualizar): Promise<ConId<T> | null>;
   inactivar(id: string): Promise<ConId<T> | null>;
+  /** De los ids dados, los que sí existen (en minúsculas). */
+  idsExistentes(ids: string[]): Promise<Set<string>>;
 }
 
 export interface Paginacion {
