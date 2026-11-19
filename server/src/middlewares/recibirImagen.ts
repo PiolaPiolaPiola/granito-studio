@@ -1,7 +1,8 @@
-import type { RequestHandler } from 'express';
+import type { Request, RequestHandler } from 'express';
+import type { ArchivoImagen } from '../almacenamiento/index.js';
 import multer from 'multer';
 import { AppError } from '../errors/AppError.js';
-import { detectarTipoImagen, esTipoImagen } from '../utils/imagen.js';
+import { detectarTipoImagen, esTipoImagen, type TipoImagen } from '../utils/imagen.js';
 
 const TAMANO_MAXIMO_MB = 5;
 
@@ -70,4 +71,11 @@ export function recibirImagen(
       next();
     });
   };
+}
+
+/** Traduce `req.file` (de Multer) al tipo que entienden los servicios. */
+export function imagenRecibida(req: Request): ArchivoImagen | undefined {
+  if (!req.file) return undefined;
+  // recibirImagen ya comprobó que el tipo declarado coincide con la firma real.
+  return { contenido: req.file.buffer, tipo: req.file.mimetype as TipoImagen };
 }

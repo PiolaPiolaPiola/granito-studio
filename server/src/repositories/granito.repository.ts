@@ -1,9 +1,5 @@
 import { GranitoModelo, type Granito } from '../models/granito.model.js';
-import type {
-  ActualizarGranito,
-  CrearGranito,
-  FiltrosGranitos,
-} from '../schemas/granito.schemas.js';
+import type { CambiosGranito, FiltrosGranitos, NuevoGranito } from '../schemas/granito.schemas.js';
 import { RepositorioMongoose } from './RepositorioMongoose.js';
 import type { QueryFilter } from 'mongoose';
 import { regexSinTildes } from '../utils/texto.js';
@@ -11,13 +7,13 @@ import type { ConId, Pagina, Paginacion, Repositorio } from './repositorio.js';
 
 const SIN_MAYUSCULAS_NI_TILDES = { locale: 'es', strength: 1 };
 
-export interface RepositorioGranitos extends Repositorio<Granito, CrearGranito, ActualizarGranito> {
+export interface RepositorioGranitos extends Repositorio<Granito, NuevoGranito, CambiosGranito> {
   existeConNombre(nombre: string, excluirId?: string): Promise<boolean>;
   buscar(filtros: FiltrosGranitos, paginacion: Paginacion): Promise<Pagina<ConId<Granito>>>;
 }
 
 class RepositorioGranitosMongoose
-  extends RepositorioMongoose<Granito, CrearGranito, ActualizarGranito>
+  extends RepositorioMongoose<Granito, NuevoGranito, CambiosGranito>
   implements RepositorioGranitos
 {
   async existeConNombre(nombre: string, excluirId?: string): Promise<boolean> {
