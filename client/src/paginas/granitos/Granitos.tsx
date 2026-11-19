@@ -20,6 +20,7 @@ import { useAviso } from '../../componentes/aviso/AvisoContext'
 import { ConfirmarDialogo } from '../../componentes/ConfirmarDialogo'
 import { EstadoConsulta } from '../../componentes/EstadoConsulta'
 import { MuestraGranito } from '../../componentes/MuestraGranito'
+import { pesos } from '../../dominio/cotizacion'
 import {
   ACABADOS,
   ETIQUETA_ACABADO,
@@ -114,8 +115,29 @@ export function Granitos() {
         {resultado?.items.map((g) => (
           <Card key={g._id} component="article">
             <CardContent>
-              <MuestraGranito imagenUrl={g.imagenUrl} alt={`Textura de ${g.nombre}`} sx={{ aspectRatio: '4 / 3', borderRadius: 2, mb: 1.5 }} />
+              {g.fotoUrl === undefined ? (
+                <MuestraGranito imagenUrl={g.imagenUrl} alt={`Textura de ${g.nombre}`} sx={{ aspectRatio: '4 / 3', borderRadius: 2, mb: 1.5 }} />
+              ) : (
+                // Foto de un trabajo real del taller, con la textura 3D en una esquina.
+                <Box sx={{ position: 'relative', mb: 1.5 }}>
+                  <Box
+                    component="img"
+                    src={g.fotoUrl}
+                    alt={`Trabajo real en ${g.nombre}`}
+                    loading="lazy"
+                    sx={{ display: 'block', width: '100%', aspectRatio: '4 / 3', objectFit: 'cover', borderRadius: 2 }}
+                  />
+                  <MuestraGranito
+                    imagenUrl={g.imagenUrl}
+                    alt={`Textura de ${g.nombre}`}
+                    sx={{ position: 'absolute', right: 8, bottom: 8, width: 44, height: 44, borderRadius: '50%', border: '2px solid #fff', boxShadow: 2 }}
+                  />
+                </Box>
+              )}
               <Typography component="h2" variant="h3" sx={{ mb: 1 }}>{g.nombre}</Typography>
+              {g.precioM2 !== undefined && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{pesos(g.precioM2)} por m²</Typography>
+              )}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1 }}>
                 <Chip size="small" label={ETIQUETA_TIPO_PIEDRA[g.tipo]} sx={{ bgcolor: '#EFEAE2' }} />
                 <Chip size="small" variant="outlined" label={ETIQUETA_ACABADO[g.acabado]} />
