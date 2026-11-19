@@ -14,3 +14,6 @@ coverage
 
 # Imágenes subidas en desarrollo
 uploads
+
+# Fotos privadas del taller para el seed (no se versionan)
+semilla-fotos

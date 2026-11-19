@@ -1,11 +1,17 @@
 import { crc32, deflateSync } from 'node:zlib';
 
 /**
- * Texturas de piedra generadas por código para el seed (no hay fotos reales todavía).
+ * Texturas de piedra generadas por código para el seed, con los colores de las fotos del taller
+ * (una foto de una cocina instalada no sirve como textura: tiene perspectiva y reflejos).
  * Escribe un PNG a mano: firma + bloques IHDR, IDAT (píxeles comprimidos) e IEND.
+ *
+ * - grano: granito natural (puntos de varios tonos)
+ * - vena: mármol o porcelánico veteado
+ * - liso: cuarzo de color uniforme
+ * - destellos: cuarzo con partículas de espejo (los negros y grises "estelares" de las fotos)
  */
 
-export type EstiloTextura = 'grano' | 'vena' | 'liso';
+export type EstiloTextura = 'grano' | 'vena' | 'liso' | 'destellos';
 type Color = [number, number, number];
 
 const TAMANO = 256;
@@ -72,6 +78,12 @@ function colorPixel(
     const manchas = fbm(x / 20, y / 20, 3);
     const fondo = mezclar(base, vena, manchas * 0.35);
     return mezclar(fondo, vena, grano > 0.58 ? (grano - 0.58) * 4 : 0);
+  }
+  if (estilo === 'destellos') {
+    // Fondo casi uniforme + puntos aislados muy claros (las partículas de espejo).
+    const fondo = mezclar(base, vena, fbm(x / 40, y / 40, 3) * 0.12);
+    const chispa = fbm(x * 1.7, y * 1.7, 1);
+    return chispa > 0.47 ? mezclar(fondo, [245, 245, 240], (chispa - 0.47) * 45) : fondo;
   }
   return mezclar(base, vena, fbm(x / 60, y / 60, 4) * 0.18);
 }
