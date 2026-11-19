@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
 import { iaApi } from '../api'
 import { aErrorApi } from '../api/errores'
+import { useAviso } from '../componentes/aviso/AvisoContext'
 import type { EntradaDiseno } from '../dominio/diseno'
 import type { Granito } from '../dominio/granito'
 import { espacioDe, type Mueble } from '../dominio/mueble'
@@ -41,6 +42,7 @@ const EJEMPLOS = [
  * tiene IA, se le pregunta a la IA por la frase completa.
  */
 export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props) {
+  const aviso = useAviso()
   const [abierto, setAbierto] = useState(false)
   const [texto, setTexto] = useState('')
   const [trabajando, setTrabajando] = useState(false)
@@ -83,8 +85,19 @@ export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props
       }
       const { diseno, hechas, fallidas } = aplicarAcciones(obtenerDiseno(), acciones, catalogo, granitos)
       const noEntendidas = acciones === local.acciones ? local.sinEntender.map((s) => `No entendí: "${s}"`) : []
-      if (hechas.length > 0) onAplicar(diseno)
-      setResultado({ hechas, fallidas: [...fallidas, ...noEntendidas], fuente })
+      const problemas = [...fallidas, ...noEntendidas]
+      if (hechas.length > 0) {
+        onAplicar(diseno)
+        // Se cierra para que el cambio se vea en el 3D; el aviso resume qué se hizo.
+        setAbierto(false)
+        setTexto('')
+        setResultado(null)
+        aviso.mostrar(`${String(hechas.length)} ${hechas.length === 1 ? 'cambio aplicado' : 'cambios aplicados'}`, problemas.length > 0 ? 'warning' : 'success', {
+          detalle: [...hechas, ...problemas],
+        })
+      } else {
+        setResultado({ hechas, fallidas: problemas.length > 0 ? problemas : ['No encontré nada para cambiar en esa frase'], fuente })
+      }
     } finally {
       setTrabajando(false)
     }

@@ -94,16 +94,28 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
     [setValue],
   )
 
-  /** Arrastre en la forma libre: conserva el giro que ya tenía la pieza. */
+  /**
+   * Arrastre con el mouse. En una forma con plantilla, el primer arrastre pasa el diseño a
+   * "libre" fijando dónde estaba cada mueble (así nada salta de lugar). Conserva el giro.
+   */
   const moverEnEscena = useCallback(
     (idMueble: string, x: number, z: number) => {
-      const actuales = metodos.getValues('muebles')
+      let actuales = metodos.getValues('muebles')
+      if (metodos.getValues('forma') !== 'libre') {
+        const porId = new Map(colocaciones.map((c) => [c.id, c]))
+        actuales = actuales.map((m) => {
+          const c = porId.get(m._id)
+          return c === undefined ? m : { ...m, ubicacion: { x: c.centro[0], z: c.centro[2], rotacion: rotacionDe(c.rotY) } }
+        })
+        setValue('forma', 'libre', { shouldDirty: true })
+        aviso.mostrar('Pasé el diseño a forma libre para que puedas mover los muebles donde quieras', 'info')
+      }
       const pieza = actuales.find((m) => m._id === idMueble)
       const colocada = colocaciones.find((c) => c.id === idMueble)
       const rotacion = pieza?.ubicacion?.rotacion ?? (colocada === undefined ? 0 : rotacionDe(colocada.rotY))
       cambiarMuebles(ubicarMueble(actuales, idMueble, { x, z, rotacion }, medidas))
     },
-    [metodos, colocaciones, cambiarMuebles, medidas],
+    [metodos, colocaciones, cambiarMuebles, medidas, setValue, aviso],
   )
 
   const quitar = (idMueble: string) => {
@@ -207,6 +219,18 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               onMover={moverEnEscena}
               onLienzo={(l) => { lienzo.current = l }}
             />
+            <Box sx={{ mt: 1.5 }}>
+              <PanelMueblesEnCocina
+                muebles={mueblesDiseno}
+                catalogo={catalogo}
+                materiales={materiales}
+                granitos={granitosPorId}
+                seleccionado={seleccionado}
+                onElegir={(idMueble) => { setSeleccionado(idMueble); setPieza(`mueble:${idMueble}`) }}
+                onQuitar={quitar}
+                onMover={(idMueble, delta) => cambiarMuebles(moverMueble(mueblesDiseno, idMueble, delta))}
+              />
+            </Box>
           </Box>
           <Box sx={{ order: { xs: 2, lg: 3 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {piezaSeleccionada !== undefined && muebleSeleccionado !== undefined && (
@@ -223,16 +247,6 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               />
             )}
             <PanelConfiguracion granitos={granitos} catalogo={catalogo} pestana={pestana} onPestana={setPestana} piezaElegida={pieza} onPieza={setPieza} />
-            <PanelMueblesEnCocina
-              muebles={mueblesDiseno}
-              catalogo={catalogo}
-              materiales={materiales}
-              granitos={granitosPorId}
-              seleccionado={seleccionado}
-              onElegir={(idMueble) => { setSeleccionado(idMueble); setPieza(`mueble:${idMueble}`) }}
-              onQuitar={quitar}
-              onMover={(idMueble, delta) => cambiarMuebles(moverMueble(mueblesDiseno, idMueble, delta))}
-            />
           </Box>
         </Box>
       </Box>

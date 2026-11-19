@@ -41,7 +41,7 @@ export function EscenaCocina({ forma, medidas, acabados, colocaciones, materiale
   const meson = resolverMaterial(materiales, granitosPorId, 'meson')
   const salpicadero = resolverMaterial(materiales, granitosPorId, 'salpicadero')
   const { ancho, fondo } = medidas
-  const arrastre = useRef<{ id: string; dx: number; dz: number } | null>(null)
+  const arrastre = useRef<{ id: string; dx: number; dz: number; x0: number; z0: number; movido: boolean } | null>(null)
   const libre = forma === 'libre'
 
   // El arrastre termina aunque se suelte el botón fuera del lienzo.
@@ -58,11 +58,11 @@ export function EscenaCocina({ forma, medidas, acabados, colocaciones, materiale
   const empezar = (c: Colocacion) => (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
     onSeleccionar?.(c.id)
-    if (!libre || onMover === undefined) return
+    if (onMover === undefined) return
     // El desfase se mide en el PISO bajo el cursor (no en la cara del mueble que se tocó):
     // si no, al tomar un mueble alto por arriba saltaría hacia el fondo.
     const punto = puntoEnPiso(e)
-    arrastre.current = { id: c.id, dx: c.centro[0] - punto.x, dz: c.centro[2] - punto.z }
+    arrastre.current = { id: c.id, dx: c.centro[0] - punto.x, dz: c.centro[2] - punto.z, x0: punto.x, z0: punto.z, movido: false }
     onArrastrando?.(true)
   }
 
@@ -70,6 +70,9 @@ export function EscenaCocina({ forma, medidas, acabados, colocaciones, materiale
     const actual = arrastre.current
     if (actual === null || onMover === undefined) return
     const punto = puntoEnPiso(e)
+    // Un clic con un temblor de la mano no es un arrastre (no debe mover ni cambiar la forma).
+    if (!actual.movido && Math.hypot(punto.x - actual.x0, punto.z - actual.z0) < 0.04) return
+    actual.movido = true
     onMover(actual.id, ajustar(punto.x + actual.dx), ajustar(punto.z + actual.dz))
   }
 
@@ -93,8 +96,13 @@ export function EscenaCocina({ forma, medidas, acabados, colocaciones, materiale
         <Lightformer form="rect" intensity={1.5} position={[5, 2, 0]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} />
       </Environment>
 
-      {/* piso: también recibe el movimiento del puntero mientras se arrastra un mueble */}
-      <mesh rotation-x={-Math.PI / 2} receiveShadow onPointerMove={mover}>
+      {/* piso */}
+      {/* Superficie invisible y grande que recibe el movimiento del puntero al arrastrar */}
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.001, 0]} onPointerMove={mover}>
+        <planeGeometry args={[60, 60]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <mesh rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[ancho + (libre ? 8 : 1), fondo + (libre ? 8 : 1)]} />
         <meshStandardMaterial color="#dcd6ca" roughness={0.9} />
       </mesh>

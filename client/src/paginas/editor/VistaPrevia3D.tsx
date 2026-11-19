@@ -73,7 +73,7 @@ export function VistaPrevia3D(props: Props) {
     <Box
       component="section"
       aria-label="Vista 3D"
-      sx={{ position: 'relative', height: 'max(520px, calc(100dvh - 150px))', borderRadius: 2, overflow: 'hidden', background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)', border: 1, borderColor: 'divider', touchAction: 'none' }}
+      sx={{ position: 'relative', height: 'max(440px, calc(100dvh - 330px))', borderRadius: 2, overflow: 'hidden', background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)', border: 1, borderColor: 'divider', touchAction: 'none' }}
     >
       <Canvas
         shadows="percentage"
@@ -106,7 +106,7 @@ export function VistaPrevia3D(props: Props) {
         sx={{ position: 'absolute', top: 12, left: 12, px: 1.5, py: 0.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.85)', color: 'text.primary' }}
       >
         {medidas.ancho} × {medidas.fondo} m · {colocaciones.length} muebles
-        {forma === 'libre' && ' · arrastra los muebles para moverlos'}
+        {onMover !== undefined && ' · arrastra un mueble para moverlo'}
       </Typography>
       {desbordados.length > 0 && (
         <Alert severity="warning" sx={{ position: 'absolute', top: 12, right: 12, maxWidth: 320 }}>

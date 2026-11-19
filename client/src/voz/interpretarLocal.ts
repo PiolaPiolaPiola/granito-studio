@@ -83,6 +83,15 @@ function partir(texto: string): string[] {
 function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[] | null {
   let m: RegExpMatchArray | null
 
+  // "de 4 metros de ancho y 3 de fondo" (una o las dos medidas)
+  const anchoDicho = orden.match(/(\d+(?:\.\d+)?)\s*(?:m|metros)?\s*de ancho/)
+  const fondoDicho = orden.match(/(\d+(?:\.\d+)?)\s*(?:m|metros)?\s*de (?:fondo|largo|profundidad)/)
+  if (anchoDicho || fondoDicho) {
+    const ancho = anchoDicho ? numero(anchoDicho[1]) : undefined
+    const fondo = fondoDicho ? numero(fondoDicho[1]) : undefined
+    if (ancho !== undefined || fondo !== undefined) return [{ tipo: 'medidas', ancho, fondo }]
+  }
+
   if ((m = orden.match(/(?:mide|medidas?|tamano|dimensiones)\D*?(\d+(?:[.,]\d+)?)\s*(?:m|metros)?\s*(?:por|x)\s*(\d+(?:[.,]\d+)?)/))) {
     const ancho = numero(m[1])
     const fondo = numero(m[2])
@@ -113,7 +122,7 @@ function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[]
   if (/\bsin plantilla\b/.test(orden)) return [{ tipo: 'forma', forma: 'libre' }]
 
   if ((m = orden.match(/(?:color(?: de(?: los)?)? muebles|muebles(?: en| de)?(?: color)?|color)\s+(.+)/))) {
-    return [{ tipo: 'colorMuebles', color: m[1].trim() }]
+    return [{ tipo: 'colorMuebles', color: m[1].replace(/^(a|en|de|por)\s+/, '').trim() }]
   }
 
   if ((m = orden.match(/(?:meson|mesones|encimera|piedra|cubierta)(?: (?:en|de|con|a))?\s+(.+)/))) {
@@ -135,7 +144,8 @@ function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[]
     return mueble === undefined ? null : [{ tipo: 'quitar', mueble }]
   }
 
-  if ((m = orden.match(/^(?:agrega(?:r)?|anade|anadir|pon(?:er)?|coloca(?:r)?|mete(?:r)?|suma(?:r)?)\s+(.+)$/))) {
+  // "agrégale", "ponme", "necesito", "quiero"… también son pedidos de agregar.
+  if ((m = orden.match(/^(?:agrega(?:r|le|les|me)?|anade(?:le|me)?|anadir|pon(?:er|le|les|me)?|coloca(?:r|le)?|mete(?:r|le)?|suma(?:r|le)?|incluye|necesito|quiero|falta)\s+(.+)$/))) {
     // "dos gabinetes de 60 y un cajonero" → dos pedidos.
     const pedidos = m[1].split(/\s+y\s+(?=(?:\d+|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s)/)
     const acciones = pedidos.flatMap((pedido) => {

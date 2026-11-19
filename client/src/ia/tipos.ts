@@ -43,7 +43,7 @@ export type AccionVoz =
   | { tipo: 'quitar'; mueble?: string }
   | { tipo: 'forma'; forma: FormaCocina }
   | { tipo: 'espacio'; espacio: Espacio }
-  | { tipo: 'medidas'; ancho: number; fondo: number }
+  | { tipo: 'medidas'; ancho?: number; fondo?: number }
   | { tipo: 'piedra'; piedra: string; pieza: 'meson' | 'salpicadero' | 'ambos' }
   | { tipo: 'salpicadero'; valor: Salpicadero }
   | { tipo: 'cascada'; valor: boolean }

@@ -103,8 +103,8 @@ export function aplicarAcciones(
         hechas.push(`Espacio: ${ETIQUETA_ESPACIO[accion.espacio]}`)
         break
       case 'medidas':
-        d = { ...d, medidasM: { ancho: accion.ancho, fondo: accion.fondo } }
-        hechas.push(`Medidas: ${String(accion.ancho)} × ${String(accion.fondo)} m`)
+        d = { ...d, medidasM: { ancho: accion.ancho ?? d.medidasM.ancho, fondo: accion.fondo ?? d.medidasM.fondo } }
+        hechas.push(`Medidas: ${String(d.medidasM.ancho)} × ${String(d.medidasM.fondo)} m`)
         break
       case 'piedra': {
         const granito = buscarPorNombre(granitos, accion.piedra)

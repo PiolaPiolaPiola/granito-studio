@@ -69,8 +69,8 @@ export const esquemaAccion = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('espacio'), espacio: z.enum(ESPACIOS) }),
   z.object({
     tipo: z.literal('medidas'),
-    ancho: z.coerce.number().min(0.5).max(20),
-    fondo: z.coerce.number().min(0.5).max(20),
+    ancho: opcional(z.coerce.number().min(0.5).max(20)),
+    fondo: opcional(z.coerce.number().min(0.5).max(20)),
   }),
   z.object({
     tipo: z.literal('piedra'),
