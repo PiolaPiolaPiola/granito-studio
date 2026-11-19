@@ -23,7 +23,7 @@ export class ServicioGranitos {
 
   async crear(datos: CrearGranito) {
     await this.validarNombreLibre(datos.nombre);
-    await this.repositorio.crear(datos);
+    return this.repositorio.crear(datos);
   }
 
   async actualizar(id: string, cambios: ActualizarGranito) {
