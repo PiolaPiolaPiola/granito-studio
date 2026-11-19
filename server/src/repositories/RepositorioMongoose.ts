@@ -1,10 +1,14 @@
 import { isValidObjectId, type Model, type QueryFilter } from 'mongoose';
 import type { ConId, Pagina, Paginacion, Repositorio } from './repositorio.js';
 
+/**
+ * `TCrear` y `TActualizar` son los datos que llegan de la petición. No se exige que sean
+ * `Partial<T>`: un diseño trae los ids como texto y Mongoose los convierte a ObjectId al guardar.
+ */
 export class RepositorioMongoose<
   T,
-  TCrear extends Partial<T>,
-  TActualizar extends Partial<T>,
+  TCrear extends object,
+  TActualizar extends object,
 > implements Repositorio<T, TCrear, TActualizar> {
   constructor(protected readonly modelo: Model<T>) {}
 

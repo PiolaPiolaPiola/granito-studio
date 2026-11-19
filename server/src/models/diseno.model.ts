@@ -60,4 +60,6 @@ const esquemaDiseno = new Schema<Diseno>(
   },
 );
 
+esquemaDiseno.index({ updatedAt: -1 });
+
 export const DisenoModelo = model<Diseno>('Diseno', esquemaDiseno);
