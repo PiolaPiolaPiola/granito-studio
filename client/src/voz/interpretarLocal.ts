@@ -1,7 +1,23 @@
 import { normalizarTexto } from '../dominio/comun'
 import type { FormaCocina, Salpicadero } from '../dominio/diseno'
 import type { Espacio } from '../dominio/mueble'
+import type { TipoObjeto } from '../dominio/objetos'
 import type { AccionVoz, ContextoComando } from '../ia/tipos'
+
+/** Cómo se dicen los objetos de referencia (sin tildes, en minúscula). */
+const OBJETOS: [RegExp, TipoObjeto][] = [
+  [/\bsofa|\bsillon/, 'sofa'],
+  [/mesa de centro|mesita/, 'mesa_centro'],
+  [/\btv\b|televisor|television|\btele\b/, 'televisor'],
+  [/alfombra|tapete/, 'alfombra'],
+  [/comedor|mesa de comer/, 'comedor'],
+  [/nevera|refrigerador|frigorifico/, 'nevera'],
+  [/\btaza\b|inodoro|sanitario|\bwc\b/, 'inodoro'],
+  [/ducha|regadera/, 'ducha'],
+  [/planta|matera/, 'planta'],
+]
+
+const objetoDicho = (texto: string): TipoObjeto | undefined => OBJETOS.find(([patron]) => patron.test(texto))?.[1]
 
 /**
  * Intérprete de comandos SIN IA: reglas para las órdenes más comunes en español.
@@ -75,7 +91,7 @@ function partir(texto: string): string[] {
   return normalizarTexto(texto)
     .replace(/(\d),(\d)/g, '$1.$2') // "3,5 metros": la coma decimal no separa órdenes
     .replace(/(\D)[.;]/g, '$1,')
-    .split(/,|\by luego\b|\bdespues\b|\btambien\b|\s(?=(?:con|sin) (?:salpicadero|cascada))|\by (?=(agrega|anade|pon|quita|elimina|borra|saca|cambia|forma|cocina|meson|piedra|salpicadero|con|sin|espesor|color|el espacio|medidas))/)
+    .split(/,|\by luego\b|\bdespues\b|\btambien\b|\s(?=(?:con|sin) (?:salpicadero|cascada))|\by (?=(?:agrega|anade|pon|quita|elimina|borra|saca|cambia|forma|cocina|meson|piedra|salpicadero|con|sin|espesor|color|el espacio|medidas|el piso|piso|la pared|pared|paredes|el techo|techo|un sofa|una nevera|una taza))/)
     .map((p) => (p ?? '').trim())
     .filter((p) => p.length > 1 && !/^(agrega|anade|pon|quita|elimina|borra|saca|cambia|forma|cocina|meson|piedra|salpicadero|con|sin|espesor|color|el espacio|medidas)$/.test(p))
 }
@@ -121,6 +137,12 @@ function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[]
   }
   if (/\bsin plantilla\b/.test(orden)) return [{ tipo: 'forma', forma: 'libre' }]
 
+  // "piso madera oscura", "paredes en verde salvia", "el techo blanco"
+  if ((m = orden.match(/\b(piso|suelo|pared|paredes|techo|cielo raso)\b(?: (?:en|de|color|a))*\s+(.+)/))) {
+    const parte = m[1].startsWith('pared') ? 'pared' : m[1] === 'techo' || m[1] === 'cielo raso' ? 'techo' : 'piso'
+    return [{ tipo: 'entorno', parte, color: m[2].replace(/^(color|en|de|a)\s+/, '').trim() }]
+  }
+
   if ((m = orden.match(/(?:color(?: de(?: los)?)? muebles|muebles(?: en| de)?(?: color)?|color)\s+(.+)/))) {
     return [{ tipo: 'colorMuebles', color: m[1].replace(/^(a|en|de|por)\s+/, '').trim() }]
   }
@@ -140,6 +162,8 @@ function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[]
   if ((m = orden.match(/^(?:quita(?:r)?|elimina(?:r)?|borra(?:r)?|saca(?:r)?)\s*(.*)$/))) {
     const resto = m[1].trim()
     if (resto === '' || /^(el |la )?(ultimo|ultima)/.test(resto)) return [{ tipo: 'quitar' }]
+    const objetoQuitar = objetoDicho(resto)
+    if (objetoQuitar !== undefined) return [{ tipo: 'objeto', objeto: objetoQuitar, quitar: true }]
     const mueble = mejorCoincidencia(resto, contexto.muebles)
     return mueble === undefined ? null : [{ tipo: 'quitar', mueble }]
   }
@@ -160,6 +184,9 @@ function interpretarOrden(orden: string, contexto: ContextoComando): AccionVoz[]
 
 /** "dos gabinetes inferiores de 60" → agregar 2 × el gabinete más parecido, de 60 cm de ancho. */
 function interpretarPedido(pedido: string, contexto: ContextoComando): AccionVoz | null {
+  // "agrega un sofá" / "pon una taza": objetos de referencia, no muebles del catálogo.
+  const objeto = objetoDicho(pedido)
+  if (objeto !== undefined) return { tipo: 'objeto', objeto }
   let resto = pedido
   let cantidad = 1
   const inicio = resto.match(/^(\d+|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+/)

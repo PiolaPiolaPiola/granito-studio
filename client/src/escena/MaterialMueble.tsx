@@ -1,6 +1,4 @@
-import { useTexture } from '@react-three/drei'
-import { Suspense, useEffect, useMemo } from 'react'
-import { SRGBColorSpace } from 'three'
+import { useEffect, useMemo } from 'react'
 import { materialDe, type Mueble } from '../dominio/mueble'
 import { COLOR_MUEBLE_POR_DEFECTO } from '../dominio/paleta'
 import { MaterialPiedra } from './MaterialPiedra'
@@ -46,42 +44,4 @@ export function MaterialSegunTipo({ material, color, tamano }: { material: Retur
   if (material === 'metal') return <meshStandardMaterial color={color} metalness={0.85} roughness={0.32} />
   if (material === 'lacado') return <meshStandardMaterial color={color} metalness={0} roughness={0.28} />
   return <meshStandardMaterial map={veta} roughness={0.68} />
-}
-
-interface PropsFrente {
-  url: string
-  ancho: number
-  alto: number
-  /** z del frente de la caja (fondo / 2). */
-  z: number
-}
-
-/**
- * Foto del mueble real pegada al frente: un plano apenas delante de la cara +z de la caja.
- * Mientras carga no se dibuja nada (se ve el material del cuerpo).
- */
-export function FrenteConFoto(props: PropsFrente) {
-  return (
-    <Suspense fallback={null}>
-      <FotoCargada {...props} />
-    </Suspense>
-  )
-}
-
-function FotoCargada({ url, ancho, alto, z }: PropsFrente) {
-  const base = useTexture(url)
-  // Se trabaja sobre una copia: la textura de useTexture está en caché y se comparte.
-  const textura = useMemo(() => {
-    const copia = base.clone()
-    copia.colorSpace = SRGBColorSpace
-    copia.needsUpdate = true
-    return copia
-  }, [base])
-  useEffect(() => () => textura.dispose(), [textura])
-  return (
-    <mesh position={[0, 0, z + 0.002]} receiveShadow>
-      <planeGeometry args={[ancho, alto]} />
-      <meshStandardMaterial map={textura} roughness={0.6} />
-    </mesh>
-  )
 }

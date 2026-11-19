@@ -150,7 +150,7 @@ function Formulario({ mueble, espacioInicial, onCerrar, onGuardado }: Omit<Props
               <Box component="img" src={fotoActual} alt="" sx={{ width: '100%', maxHeight: 140, objectFit: 'cover', borderRadius: 1.5 }} />
             )}
             <Typography variant="body2" color="text.secondary" align="center">
-              {fotoActual === null ? 'Foto del mueble (opcional)' : 'Haz clic para cambiar la foto'}
+              {fotoActual === null ? 'Foto del mueble (opcional): sirve para llenar los datos y como miniatura del catálogo' : 'Haz clic para cambiar la foto'}
             </Typography>
             <input
               type="file"

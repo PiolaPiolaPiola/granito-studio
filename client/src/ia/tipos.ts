@@ -1,6 +1,7 @@
 import type { FormaCocina, Salpicadero } from '../dominio/diseno'
 import type { Acabado, TipoPiedra } from '../dominio/granito'
 import type { Espacio, MaterialMueble, TipoMueble } from '../dominio/mueble'
+import type { TipoObjeto } from '../dominio/objetos'
 
 /** Lo que el análisis de una foto propone para el formulario de muebles (todo opcional). */
 export interface SugerenciaMueble {
@@ -49,6 +50,8 @@ export type AccionVoz =
   | { tipo: 'cascada'; valor: boolean }
   | { tipo: 'espesor'; valor: number }
   | { tipo: 'colorMuebles'; color: string }
+  | { tipo: 'entorno'; parte: 'pared' | 'piso' | 'techo'; color: string }
+  | { tipo: 'objeto'; objeto: TipoObjeto; quitar?: boolean }
 
 export interface ContextoComando {
   espacio: Espacio

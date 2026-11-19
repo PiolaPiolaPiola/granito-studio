@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FORMAS_COCINA, SALPICADEROS } from '../models/diseno.model.js';
+import { FORMAS_COCINA, SALPICADEROS, TIPOS_OBJETO } from '../models/diseno.model.js';
 import { ACABADOS, TIPOS_PIEDRA } from '../models/granito.model.js';
 import { ESPACIOS, MATERIALES_MUEBLE, TIPOS_MUEBLE } from '../models/mueble.model.js';
 
@@ -11,7 +11,7 @@ import { ESPACIOS, MATERIALES_MUEBLE, TIPOS_MUEBLE } from '../models/mueble.mode
  */
 
 /** Sube este número si cambias una instrucción: así no se reutilizan respuestas viejas. */
-export const VERSION_INSTRUCCIONES = 1;
+export const VERSION_INSTRUCCIONES = 2;
 
 const opcional = <T extends z.ZodType>(esquema: T) => esquema.optional().catch(undefined);
 const medidaCm = opcional(z.coerce.number().min(1).max(500).transform(Math.round));
@@ -81,6 +81,16 @@ export const esquemaAccion = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('cascada'), valor: z.boolean() }),
   z.object({ tipo: z.literal('espesor'), valor: z.coerce.number().min(1).max(10) }),
   z.object({ tipo: z.literal('colorMuebles'), color: z.string().min(1).max(40) }),
+  z.object({
+    tipo: z.literal('entorno'),
+    parte: z.enum(['pared', 'piso', 'techo']),
+    color: z.string().min(1).max(40),
+  }),
+  z.object({
+    tipo: z.literal('objeto'),
+    objeto: z.enum(TIPOS_OBJETO),
+    quitar: opcional(z.boolean()),
+  }),
 ]);
 
 /** Se quedan solo las acciones válidas (una acción rara no tumba las demás). */
@@ -116,6 +126,8 @@ Convierte la orden del usuario en acciones y responde SOLO {"acciones": [...]}. 
 {"tipo":"cascada","valor":true|false}
 {"tipo":"espesor","valor":cm}
 {"tipo":"colorMuebles","color":<nombre de color o #rrggbb>}
+{"tipo":"entorno","parte":"pared|piso|techo","color":<nombre de color o #rrggbb>}
+{"tipo":"objeto","objeto":"${TIPOS_OBJETO.join('|')}","quitar":true?} (objetos de referencia: sofá, taza de baño…)
 Muebles del catálogo: ${contexto.muebles.join('; ') || 'ninguno'}.
 Piedras del catálogo: ${contexto.piedras.join('; ') || 'ninguna'}.
 Usa nombres exactos del catálogo. Si no entiendes la orden, responde {"acciones": []}.`;

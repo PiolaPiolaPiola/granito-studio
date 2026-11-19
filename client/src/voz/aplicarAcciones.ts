@@ -10,7 +10,9 @@ import {
 } from '../dominio/diseno'
 import type { Granito } from '../dominio/granito'
 import { espacioDe, ETIQUETA_ESPACIO, type Mueble } from '../dominio/mueble'
-import { PALETA_MUEBLES } from '../dominio/paleta'
+import { PALETA_MUEBLES, PALETA_PAREDES, PALETA_PISOS, PALETA_TECHOS, type ColorPaleta } from '../dominio/paleta'
+import { ETIQUETA_OBJETO, objetosPorDefecto } from '../dominio/objetos'
+import { generarObjectId } from '../infra/generarId'
 import type { AccionVoz } from '../ia/tipos'
 import { mejorCoincidencia } from './interpretarLocal'
 
@@ -28,10 +30,10 @@ const COLORES_BASICOS: Record<string, string> = {
   verde: '#6f7559', azul: '#2f4a5c', madera: '#c9b49a',
 }
 
-function resolverColor(texto: string): { hex: string; nombre: string } | undefined {
+function resolverColor(texto: string, paleta: ColorPaleta[] = PALETA_MUEBLES): { hex: string; nombre: string } | undefined {
   const limpio = normalizarTexto(texto)
   if (/^#[0-9a-f]{6}$/.test(limpio)) return { hex: limpio, nombre: limpio }
-  const dePaleta = PALETA_MUEBLES.find((c) => limpio.includes(normalizarTexto(c.nombre)) || normalizarTexto(c.nombre).includes(limpio))
+  const dePaleta = paleta.find((c) => limpio.includes(normalizarTexto(c.nombre)) || normalizarTexto(c.nombre).includes(limpio))
   if (dePaleta) return { hex: dePaleta.hex, nombre: dePaleta.nombre }
   const basico = Object.entries(COLORES_BASICOS).find(([nombre]) => limpio.includes(nombre))
   return basico ? { hex: basico[1], nombre: basico[0] } : undefined
@@ -131,6 +133,37 @@ export function aplicarAcciones(
         d = { ...d, acabados: { ...d.acabados, espesorCm: Math.min(10, Math.max(1, accion.valor)) } }
         hechas.push(`Espesor del mesón: ${String(accion.valor)} cm`)
         break
+      case 'entorno': {
+        const paleta = accion.parte === 'pared' ? PALETA_PAREDES : accion.parte === 'piso' ? PALETA_PISOS : PALETA_TECHOS
+        const color = resolverColor(accion.color, paleta)
+        const parte = accion.parte === 'pared' ? 'Paredes' : accion.parte === 'piso' ? 'Piso' : 'Techo'
+        if (color === undefined) {
+          fallidas.push(`No reconocí el color "${accion.color}" para ${parte.toLowerCase()}`)
+          break
+        }
+        d = { ...d, entorno: { ...d.entorno, [accion.parte]: color.hex } }
+        hechas.push(`${parte} en ${color.nombre}`)
+        break
+      }
+      case 'objeto': {
+        const nombre = ETIQUETA_OBJETO[accion.objeto]
+        if (accion.quitar === true) {
+          const ultimo = [...d.objetos].reverse().find((o) => o.tipo === accion.objeto)
+          if (ultimo === undefined) {
+            fallidas.push(`No hay ${nombre.toLowerCase()} en el diseño`)
+            break
+          }
+          d = { ...d, objetos: d.objetos.filter((o) => o._id !== ultimo._id) }
+          hechas.push(`Quité ${nombre.toLowerCase()}`)
+          break
+        }
+        // Donde lo pondría un espacio nuevo; si ese espacio no lo trae, en el centro.
+        const sugerido = objetosPorDefecto(d.espacio, d.medidasM).find((o) => o.tipo === accion.objeto)
+        const ubicacion = sugerido?.ubicacion ?? { x: 0, z: 0, rotacion: 0 as const }
+        d = { ...d, objetos: [...d.objetos, { _id: generarObjectId(), tipo: accion.objeto, ubicacion }] }
+        hechas.push(`Agregué ${nombre.toLowerCase()}`)
+        break
+      }
       case 'colorMuebles': {
         const color = resolverColor(accion.color)
         if (color === undefined) {

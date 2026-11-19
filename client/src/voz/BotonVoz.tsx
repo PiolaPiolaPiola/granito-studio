@@ -92,7 +92,7 @@ export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props
         setAbierto(false)
         setTexto('')
         setResultado(null)
-        aviso.mostrar(`${String(hechas.length)} ${hechas.length === 1 ? 'cambio aplicado' : 'cambios aplicados'}`, problemas.length > 0 ? 'warning' : 'success', {
+        aviso.mostrar(`${String(hechas.length)} ${hechas.length === 1 ? 'cambio aplicado' : 'cambios aplicados'}. Toca Guardar para conservarlos.`, problemas.length > 0 ? 'warning' : 'success', {
           detalle: [...hechas, ...problemas],
         })
       } else {

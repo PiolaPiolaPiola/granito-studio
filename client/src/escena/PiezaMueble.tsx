@@ -6,7 +6,7 @@ import type { AcabadosMeson } from '../dominio/diseno'
 import type { TipoMueble } from '../dominio/mueble'
 import type { Colocacion } from './distribucion'
 import { Losa } from './Losa'
-import { FrenteConFoto, MaterialMueble } from './MaterialMueble'
+import { MaterialMueble } from './MaterialMueble'
 import type { MaterialResuelto } from './materiales'
 
 // Qué piezas llevan mesón, salpicadero o cascada: lo define `dominio/cotizacion.ts`
@@ -55,7 +55,6 @@ export function PiezaMueble({ colocacion: c, acabados, materialMueble, materialM
   const anchoCuerpo = Math.max(0.01, c.ancho - 0.004 - (cascada ? 2 * espesor : 0))
   const altoCuerpo = c.alto - zocalo
   const yCuerpo = zocalo / 2
-  const conFoto = c.mueble.imagenUrl !== undefined && materialMueble.granito === undefined && materialMueble.colorHex === undefined
   const { puertas, cajones } = frentes(nombre, tipo, anchoCuerpo)
   const nombreNorm = normalizarTexto(nombre)
   const conPoceta = tieneMeson && (nombreNorm.includes('lavaplatos') || nombreNorm.includes('tarja'))
@@ -69,7 +68,6 @@ export function PiezaMueble({ colocacion: c, acabados, materialMueble, materialM
       <RoundedBox args={[anchoCuerpo, altoCuerpo, c.fondo]} radius={Math.min(0.006, altoCuerpo / 4)} smoothness={2} position={[0, yCuerpo, 0]} castShadow receiveShadow>
         <MaterialMueble mueble={c.mueble} asignado={materialMueble} tamano={[c.ancho, c.alto]} />
       </RoundedBox>
-      {conFoto && <FrenteConFoto url={c.mueble.imagenUrl as string} ancho={anchoCuerpo} alto={altoCuerpo} z={c.fondo / 2} />}
 
       {zocalo > 0 && (
         <mesh position={[0, -c.alto / 2 + zocalo / 2, -RETRANQUEO_ZOCALO / 2]} receiveShadow>
@@ -79,15 +77,13 @@ export function PiezaMueble({ colocacion: c, acabados, materialMueble, materialM
       )}
 
       {/* juntas entre puertas (verticales) y cajones (horizontales) */}
-      {!conFoto &&
-        Array.from({ length: puertas - 1 }, (_, i) => (
+      {Array.from({ length: puertas - 1 }, (_, i) => (
           <mesh key={`p${String(i)}`} position={[-anchoCuerpo / 2 + ((i + 1) * anchoCuerpo) / puertas, yCuerpo, zFrente]}>
             <planeGeometry args={[0.004, altoCuerpo - 0.01]} />
             <meshBasicMaterial color={COLOR_JUNTA} />
           </mesh>
         ))}
-      {!conFoto &&
-        Array.from({ length: cajones - 1 }, (_, i) => (
+      {Array.from({ length: cajones - 1 }, (_, i) => (
           <mesh key={`c${String(i)}`} position={[0, -c.alto / 2 + zocalo + ((i + 1) * altoCuerpo) / cajones, zFrente]}>
             <planeGeometry args={[anchoCuerpo - 0.01, 0.004]} />
             <meshBasicMaterial color={COLOR_JUNTA} />
