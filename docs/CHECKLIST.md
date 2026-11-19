@@ -65,7 +65,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B9.1** Endpoint con reglas por etiquetas (punto de partida para IA más adelante) — 1 h 🧩 Strategy · 🤖
 
 ### B10 · Pruebas (~3 h)
-- [ ] **B10.1** Vitest + supertest + mongodb-memory-server — 40 min
+- [x] **B10.1** Vitest + supertest + mongodb-memory-server — 40 min
 - [ ] **B10.2** Pruebas de auth (login, token inválido, rol sin permiso) — 1 h
 - [ ] **B10.3** Pruebas del CRUD de granitos — 1 h 20 min
 
