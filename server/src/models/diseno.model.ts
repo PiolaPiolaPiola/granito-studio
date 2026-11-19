@@ -12,6 +12,23 @@ export const SALPICADEROS = ['ninguno', 'bajo', 'completo'] as const;
 export type Salpicadero = (typeof SALPICADEROS)[number];
 
 export const ROTACIONES = [0, 90, 180, 270] as const;
+
+/**
+ * Objetos de referencia: no son muebles del taller, sirven para dar escala y contexto
+ * (una taza de baño, un sofá, la nevera…). No entran en la cotización.
+ */
+export const TIPOS_OBJETO = [
+  'sofa',
+  'mesa_centro',
+  'televisor',
+  'alfombra',
+  'comedor',
+  'nevera',
+  'inodoro',
+  'ducha',
+  'planta',
+] as const;
+export type TipoObjeto = (typeof TIPOS_OBJETO)[number];
 export type Rotacion = (typeof ROTACIONES)[number];
 
 /** Medidas propias de esta pieza en el diseño; lo que falte se toma del catálogo. */
@@ -34,6 +51,12 @@ export interface MuebleEnDiseno {
   posicion: number;
   medidasCm?: MedidasPieza;
   ubicacion?: Ubicacion;
+}
+
+export interface ObjetoReferencia {
+  _id: Types.ObjectId;
+  tipo: TipoObjeto;
+  ubicacion: Ubicacion;
 }
 
 export interface MaterialAsignado {
@@ -59,6 +82,10 @@ export interface Diseno {
   acabados: AcabadosMeson;
   muebles: MuebleEnDiseno[];
   materiales: MaterialAsignado[];
+  /** Puede faltar en diseños guardados antes de existir (las consultas `lean` no ponen defaults). */
+  objetos?: ObjetoReferencia[];
+  /** Foto del espacio real del cliente sobre la que se diseña (privada: no sale en el enlace). */
+  fondoUrl?: string;
   /** Código secreto del enlace público de solo lectura (no existe si no se ha compartido). */
   codigoPublico?: string;
   /** Se muestra en la página de inicio pública (lo decide un admin). */
@@ -91,6 +118,20 @@ const esquemaMuebleEnDiseno = new Schema<MuebleEnDiseno>({
   },
 });
 
+const esquemaUbicacion = new Schema<Ubicacion>(
+  {
+    x: coordenada,
+    z: coordenada,
+    rotacion: { type: Number, enum: ROTACIONES, required: true, default: 0 },
+  },
+  { _id: false },
+);
+
+const esquemaObjeto = new Schema<ObjetoReferencia>({
+  tipo: { type: String, enum: TIPOS_OBJETO, required: true },
+  ubicacion: { type: esquemaUbicacion, required: true },
+});
+
 const esquemaMaterial = new Schema<MaterialAsignado>(
   {
     pieza: { type: String, enum: PIEZAS, required: true },
@@ -121,6 +162,8 @@ const esquemaDiseno = new Schema<Diseno>(
     acabados: { type: esquemaAcabados, default: () => ({}) },
     muebles: { type: [esquemaMuebleEnDiseno], default: [] },
     materiales: { type: [esquemaMaterial], default: [] },
+    objetos: { type: [esquemaObjeto], default: [] },
+    fondoUrl: { type: String, trim: true },
     codigoPublico: { type: String },
     destacado: { type: Boolean, required: true, default: false },
   },

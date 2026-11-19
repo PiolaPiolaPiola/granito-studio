@@ -18,9 +18,29 @@ function descargar(url: string, archivo: string) {
   enlace.click()
 }
 
-/** Imagen PNG de lo que se ve en el lienzo (necesita `preserveDrawingBuffer`). */
-export function descargarImagen(lienzo: HTMLCanvasElement, nombre: string) {
-  descargar(lienzo.toDataURL('image/png'), `${nombreArchivo(nombre)}.png`)
+/**
+ * Imagen PNG de lo que se ve en el lienzo (necesita `preserveDrawingBuffer`). Si el diseño se
+ * está viendo sobre la foto del espacio, la foto va de fondo (recortada como `cover`).
+ */
+export async function descargarImagen(lienzo: HTMLCanvasElement, nombre: string, fondoUrl?: string) {
+  if (fondoUrl === undefined) {
+    descargar(lienzo.toDataURL('image/png'), `${nombreArchivo(nombre)}.png`)
+    return
+  }
+  const foto = new Image()
+  foto.src = fondoUrl
+  await foto.decode()
+  const salida = document.createElement('canvas')
+  salida.width = lienzo.width
+  salida.height = lienzo.height
+  const ctx = salida.getContext('2d')
+  if (ctx === null) return
+  const escala = Math.max(salida.width / foto.width, salida.height / foto.height)
+  const w = foto.width * escala
+  const h = foto.height * escala
+  ctx.drawImage(foto, (salida.width - w) / 2, (salida.height - h) / 2, w, h)
+  ctx.drawImage(lienzo, 0, 0)
+  descargar(salida.toDataURL('image/png'), `${nombreArchivo(nombre)}.png`)
 }
 
 /**

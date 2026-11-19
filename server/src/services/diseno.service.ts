@@ -1,6 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { Types } from 'mongoose';
+import {
+  almacenamiento,
+  type AlmacenamientoArchivos,
+  type ArchivoImagen,
+} from '../almacenamiento/index.js';
 import { AppError, existeOFallar } from '../errors/AppError.js';
+import { conImagenGuardada, eliminarSinFallar } from './imagenes.js';
 import { ErrorValidacion, type DetalleValidacion } from '../errors/ErrorValidacion.js';
 import { repositorioDisenos, type RepositorioDisenos } from '../repositories/diseno.repository.js';
 import {
@@ -23,6 +29,7 @@ export class ServicioDisenos {
     private readonly repositorio: RepositorioDisenos,
     private readonly muebles: RepositorioMuebles,
     private readonly granitos: RepositorioGranitos,
+    private readonly almacenamiento: AlmacenamientoArchivos,
   ) {}
 
   listar() {
@@ -77,6 +84,10 @@ export class ServicioDisenos {
       forma: original.forma,
       medidasM: { ancho: original.medidasM.ancho, fondo: original.medidasM.fondo },
       acabados: { ...original.acabados },
+      objetos: (original.objetos ?? []).map(({ tipo, ubicacion }) => ({
+        tipo,
+        ubicacion: { ...ubicacion },
+      })),
       muebles,
       materiales,
     });
@@ -140,6 +151,7 @@ export class ServicioDisenos {
 
     const publico = { ...diseno };
     delete publico.codigoPublico;
+    delete publico.fondoUrl; // la foto de la casa del cliente es privada
     return {
       diseno: publico,
       muebles: muebles.map(
@@ -179,7 +191,24 @@ export class ServicioDisenos {
     };
   }
 
+  /** Foto del espacio real (la de antes se borra). */
+  async cambiarFondo(id: string, imagen: ArchivoImagen | null) {
+    const anterior = await this.obtener(id);
+    let diseno;
+    if (imagen) {
+      diseno = await conImagenGuardada(this.almacenamiento, imagen, 'fondos', async (url) =>
+        existeOFallar(await this.repositorio.cambiarFondo(id, url), NO_EXISTE),
+      );
+    } else {
+      diseno = existeOFallar(await this.repositorio.cambiarFondo(id, null), NO_EXISTE);
+    }
+    await eliminarSinFallar(this.almacenamiento, anterior.fondoUrl);
+    return diseno;
+  }
+
   async eliminar(id: string) {
+    const anterior = await this.repositorio.buscarPorId(id);
+    await eliminarSinFallar(this.almacenamiento, anterior?.fondoUrl);
     if (!(await this.repositorio.eliminar(id))) {
       throw new AppError(404, NO_EXISTE);
     }
@@ -225,4 +254,5 @@ export const servicioDisenos = new ServicioDisenos(
   repositorioDisenos,
   repositorioMuebles,
   repositorioGranitos,
+  almacenamiento,
 );

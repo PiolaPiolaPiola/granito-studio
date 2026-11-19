@@ -12,6 +12,7 @@ import {
   DisenoModelo,
   type AcabadosMeson,
   type FormaCocina,
+  type TipoObjeto,
   type Ubicacion,
 } from '../models/diseno.model.js';
 import { GranitoModelo, type Acabado, type TipoPiedra } from '../models/granito.model.js';
@@ -245,6 +246,8 @@ interface DisenoSemilla {
   muebles: (string | [string, Ubicacion])[];
   /** Nombre de la piedra del mesón y del salpicadero. */
   piedra: string;
+  /** Objetos de referencia (sofá, taza de baño…) para dar escala. */
+  objetos?: { tipo: TipoObjeto; ubicacion: Ubicacion }[];
 }
 
 const DISENOS: DisenoSemilla[] = [
@@ -297,6 +300,10 @@ const DISENOS: DisenoSemilla[] = [
       'Repisa de baño',
     ],
     piedra: 'Blanco Nieve',
+    objetos: [
+      { tipo: 'inodoro', ubicacion: { x: 0.65, z: -0.54, rotacion: 0 } },
+      { tipo: 'ducha', ubicacion: { x: -0.63, z: 0.43, rotacion: 0 } },
+    ],
   },
   {
     nombre: 'Sala con barra y mueble de TV',
@@ -311,6 +318,13 @@ const DISENOS: DisenoSemilla[] = [
       ['Barra divisoria', { x: -0.9, z: 1.2, rotacion: 180 }],
     ],
     piedra: 'Blanco Polar Brillante',
+    objetos: [
+      { tipo: 'televisor', ubicacion: { x: 0, z: -1.75, rotacion: 0 } },
+      { tipo: 'alfombra', ubicacion: { x: 0, z: -0.3, rotacion: 0 } },
+      { tipo: 'mesa_centro', ubicacion: { x: 0, z: -0.4, rotacion: 0 } },
+      { tipo: 'sofa', ubicacion: { x: 0, z: 0.55, rotacion: 180 } },
+      { tipo: 'planta', ubicacion: { x: 1.9, z: 1.4, rotacion: 0 } },
+    ],
   },
 ];
 
@@ -430,6 +444,7 @@ async function sembrarDisenos(
       codigoPublico: randomBytes(16).toString('base64url'),
       destacado: true,
       muebles: mueblesEnDiseno,
+      objetos: diseno.objetos ?? [],
       materiales: [
         { pieza: 'meson', granito },
         { pieza: 'salpicadero', granito },

@@ -59,6 +59,48 @@ export function texturaMadera(colorHex: string): CanvasTexture {
   return textura
 }
 
+let piso: CanvasTexture | null = null
+
+/**
+ * Piso de porcelanato claro (como en las fotos del taller): baldosas de 60 cm con una
+ * variación muy leve de tono y juntas finas. Cada repetición de la textura = 2 × 2 baldosas.
+ */
+export function texturaPiso(): CanvasTexture {
+  if (piso !== null) return piso
+  const lado = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = lado
+  canvas.height = lado
+  const ctx = canvas.getContext('2d')
+  if (ctx === null) throw new Error('El navegador no permite dibujar en canvas')
+  const mitad = lado / 2
+  const tonos = ['#e3ddd3', '#e6e0d6', '#e1dbd0', '#e5dfd5']
+  tonos.forEach((tono, i) => {
+    ctx.fillStyle = tono
+    ctx.fillRect((i % 2) * mitad, Math.floor(i / 2) * mitad, mitad, mitad)
+  })
+  // Vetas muy suaves para que no parezca plástico.
+  ctx.strokeStyle = 'rgba(160, 150, 135, 0.12)'
+  for (let i = 0; i < 14; i += 1) {
+    ctx.beginPath()
+    const y = (i * 37) % lado
+    ctx.moveTo(0, y)
+    ctx.bezierCurveTo(lado * 0.3, y + 25, lado * 0.6, y - 20, lado, y + 10)
+    ctx.stroke()
+  }
+  ctx.fillStyle = '#c9c1b4'
+  ctx.fillRect(mitad - 1, 0, 2, lado)
+  ctx.fillRect(0, mitad - 1, lado, 2)
+  ctx.fillRect(0, 0, lado, 2)
+  ctx.fillRect(0, 0, 2, lado)
+
+  piso = new CanvasTexture(canvas)
+  piso.wrapS = piso.wrapT = RepeatWrapping
+  piso.colorSpace = SRGBColorSpace
+  piso.anisotropy = 8
+  return piso
+}
+
 function clamp(v: number): number {
   return Math.max(0, Math.min(255, Math.round(v)))
 }

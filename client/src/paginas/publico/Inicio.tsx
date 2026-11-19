@@ -129,6 +129,7 @@ export function Inicio() {
                 desbordados={[]}
                 materiales={previa.vista.diseno.materiales}
                 granitos={previa.vista.granitos}
+                objetos={previa.vista.diseno.objetos}
                 nombreArchivo={previa.vista.diseno.nombre}
                 zoomConRueda={false}
               />

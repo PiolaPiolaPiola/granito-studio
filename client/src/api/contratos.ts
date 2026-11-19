@@ -64,6 +64,9 @@ export interface DisenosApi {
   dejarDeCompartir(id: string): Promise<void>
   /** Sin sesión: lo que ve el cliente con el enlace. */
   verPublico(codigo: string): Promise<DisenoPublico>
+  /** Foto del espacio real del cliente para diseñar encima. */
+  subirFondo(id: string, imagen: File): Promise<Diseno>
+  quitarFondo(id: string): Promise<Diseno>
   /** Solo admin: mostrar (o no) el diseño en la página de inicio. Destacar también lo comparte. */
   destacar(id: string, destacado: boolean): Promise<{ destacado: boolean; codigoPublico?: string }>
 }

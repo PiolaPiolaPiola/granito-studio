@@ -14,6 +14,8 @@ export interface RepositorioDisenos extends Repositorio<Diseno, EntradaDiseno, E
   /** Pone o quita (`null`) el código del enlace público. */
   cambiarCodigo(id: string, codigo: string | null): Promise<ConId<Diseno> | null>;
   cambiarDestacado(id: string, destacado: boolean): Promise<ConId<Diseno> | null>;
+  /** Pone o quita (`null`) la foto del espacio. */
+  cambiarFondo(id: string, url: string | null): Promise<ConId<Diseno> | null>;
   /** Diseños destacados que además tienen enlace público, en el orden en que se crearon. */
   listarDestacados(limite: number): Promise<ConId<Diseno>[]>;
 }
@@ -50,6 +52,15 @@ class RepositorioDisenosMongoose
         { $set: { destacado } },
         { returnDocument: 'after', timestamps: false },
       )
+      .lean<ConId<Diseno>>()
+      .exec();
+  }
+
+  async cambiarFondo(id: string, url: string | null): Promise<ConId<Diseno> | null> {
+    if (!isValidObjectId(id)) return null;
+    const cambios = url === null ? { $unset: { fondoUrl: 1 } } : { $set: { fondoUrl: url } };
+    return this.modelo
+      .findByIdAndUpdate(id, cambios, { returnDocument: 'after' })
       .lean<ConId<Diseno>>()
       .exec();
   }

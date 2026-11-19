@@ -44,6 +44,7 @@ export function EditorPagina() {
       inicial={inicial}
       codigoPublico={diseno.datos?.codigoPublico}
       destacado={diseno.datos?.destacado ?? false}
+      fondoUrl={diseno.datos?.fondoUrl}
       muebles={muebles.datos.items}
       granitos={granitos.datos.items}
     />

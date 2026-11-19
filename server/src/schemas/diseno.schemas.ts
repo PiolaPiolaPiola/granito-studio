@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { FORMAS_COCINA, PIEZAS, ROTACIONES, SALPICADEROS } from '../models/diseno.model.js';
+import {
+  FORMAS_COCINA,
+  PIEZAS,
+  ROTACIONES,
+  SALPICADEROS,
+  TIPOS_OBJETO,
+} from '../models/diseno.model.js';
 import { ESPACIOS } from '../models/mueble.model.js';
 import { idMongo, nombre } from './comunes.js';
 
@@ -27,6 +33,16 @@ const esquemaMuebleEnDiseno = z.strictObject({
       rotacion: z.union(ROTACIONES.map((r) => z.literal(r))).default(0),
     })
     .optional(),
+});
+
+const esquemaObjeto = z.strictObject({
+  _id: idMongo.optional(),
+  tipo: z.enum(TIPOS_OBJETO),
+  ubicacion: z.strictObject({
+    x: coordenadaM,
+    z: coordenadaM,
+    rotacion: z.union(ROTACIONES.map((r) => z.literal(r))).default(0),
+  }),
 });
 
 export const ACABADOS_POR_DEFECTO = { espesorCm: 3, salpicadero: 'bajo', cascada: false } as const;
@@ -65,6 +81,7 @@ export const esquemaDiseno = z
     acabados: esquemaAcabados.default({ ...ACABADOS_POR_DEFECTO }),
     muebles: z.array(esquemaMuebleEnDiseno).max(50).default([]),
     materiales: z.array(esquemaMaterial).max(100).default([]),
+    objetos: z.array(esquemaObjeto).max(30).default([]),
   })
   .superRefine((diseno, ctx) => {
     const posiciones = new Set<number>();

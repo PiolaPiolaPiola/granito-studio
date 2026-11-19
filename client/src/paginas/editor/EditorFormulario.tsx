@@ -28,10 +28,12 @@ import { esquemaDiseno } from '../../esquemas/diseno.esquemas'
 import { aplicarErroresApi, listarMensajes } from '../../formularios/erroresApi'
 import { BotonVoz } from '../../voz/BotonVoz'
 import { BotonCompartir } from './BotonCompartir'
+import { BotonFotoEspacio } from './BotonFotoEspacio'
 import { DialogoCotizacion } from './DialogoCotizacion'
 import { PanelCatalogoMuebles } from './PanelCatalogoMuebles'
 import { PanelConfiguracion, type Pestana } from './PanelConfiguracion'
 import { PanelMueblesEnCocina } from './PanelMueblesEnCocina'
+import { PanelObjetos } from './PanelObjetos'
 import { PanelPieza } from './PanelPieza'
 import { VistaPrevia3D } from './VistaPrevia3D'
 
@@ -42,6 +44,8 @@ interface Props {
   codigoPublico?: string
   /** Si se muestra en la página de inicio. */
   destacado?: boolean
+  /** Foto del espacio real guardada. */
+  fondoUrl?: string
   muebles: Mueble[]
   granitos: Granito[]
 }
@@ -50,13 +54,14 @@ interface Props {
 const medidaSegura = (valor: number) => (Number.isFinite(valor) ? Math.min(20, Math.max(0.5, valor)) : 3)
 const espesorSeguro = (valor: number) => (Number.isFinite(valor) ? Math.min(10, Math.max(1, valor)) : 3)
 
-export function EditorFormulario({ id, inicial, codigoPublico, destacado = false, muebles: catalogoLista, granitos }: Props) {
+export function EditorFormulario({ id, inicial, codigoPublico, destacado = false, fondoUrl: fondoInicial, muebles: catalogoLista, granitos }: Props) {
   const navegar = useNavigate()
   const aviso = useAviso()
   const [pestana, setPestana] = useState<Pestana>('materiales')
   const [pieza, setPieza] = useState('meson')
   const [seleccionado, setSeleccionado] = useState<string | null>(null)
   const lienzo = useRef<HTMLCanvasElement | null>(null)
+  const [fondoUrl, setFondoUrl] = useState(fondoInicial)
   /** Foto del lienzo al abrir la cotización (null = cerrada). */
   const [cotizacion, setCotizacion] = useState<{ imagen: string | null } | null>(null)
 
@@ -72,6 +77,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
   const acabadosForm = useWatch({ control, name: 'acabados' })
   const mueblesDiseno = useWatch({ control, name: 'muebles' })
   const materiales = useWatch({ control, name: 'materiales' })
+  const objetos = useWatch({ control, name: 'objetos' })
 
   const catalogo = useMemo(() => new Map(catalogoLista.map((m) => [m._id, m])), [catalogoLista])
   const granitosPorId = useMemo(() => new Map(granitos.map((g) => [g._id, g])), [granitos])
@@ -100,6 +106,17 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
    */
   const moverEnEscena = useCallback(
     (idMueble: string, x: number, z: number) => {
+      // Objetos de referencia: se mueven sin tocar la forma del diseño.
+      if (idMueble.startsWith('obj:')) {
+        const idObjeto = idMueble.slice(4)
+        const limite = (v: number, mitad: number) => Math.round(Math.min(mitad + 1, Math.max(-mitad - 1, v)) * 100) / 100
+        setValue(
+          'objetos',
+          metodos.getValues('objetos').map((o) => (o._id === idObjeto ? { ...o, ubicacion: { ...o.ubicacion, x: limite(x, medidas.ancho / 2), z: limite(z, medidas.fondo / 2) } } : o)),
+          { shouldDirty: true },
+        )
+        return
+      }
       let actuales = metodos.getValues('muebles')
       if (metodos.getValues('forma') !== 'libre') {
         const porId = new Map(colocaciones.map((c) => [c.id, c]))
@@ -176,6 +193,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               setValue('materiales', nuevo.materiales, opciones)
             }}
           />
+          <BotonFotoEspacio idDiseno={id} fondoUrl={fondoUrl} onCambio={setFondoUrl} />
           {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} destacadoInicial={destacado} />}
           <Button
             variant="outlined"
@@ -213,6 +231,9 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               desbordados={desbordados}
               materiales={materiales}
               granitos={granitos}
+              objetos={objetos}
+              fondoUrl={fondoUrl}
+              key={fondoUrl ?? 'sin-foto'}
               nombreArchivo={nombre}
               seleccionado={seleccionado}
               onSeleccionar={setSeleccionado}
@@ -246,6 +267,14 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
                 onCerrar={() => setSeleccionado(null)}
               />
             )}
+            <PanelObjetos
+              objetos={objetos}
+              espacio={espacio}
+              medidas={medidas}
+              seleccionado={seleccionado}
+              onSeleccionar={setSeleccionado}
+              onCambiar={(lista) => setValue('objetos', lista, { shouldDirty: true })}
+            />
             <PanelConfiguracion granitos={granitos} catalogo={catalogo} pestana={pestana} onPestana={setPestana} piezaElegida={pieza} onPieza={setPieza} />
           </Box>
         </Box>

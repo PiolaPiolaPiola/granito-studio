@@ -1,6 +1,7 @@
 import { generarObjectId } from '../infra/generarId'
 import type { ConTiempos } from './comun'
 import type { Espacio } from './mueble'
+import { objetosPorDefecto, type ObjetoReferencia } from './objetos'
 
 /** `libre`: sin plantilla; cada mueble lleva su propia ubicación (x, z, giro). */
 export const FORMAS_COCINA = ['lineal', 'L', 'U', 'isla', 'libre'] as const
@@ -84,11 +85,16 @@ export interface EntradaDiseno {
   acabados: AcabadosMeson
   muebles: MuebleEnDiseno[]
   materiales: MaterialAsignado[]
+  /** Sofá, taza de baño, nevera…: dan escala, no se cotizan. */
+  objetos: ObjetoReferencia[]
 }
 
 /** Lo que devuelve la API. Los diseños viejos pueden no traer `espacio` ni `acabados`. */
-export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'acabados'> {
+export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'acabados' | 'objetos'> {
   espacio?: Espacio
+  objetos?: ObjetoReferencia[]
+  /** Foto del espacio real del cliente (se muestra detrás del 3D). */
+  fondoUrl?: string
   acabados?: Partial<AcabadosMeson>
   /** Código del enlace público de solo lectura, si el diseño está compartido. */
   codigoPublico?: string
@@ -97,14 +103,16 @@ export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'aca
 }
 
 export function disenoVacio(espacio: Espacio = 'cocina'): EntradaDiseno {
+  const medidasM = espacio === 'bano' ? { ancho: 2.2, fondo: 1.8 } : { ancho: 3.4, fondo: 2.6 }
   return {
     nombre: 'Nuevo diseño',
     espacio,
     forma: espacio === 'cocina' ? 'L' : 'lineal',
-    medidasM: espacio === 'bano' ? { ancho: 2.2, fondo: 1.8 } : { ancho: 3.4, fondo: 2.6 },
+    medidasM,
     acabados: { ...ACABADOS_POR_DEFECTO },
     muebles: [],
     materiales: [],
+    objetos: objetosPorDefecto(espacio, medidasM),
   }
 }
 
@@ -181,6 +189,7 @@ export function clonarContenido(origen: EntradaDiseno): EntradaDiseno {
     ...origen,
     medidasM: { ...origen.medidasM },
     acabados: { ...origen.acabados },
+    objetos: origen.objetos.map((o) => ({ ...o, _id: generarObjectId(), ubicacion: { ...o.ubicacion } })),
     muebles: origen.muebles.map((m) => ({ ...copiarMueble(m), _id: nuevosIds.get(m._id) ?? m._id })),
     materiales: origen.materiales.map((m) => ({
       ...m,
@@ -200,6 +209,7 @@ export function aEntrada(diseno: Diseno): EntradaDiseno {
     acabados: { ...ACABADOS_POR_DEFECTO, ...diseno.acabados },
     muebles: diseno.muebles.map(copiarMueble),
     materiales: diseno.materiales.map((m) => ({ ...m })),
+    objetos: (diseno.objetos ?? []).map((o) => ({ ...o, ubicacion: { ...o.ubicacion } })),
   }
 }
 

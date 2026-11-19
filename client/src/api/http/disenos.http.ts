@@ -56,6 +56,18 @@ export class DisenosApiHttp implements DisenosApi {
     }
   }
 
+  async subirFondo(id: string, imagen: File): Promise<Diseno> {
+    const form = new FormData()
+    form.append('imagen', imagen)
+    const { data } = await this.http.post<{ diseno: Diseno }>(`/disenos/${id}/fondo`, form)
+    return data.diseno
+  }
+
+  async quitarFondo(id: string): Promise<Diseno> {
+    const { data } = await this.http.delete<{ diseno: Diseno }>(`/disenos/${id}/fondo`)
+    return data.diseno
+  }
+
   async destacar(id: string, destacado: boolean) {
     const { data } = await this.http.post<{ destacado: boolean; codigoPublico?: string }>(`/disenos/${id}/destacar`, { destacado })
     return data

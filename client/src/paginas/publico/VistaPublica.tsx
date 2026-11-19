@@ -61,6 +61,7 @@ export function VistaPublica() {
             desbordados={[]}
             materiales={diseno.materiales}
             granitos={granitos}
+            objetos={diseno.objetos}
             nombreArchivo={diseno.nombre}
           />
         </Box>

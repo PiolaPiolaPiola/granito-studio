@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
+  cambiarFondoDiseno,
   compartirDiseno,
+  quitarFondoDiseno,
   destacarDiseno,
   crearDiseno,
   dejarDeCompartirDiseno,
@@ -13,6 +15,7 @@ import {
 import { z } from 'zod';
 import { autenticar } from '../middlewares/autenticar.js';
 import { autorizar } from '../middlewares/autorizar.js';
+import { recibirImagen } from '../middlewares/recibirImagen.js';
 import { validar } from '../middlewares/validar.js';
 import { esquemaParamsId } from '../schemas/comunes.js';
 import { esquemaDiseno } from '../schemas/diseno.schemas.js';
@@ -34,6 +37,14 @@ rutasDisenos.post('/:id/duplicar', validar({ params: esquemaParamsId }), duplica
 rutasDisenos.delete('/:id', validar({ params: esquemaParamsId }), eliminarDiseno);
 rutasDisenos.post('/:id/compartir', validar({ params: esquemaParamsId }), compartirDiseno);
 rutasDisenos.delete('/:id/compartir', validar({ params: esquemaParamsId }), dejarDeCompartirDiseno);
+// Foto del espacio real del cliente para diseñar encima.
+rutasDisenos.post(
+  '/:id/fondo',
+  validar({ params: esquemaParamsId }),
+  recibirImagen('imagen'),
+  cambiarFondoDiseno,
+);
+rutasDisenos.delete('/:id/fondo', validar({ params: esquemaParamsId }), quitarFondoDiseno);
 // Qué se muestra en la página pública de inicio lo decide un admin.
 rutasDisenos.post(
   '/:id/destacar',

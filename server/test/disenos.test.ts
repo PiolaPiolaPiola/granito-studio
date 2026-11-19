@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { app } from '../src/app.js';
 import { GranitoModelo } from '../src/models/granito.model.js';
 import { MuebleModelo } from '../src/models/mueble.model.js';
-import { autorizacion } from './ayudantes.js';
+import { autorizacion, JPG } from './ayudantes.js';
 
 interface DisenoRespuesta {
   _id: string;
@@ -175,5 +175,40 @@ describe('página de inicio pública', () => {
     expect(respuesta.status).toBe(200);
     expect(piedras).toHaveLength(1);
     expect(piedras[0]).not.toHaveProperty('precioM2');
+  });
+});
+
+describe('objetos de referencia y foto del espacio', () => {
+  it('guarda objetos, sube la foto de fondo y no la publica en el enlace', async () => {
+    const respuesta = await request(app)
+      .post('/api/disenos')
+      .set(vendedor)
+      .send({
+        ...entrada,
+        objetos: [{ tipo: 'nevera', ubicacion: { x: 1, z: -0.8, rotacion: 0 } }],
+      });
+    const { diseno } = respuesta.body as {
+      diseno: DisenoRespuesta & { objetos: { tipo: string }[] };
+    };
+    expect(respuesta.status).toBe(201);
+    expect(diseno.objetos).toMatchObject([{ tipo: 'nevera' }]);
+
+    const conFondo = await request(app)
+      .post(`/api/disenos/${diseno._id}/fondo`)
+      .set(vendedor)
+      .attach('imagen', JPG, { filename: 'cocina.jpg', contentType: 'image/jpeg' });
+    const { fondoUrl } = (conFondo.body as { diseno: { fondoUrl: string } }).diseno;
+    expect(conFondo.status).toBe(200);
+    expect(fondoUrl).toMatch(/^\/uploads\/fondos\//);
+
+    const { codigoPublico } = (
+      await request(app).post(`/api/disenos/${diseno._id}/compartir`).set(vendedor)
+    ).body as { codigoPublico: string };
+    const publico = await request(app).get(`/api/publico/disenos/${codigoPublico}`);
+    expect((publico.body as { diseno: object }).diseno).not.toHaveProperty('fondoUrl');
+
+    const sinFondo = await request(app).delete(`/api/disenos/${diseno._id}/fondo`).set(vendedor);
+    expect((sinFondo.body as { diseno: object }).diseno).not.toHaveProperty('fondoUrl');
+    expect((await request(app).get(fondoUrl)).status).toBe(404);
   });
 });

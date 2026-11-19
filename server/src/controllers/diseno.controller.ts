@@ -1,4 +1,6 @@
 import type { RequestHandler } from 'express';
+import { AppError } from '../errors/AppError.js';
+import { imagenRecibida } from '../middlewares/recibirImagen.js';
 import type { EntradaDiseno } from '../schemas/diseno.schemas.js';
 import { servicioDisenos } from '../services/diseno.service.js';
 
@@ -37,6 +39,16 @@ export const compartirDiseno: ConParamId = async (req, res) => {
 export const dejarDeCompartirDiseno: ConParamId = async (req, res) => {
   await servicioDisenos.dejarDeCompartir(req.params.id);
   res.status(204).end();
+};
+
+export const cambiarFondoDiseno: ConParamId = async (req, res) => {
+  const imagen = imagenRecibida(req);
+  if (!imagen) throw new AppError(400, 'Adjunta la foto en el campo "imagen"');
+  res.json({ diseno: await servicioDisenos.cambiarFondo(req.params.id, imagen) });
+};
+
+export const quitarFondoDiseno: ConParamId = async (req, res) => {
+  res.json({ diseno: await servicioDisenos.cambiarFondo(req.params.id, null) });
 };
 
 export const destacarDiseno: ConParamId = async (req, res) => {

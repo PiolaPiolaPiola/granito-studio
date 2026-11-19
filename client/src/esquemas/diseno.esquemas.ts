@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { FORMAS_COCINA, PIEZAS, ROTACIONES, SALPICADEROS } from '../dominio/diseno'
 import { ESPACIOS } from '../dominio/mueble'
+import { TIPOS_OBJETO } from '../dominio/objetos'
 
 const idMongo = z.string().regex(/^[0-9a-f]{24}$/i, 'Debe ser un id válido')
 
@@ -64,6 +65,15 @@ export const esquemaDiseno = z
     }),
     muebles: z.array(esquemaMuebleEnDiseno).max(50, 'Máximo 50 muebles'),
     materiales: z.array(esquemaMaterial).max(100),
+    objetos: z
+      .array(
+        z.object({
+          _id: idMongo,
+          tipo: z.enum(TIPOS_OBJETO),
+          ubicacion: z.object({ x: z.number().min(-20).max(20), z: z.number().min(-20).max(20), rotacion: z.union(ROTACIONES.map((r) => z.literal(r))) }),
+        }),
+      )
+      .max(30),
   })
   .superRefine((diseno, ctx) => {
     const posiciones = new Set<number>()

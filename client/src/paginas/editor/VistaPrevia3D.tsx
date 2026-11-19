@@ -1,4 +1,6 @@
 import AutorenewOutlined from '@mui/icons-material/AutorenewOutlined'
+import PhotoOutlined from '@mui/icons-material/PhotoOutlined'
+import StraightenOutlined from '@mui/icons-material/StraightenOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import RestartAltOutlined from '@mui/icons-material/RestartAltOutlined'
 import ViewInArOutlined from '@mui/icons-material/ViewInArOutlined'
@@ -18,6 +20,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import type { Scene } from 'three'
 import type { AcabadosMeson, FormaCocina, MaterialAsignado, MedidasM } from '../../dominio/diseno'
 import type { Granito } from '../../dominio/granito'
+import type { ObjetoReferencia } from '../../dominio/objetos'
 import { puntoDeVista, type ComandoCamara, type Vista } from '../../escena/camara'
 import { ControlCamara } from '../../escena/ControlCamara'
 import type { Colocacion } from '../../escena/distribucion'
@@ -33,6 +36,9 @@ interface Props {
   desbordados: Colocacion[]
   materiales: MaterialAsignado[]
   granitos: Granito[]
+  objetos?: ObjetoReferencia[]
+  /** Foto del espacio real: se puede ver el diseño encima. */
+  fondoUrl?: string
   nombreArchivo: string
   /** Sin estos tres la vista es de solo lectura (enlace público). */
   seleccionado?: string | null
@@ -45,7 +51,10 @@ interface Props {
 }
 
 export function VistaPrevia3D(props: Props) {
-  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true } = props
+  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl } = props
+  const [cotas, setCotas] = useState(onMover !== undefined)
+  const [sobreFoto, setSobreFoto] = useState(fondoUrl !== undefined)
+  const verFoto = sobreFoto && fondoUrl !== undefined
   const [vista, setVista] = useState<Vista>('frontal')
   const [comando, setComando] = useState<ComandoCamara | null>(null)
   const [autoRotar, setAutoRotar] = useState(false)
@@ -73,7 +82,10 @@ export function VistaPrevia3D(props: Props) {
     <Box
       component="section"
       aria-label="Vista 3D"
-      sx={{ position: 'relative', height: 'max(440px, calc(100dvh - 330px))', borderRadius: 2, overflow: 'hidden', background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)', border: 1, borderColor: 'divider', touchAction: 'none' }}
+      sx={{
+        position: 'relative', height: 'max(440px, calc(100dvh - 330px))', borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider', touchAction: 'none',
+        background: verFoto ? `center / cover no-repeat url("${fondoUrl}")` : 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)',
+      }}
     >
       <Canvas
         shadows="percentage"
@@ -97,6 +109,9 @@ export function VistaPrevia3D(props: Props) {
           onSeleccionar={onSeleccionar}
           onMover={onMover}
           onArrastrando={setArrastrando}
+          objetos={objetos}
+          mostrarCotas={cotas}
+          sobreFoto={verFoto}
         />
         <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} zoomConRueda={zoomConRueda} />
       </Canvas>
@@ -131,8 +146,20 @@ export function VistaPrevia3D(props: Props) {
         </Button>
         <IconButton aria-label="Restablecer cámara" onClick={() => { setVista('frontal'); enviar({ tipo: 'reiniciar' }) }}><RestartAltOutlined /></IconButton>
         <Divider orientation="vertical" flexItem sx={{ my: 1, mx: 0.5 }} />
+        <Tooltip title={cotas ? 'Ocultar medidas' : 'Mostrar medidas del espacio'}>
+          <ToggleButton value="cotas" selected={cotas} onChange={() => setCotas((v) => !v)} aria-label="Medidas del espacio" sx={{ border: 0, borderRadius: '50%', width: 44, height: 44 }}>
+            <StraightenOutlined />
+          </ToggleButton>
+        </Tooltip>
+        {fondoUrl !== undefined && (
+          <Tooltip title={verFoto ? 'Ver el espacio en 3D' : 'Ver el diseño sobre la foto del espacio'}>
+            <ToggleButton value="foto" selected={verFoto} onChange={() => setSobreFoto((v) => !v)} aria-label="Ver sobre la foto" sx={{ border: 0, borderRadius: '50%', width: 44, height: 44 }}>
+              <PhotoOutlined />
+            </ToggleButton>
+          </Tooltip>
+        )}
         <Tooltip title="Descargar imagen (PNG)">
-          <IconButton aria-label="Descargar imagen" onClick={() => lienzo.current && descargarImagen(lienzo.current, nombre)}><ImageOutlined /></IconButton>
+          <IconButton aria-label="Descargar imagen" onClick={() => lienzo.current && void descargarImagen(lienzo.current, nombre, verFoto ? fondoUrl : undefined)}><ImageOutlined /></IconButton>
         </Tooltip>
         <Tooltip title="Descargar modelo 3D (.glb)">
           <IconButton aria-label="Descargar modelo 3D" onClick={() => escena.current && void descargarModelo3D(escena.current, nombre)}><ViewInArOutlined /></IconButton>
