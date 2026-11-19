@@ -9,7 +9,10 @@ import { servicioGranitos } from '../services/granito.service.js';
 type ConParamId = RequestHandler<{ id: string }>;
 
 export const listarGranitos: RequestHandler = async (req, res) => {
-  const resultado = await servicioGranitos.listar(req.query as unknown as ListarGranitos);
+  const resultado = await servicioGranitos.listar(
+    req.query as unknown as ListarGranitos,
+    req.usuario?.rol === 'admin',
+  );
   res.json(resultado);
 };
 export const obtenerGranito: ConParamId = async (req, res) => {
@@ -25,4 +28,9 @@ export const crearGranito: RequestHandler = async (req, res) => {
 export const actualizarGranito: ConParamId = async (req, res) => {
   const granito = await servicioGranitos.actualizar(req.params.id, req.body as ActualizarGranito);
   res.json({ granito });
+};
+
+export const inactivarGranito: ConParamId = async (req, res) => {
+  await servicioGranitos.inactivar(req.params.id);
+  res.status(204).end();
 };

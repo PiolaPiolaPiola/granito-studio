@@ -27,10 +27,11 @@ class RepositorioGranitosMongoose
   }
 
   async buscar(
-    { busqueda, tipo, acabado, etiqueta }: FiltrosGranitos,
+    { busqueda, tipo, acabado, etiqueta, incluirInactivos }: FiltrosGranitos,
     { pagina, porPagina }: Paginacion,
   ): Promise<Pagina<ConId<Granito>>> {
     const filtro: QueryFilter<Granito> = {};
+    if (!incluirInactivos) filtro.active = true;
     if (busqueda) filtro.nombre = regexSinTildes(busqueda);
     if (tipo) filtro.tipo = tipo;
     if (acabado) filtro.acabado = acabado;

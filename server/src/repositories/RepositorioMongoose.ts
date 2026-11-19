@@ -32,4 +32,12 @@ export class RepositorioMongoose<
       .lean<ConId<T>>()
       .exec();
   }
+
+  async inactivar(id: string): Promise<ConId<T> | null> {
+    if (!isValidObjectId(id)) return null;
+    return this.modelo
+      .findByIdAndUpdate(id, { active: false }, { returnDocument: 'after' })
+      .lean<ConId<T>>()
+      .exec();
+  }
 }

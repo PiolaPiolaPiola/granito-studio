@@ -12,8 +12,11 @@ import type {
 export class ServicioGranitos {
   constructor(private readonly repositorio: RepositorioGranitos) {}
 
-  async listar({ pagina, porPagina, ...filtros }: ListarGranitos) {
-    const { elementos, total } = await this.repositorio.buscar(filtros, { pagina, porPagina });
+  async listar({ pagina, porPagina, ...filtros }: ListarGranitos, esAdmin: boolean) {
+    const { elementos, total } = await this.repositorio.buscar(
+      { ...filtros, incluirInactivos: filtros.incluirInactivos && esAdmin },
+      { pagina, porPagina },
+    );
     return {
       granitos: elementos,
       pagina,
@@ -47,6 +50,13 @@ export class ServicioGranitos {
       throw new AppError(404, 'No existe un granito con ese id');
     }
     return granito;
+  }
+
+  async inactivar(id: string) {
+    const granito = await this.repositorio.inactivar(id);
+    if (!granito) {
+      throw new AppError(404, 'No existe un granito con ese id');
+    }
   }
 
   private async validarNombreLibre(nombre: string, excluirId?: string) {

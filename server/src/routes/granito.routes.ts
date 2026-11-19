@@ -4,6 +4,7 @@ import {
   crearGranito,
   listarGranitos,
   obtenerGranito,
+  inactivarGranito,
 } from '../controllers/granito.controller.js';
 import { autenticar } from '../middlewares/autenticar.js';
 import { autorizar } from '../middlewares/autorizar.js';
@@ -27,4 +28,11 @@ rutasGranitos.patch(
   autorizar('admin'),
   validar({ params: esquemaParamsId, body: esquemaActualizarGranito }),
   actualizarGranito,
+);
+
+rutasGranitos.delete(
+  '/:id',
+  autorizar('admin'),
+  validar({ params: esquemaParamsId }),
+  inactivarGranito,
 );

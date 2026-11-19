@@ -7,6 +7,7 @@ export interface Repositorio<T, TCrear, TActualizar> {
   buscarPorId(id: string): Promise<ConId<T> | null>;
   crear(datos: TCrear): Promise<ConId<T>>;
   actualizar(id: string, cambiosActualizar: TActualizar): Promise<ConId<T> | null>;
+  inactivar(id: string): Promise<ConId<T> | null>;
 }
 
 export interface Paginacion {

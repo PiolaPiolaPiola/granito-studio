@@ -27,7 +27,7 @@ export const esquemaCrearGranito = z.strictObject({
 });
 
 export const esquemaActualizarGranito = z
-  .strictObject(camposGranito)
+  .strictObject({ ...camposGranito, active: z.boolean() })
   .partial()
   .refine(alMenosUnCampo, MENSAJE_SIN_CAMPOS);
 
@@ -39,6 +39,7 @@ export const esquemaListarGranitos = esquemaPaginacion.extend({
   tipo: z.enum(TIPOS_PIEDRA).optional(),
   acabado: z.enum(ACABADOS).optional(),
   etiqueta: z.string().trim().toLowerCase().min(1).max(30).optional(),
+  incluirInactivos: z.stringbool().default(false),
 });
 
 export type ListarGranitos = z.infer<typeof esquemaListarGranitos>;
