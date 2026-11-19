@@ -4,6 +4,14 @@ import type { EntradaGranito, FiltrosGranitos, Granito } from '../dominio/granit
 import type { EntradaMueble, FiltrosMuebles, Mueble } from '../dominio/mueble'
 import type { ContextoSugerencia, Sugerencia } from '../dominio/sugerencia'
 import type { SesionIniciada, Usuario } from '../dominio/usuario'
+import type {
+  AccionVoz,
+  ContextoComando,
+  EstadoIa,
+  RespuestaIa,
+  SugerenciaGranito,
+  SugerenciaMueble,
+} from '../ia/tipos'
 
 /**
  * Contratos de acceso a datos (patrón Repository / Puerto-Adaptador).
@@ -55,4 +63,15 @@ export interface DisenosApi {
 
 export interface SugerenciasApi {
   sugerir(contexto: ContextoSugerencia): Promise<Sugerencia[]>
+}
+
+/** IA opcional del servidor (proveedores gratuitos en cadena, con caché). */
+export interface IaApi {
+  estado(): Promise<EstadoIa>
+  analizarFoto<T extends 'mueble' | 'granito'>(
+    tipo: T,
+    imagen: Blob,
+  ): Promise<RespuestaIa & { sugerencia: T extends 'mueble' ? SugerenciaMueble : SugerenciaGranito }>
+  interpretar(texto: string, contexto: ContextoComando): Promise<RespuestaIa & { acciones: AccionVoz[] }>
+  transcribir(audio: Blob, nombre: string): Promise<{ texto: string; proveedor: string }>
 }
