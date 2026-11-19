@@ -6,7 +6,7 @@ export class RepositorioMongoose<
   TCrear extends Partial<T>,
   TActualizar extends Partial<T>,
 > implements Repositorio<T, TCrear, TActualizar> {
-  constructor(private readonly modelo: Model<T>) {}
+  constructor(protected readonly modelo: Model<T>) {}
 
   listar(): Promise<ConId<T>[]> {
     return this.modelo.find().sort({ creationAt: -1 }).lean<ConId<T>[]>().exec();

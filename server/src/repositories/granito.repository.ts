@@ -3,6 +3,23 @@ import type { ActualizarGranito, CrearGranito } from '../schemas/granito.schemas
 import type { Repositorio } from './repositorio.js';
 import { RepositorioMongoose } from './RepositorioMongoose.js';
 
-export type RepositorioGranitos = Repositorio<Granito, CrearGranito, ActualizarGranito>;
+const SIN_MAYUSCULAS_NI_TILDES = { locale: 'es', strength: 1 };
 
-export const repositorioGranitos: RepositorioGranitos = new RepositorioMongoose(GranitoModelo);
+export interface RepositorioGranitos extends Repositorio<Granito, CrearGranito, ActualizarGranito> {
+  existeConNombre(nombre: string, excluirId?: string): Promise<boolean>;
+}
+
+class RepositorioGranitosMongoose
+  extends RepositorioMongoose<Granito, CrearGranito, ActualizarGranito>
+  implements RepositorioGranitos
+{
+  async existeConNombre(nombre: string, excluirId?: string): Promise<boolean> {
+    const filtro = excluirId ? { nombre, _id: { $ne: excluirId } } : { nombre };
+    const encontrado = await this.modelo.exists(filtro).collation(SIN_MAYUSCULAS_NI_TILDES);
+    return encontrado !== null;
+  }
+}
+
+export const repositorioGranitos: RepositorioGranitos = new RepositorioGranitosMongoose(
+  GranitoModelo,
+);
