@@ -8,10 +8,12 @@ interface Props {
   comando: ComandoCamara | null
   medidas: MedidasM
   autoRotar: boolean
+  /** Mientras se arrastra un mueble la cámara no debe girar. */
+  bloqueada?: boolean
 }
 
 /** Cámara orbital + ejecución de las órdenes de la barra (vista, zoom, reiniciar). */
-export function ControlCamara({ comando, medidas, autoRotar }: Props) {
+export function ControlCamara({ comando, medidas, autoRotar, bloqueada = false }: Props) {
   const controles = useRef<ComponentRef<typeof OrbitControls>>(null)
   const { camera, invalidate } = useThree()
 
@@ -36,7 +38,8 @@ export function ControlCamara({ comando, medidas, autoRotar }: Props) {
     <OrbitControls
       ref={controles}
       makeDefault
-      autoRotate={autoRotar}
+      enabled={!bloqueada}
+      autoRotate={autoRotar && !bloqueada}
       autoRotateSpeed={1.2}
       target={puntoDeVista('inicial', medidas).objetivo}
       maxPolarAngle={Math.PI / 2 - 0.02}

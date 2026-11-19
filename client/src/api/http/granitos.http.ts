@@ -15,6 +15,7 @@ function armarFormData(datos: Partial<EntradaGranito>, imagen?: File): FormData 
     if (datos.etiquetas.length === 0) form.append('etiquetas', '')
     else datos.etiquetas.forEach((e) => form.append('etiquetas', e))
   }
+  if (datos.precioM2 !== undefined) form.append('precioM2', String(datos.precioM2))
   if (imagen !== undefined) form.append('imagen', imagen)
   return form
 }

@@ -22,6 +22,10 @@ export interface Granito extends ConTiempos {
   tipo: TipoPiedra
   acabado: Acabado
   imagenUrl: string
+  /** Foto de un trabajo real hecho con esta piedra. */
+  fotoUrl?: string
+  /** Precio por m² instalado (pesos), para la cotización. */
+  precioM2?: number
   etiquetas: string[]
   active: boolean
 }
@@ -32,6 +36,7 @@ export interface EntradaGranito {
   tipo: TipoPiedra
   acabado: Acabado
   etiquetas: string[]
+  precioM2?: number
 }
 
 export interface FiltrosGranitos extends ParametrosPagina {

@@ -20,6 +20,8 @@ export function crearEsquemaGranito(requiereImagen: boolean) {
         'Máximo 20 etiquetas de hasta 30 caracteres',
       ),
       imagen: z.custom<File>((v) => v instanceof File).optional(),
+      /** Vacío = sin precio. Se escribe en pesos por m². */
+      precioTexto: z.string().refine((t) => t.trim() === '' || (Number.isFinite(Number(t)) && Number(t) >= 0), 'Escribe un precio válido'),
     })
     .refine((d) => !requiereImagen || d.imagen !== undefined, {
       message: 'Selecciona la foto de la textura',

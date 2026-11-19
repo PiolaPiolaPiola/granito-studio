@@ -16,31 +16,40 @@ interface Props {
   catalogo: Map<string, Mueble>
   materiales: MaterialAsignado[]
   granitos: Map<string, Granito>
+  seleccionado: string | null
   onElegir: (idMuebleEnDiseno: string) => void
   onQuitar: (idMuebleEnDiseno: string) => void
   onMover: (idMuebleEnDiseno: string, delta: -1 | 1) => void
 }
 
-export function PanelMueblesEnCocina({ muebles, catalogo, materiales, granitos, onElegir, onQuitar, onMover }: Props) {
+export function PanelMueblesEnCocina({ muebles, catalogo, materiales, granitos, seleccionado, onElegir, onQuitar, onMover }: Props) {
   const ordenados = [...muebles].sort((a, b) => a.posicion - b.posicion)
   return (
-    <Paper component="section" aria-label="Muebles en la cocina" variant="outlined" sx={{ p: 2 }}>
-      <Typography component="h2" variant="h2" sx={{ mb: 1 }}>Muebles en la cocina</Typography>
+    <Paper component="section" aria-label="Muebles en el diseño" variant="outlined" sx={{ p: 2 }}>
+      <Typography component="h2" variant="h2" sx={{ mb: 1 }}>Muebles en el diseño</Typography>
       {ordenados.length === 0 && <Typography variant="body2" color="text.secondary">Agrega muebles desde el catálogo.</Typography>}
+      {ordenados.length > 0 && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+          Toca un mueble (aquí o en la vista 3D) para cambiar sus medidas, material o posición.
+        </Typography>
+      )}
       {ordenados.map((m, i) => {
         const mueble = catalogo.get(m.mueble)
         const material = materiales.find((x) => x.pieza === 'mueble' && x.muebleEnDiseno === m._id)
         const granito = material?.granito === undefined ? undefined : granitos.get(material.granito)
         return (
-          <Box key={m._id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, py: 0.5 }}>
-            <ButtonBase onClick={() => onElegir(m._id)} sx={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left', borderRadius: 2, p: 0.5, gap: 1.5 }} aria-label={`Asignar material a ${mueble?.nombre ?? 'mueble'} ${m.posicion}`}>
+          <Box key={m._id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, py: 0.5, borderRadius: 2, ...(m._id === seleccionado ? { bgcolor: 'rgba(143,112,66,0.12)' } : {}) }}>
+            <ButtonBase onClick={() => onElegir(m._id)} sx={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left', borderRadius: 2, p: 0.5, gap: 1.5 }} aria-label={`Seleccionar ${mueble?.nombre ?? 'mueble'} ${m.posicion}`} aria-pressed={m._id === seleccionado}>
               {granito !== undefined ? (
                 <MuestraGranito imagenUrl={granito.imagenUrl} sx={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0 }} />
               ) : (
                 <Box aria-hidden="true" sx={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, border: 1, borderColor: 'divider', bgcolor: material?.colorHex ?? '#D8D2C6' }} />
               )}
               <Box sx={{ minWidth: 0 }}>
-                <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>{m.posicion}. {mueble?.nombre ?? 'Mueble inactivo'}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
+                  {m.posicion}. {mueble?.nombre ?? 'Mueble inactivo'}
+                  {m.medidasCm !== undefined && ' · medidas propias'}
+                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {granito?.nombre ?? (material?.colorHex !== undefined ? `Color ${material.colorHex}` : 'Sin material · toca para asignar')}
                 </Typography>

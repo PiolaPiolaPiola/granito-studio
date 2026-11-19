@@ -1,8 +1,10 @@
 import type { FormaCocina } from './diseno'
+import type { Espacio } from './mueble'
 
 /** Pregunta que se le hace al motor de sugerencias. */
 export interface ContextoSugerencia {
   forma: FormaCocina
+  espacio?: Espacio
   /** Granito que hoy tiene el mesón, para no repetirlo. */
   granitoActualId?: string
 }

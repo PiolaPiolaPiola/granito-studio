@@ -17,6 +17,7 @@ import { useAviso } from '../../componentes/aviso/AvisoContext'
 import { ConfirmarDialogo } from '../../componentes/ConfirmarDialogo'
 import { EstadoConsulta } from '../../componentes/EstadoConsulta'
 import { ETIQUETA_FORMA, type Diseno } from '../../dominio/diseno'
+import { ETIQUETA_ESPACIO } from '../../dominio/mueble'
 import { useConsulta } from '../../hooks/useConsulta'
 
 const FONDO_FORMA: Record<Diseno['forma'], string> = {
@@ -24,6 +25,7 @@ const FONDO_FORMA: Record<Diseno['forma'], string> = {
   L: 'linear-gradient(135deg, #cfc8ba 0%, #a89f91 100%)',
   U: 'linear-gradient(135deg, #cbc4b6 0%, #9d9486 100%)',
   isla: 'linear-gradient(135deg, #d2ccbf 0%, #8f8578 100%)',
+  libre: 'linear-gradient(135deg, #d9d3c8 0%, #b9ae9d 100%)',
 }
 
 export function Disenos() {
@@ -68,7 +70,11 @@ export function Disenos() {
         {disenos?.map((d) => (
           <Card key={d._id} component="article" sx={{ overflow: 'hidden' }}>
             <Box sx={{ height: 130, display: 'grid', placeItems: 'center', background: FONDO_FORMA[d.forma] }}>
-              <Typography sx={{ fontSize: 20, fontWeight: 700, color: 'rgba(38,35,32,0.7)' }}>{ETIQUETA_FORMA[d.forma]}</Typography>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, color: 'rgba(38,35,32,0.7)', textAlign: 'center' }}>
+                {ETIQUETA_ESPACIO[d.espacio ?? 'cocina']}
+                <br />
+                <Box component="span" sx={{ fontSize: 15, fontWeight: 500 }}>{ETIQUETA_FORMA[d.forma]}</Box>
+              </Typography>
             </Box>
             <CardContent>
               <Typography component="h2" variant="h3" noWrap>{d.nombre}</Typography>

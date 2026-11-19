@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { FORMAS_COCINA, PIEZAS } from '../dominio/diseno'
+import { FORMAS_COCINA, PIEZAS, ROTACIONES, SALPICADEROS } from '../dominio/diseno'
+import { ESPACIOS } from '../dominio/mueble'
 
 const idMongo = z.string().regex(/^[0-9a-f]{24}$/i, 'Debe ser un id válido')
 
@@ -8,10 +9,22 @@ const medidaM = z
   .min(0.5, 'Mínimo 0.5 m')
   .max(20, 'Máximo 20 m')
 
+const medidaCm = z.number().min(1, 'Mínimo 1 cm').max(500, 'Máximo 500 cm')
+
 const esquemaMuebleEnDiseno = z.object({
   _id: idMongo,
   mueble: idMongo,
   posicion: z.int().min(1),
+  medidasCm: z
+    .object({ ancho: medidaCm.optional(), alto: medidaCm.optional(), fondo: medidaCm.optional() })
+    .optional(),
+  ubicacion: z
+    .object({
+      x: z.number().min(-20).max(20),
+      z: z.number().min(-20).max(20),
+      rotacion: z.union(ROTACIONES.map((r) => z.literal(r))),
+    })
+    .optional(),
 })
 
 const esquemaMaterial = z
@@ -41,8 +54,14 @@ const esquemaMaterial = z
 export const esquemaDiseno = z
   .object({
     nombre: z.string().trim().min(1, 'El nombre es obligatorio').max(80, 'Máximo 80 caracteres'),
+    espacio: z.enum(ESPACIOS),
     forma: z.enum(FORMAS_COCINA),
     medidasM: z.object({ ancho: medidaM, fondo: medidaM }),
+    acabados: z.object({
+      espesorCm: z.number({ error: 'Escribe un número' }).min(1, 'Mínimo 1 cm').max(10, 'Máximo 10 cm'),
+      salpicadero: z.enum(SALPICADEROS),
+      cascada: z.boolean(),
+    }),
     muebles: z.array(esquemaMuebleEnDiseno).max(50, 'Máximo 50 muebles'),
     materiales: z.array(esquemaMaterial).max(100),
   })

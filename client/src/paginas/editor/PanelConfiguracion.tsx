@@ -16,18 +16,24 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { sugerenciasApi } from '../../api'
 import { EstadoConsulta } from '../../componentes/EstadoConsulta'
 import { MuestraGranito } from '../../componentes/MuestraGranito'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
+import { SelectorColor } from '../../componentes/SelectorColor'
 import {
   asignarMaterial,
   buscarMaterial,
   ETIQUETA_FORMA,
+  ETIQUETA_SALPICADERO,
   FORMAS_COCINA,
   quitarMaterial,
+  SALPICADEROS,
   type EntradaDiseno,
   type MaterialAsignado,
   type Pieza,
 } from '../../dominio/diseno'
 import { ETIQUETA_TIPO_PIEDRA, TIPOS_PIEDRA, type Granito, type TipoPiedra } from '../../dominio/granito'
-import type { Mueble } from '../../dominio/mueble'
+import { ESPACIOS, ETIQUETA_ESPACIO, type Espacio, type Mueble } from '../../dominio/mueble'
+import { PALETA_MUEBLES, PALETA_PIEDRAS } from '../../dominio/paleta'
 import type { Sugerencia } from '../../dominio/sugerencia'
 import { useConsulta } from '../../hooks/useConsulta'
 
@@ -67,9 +73,22 @@ function TabForma() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Controller
         control={control}
+        name="espacio"
+        render={({ field }) => (
+          <ToggleButtonGroup exclusive fullWidth value={field.value} onChange={(_, v: Espacio | null) => v !== null && field.onChange(v)} aria-label="Espacio">
+            {ESPACIOS.map((e) => (
+              <ToggleButton key={e} value={e} sx={{ minHeight: 44, '&.Mui-selected': { bgcolor: 'rgba(143,112,66,0.16)', color: 'primary.dark' } }}>
+                {ETIQUETA_ESPACIO[e]}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        )}
+      />
+      <Controller
+        control={control}
         name="forma"
         render={({ field }) => (
-          <ToggleButtonGroup exclusive fullWidth value={field.value} onChange={(_, v: EntradaDiseno['forma'] | null) => v !== null && field.onChange(v)} aria-label="Forma de la cocina">
+          <ToggleButtonGroup exclusive fullWidth value={field.value} onChange={(_, v: EntradaDiseno['forma'] | null) => v !== null && field.onChange(v)} aria-label="Forma del espacio" sx={{ flexWrap: 'wrap' }}>
             {FORMAS_COCINA.map((f) => (
               <ToggleButton key={f} value={f} sx={{ minHeight: 44, '&.Mui-selected': { bgcolor: 'rgba(143,112,66,0.16)', color: 'primary.dark' } }}>
                 {ETIQUETA_FORMA[f]}
@@ -83,8 +102,40 @@ function TabForma() {
         <TextField label="Fondo (m)" type="number" slotProps={{ htmlInput: { step: 0.1, min: 0.5, max: 20 } }} error={errors.medidasM?.fondo !== undefined} helperText={errors.medidasM?.fondo?.message} {...register('medidasM.fondo', { valueAsNumber: true })} />
       </Box>
       <Typography variant="body2" color="text.secondary">
-        La forma define la distribución base del espacio: los muebles se colocan por su posición, pared por pared.
+        La forma define la distribución: los muebles se colocan por su posición, pared por pared.
+        En <strong>Libre</strong> no hay plantilla: arrastra cada mueble en la vista 3D o escribe su posición.
       </Typography>
+
+      <Typography component="h3" sx={{ fontWeight: 600, mt: 1 }}>Mesón</Typography>
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField
+          label="Espesor (cm)"
+          type="number"
+          slotProps={{ htmlInput: { step: 0.5, min: 1, max: 10 } }}
+          error={errors.acabados?.espesorCm !== undefined}
+          helperText={errors.acabados?.espesorCm?.message}
+          {...register('acabados.espesorCm', { valueAsNumber: true })}
+        />
+        <Controller
+          control={control}
+          name="acabados.salpicadero"
+          render={({ field }) => (
+            <TextField select label="Salpicadero" {...field} sx={{ minWidth: 170 }}>
+              {SALPICADEROS.map((s) => <MenuItem key={s} value={s}>{ETIQUETA_SALPICADERO[s]}</MenuItem>)}
+            </TextField>
+          )}
+        />
+      </Box>
+      <Controller
+        control={control}
+        name="acabados.cascada"
+        render={({ field }) => (
+          <FormControlLabel
+            control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+            label="Caída en cascada en islas y barras (la piedra baja hasta el piso)"
+          />
+        )}
+      />
     </Box>
   )
 }
@@ -103,6 +154,7 @@ function TabMateriales({ granitos, catalogo, piezaElegida, onPieza }: Props) {
   const [colorLiso, setColorLiso] = useState('#f4f1ea')
 
   const { pieza, muebleEnDiseno } = interpretarPieza(piezaElegida)
+  const paleta = pieza === 'mueble' ? PALETA_MUEBLES : PALETA_PIEDRAS
   const actual = buscarMaterial(materiales, pieza, muebleEnDiseno)
 
   const etiquetas = useMemo(() => [...new Set(granitos.flatMap((g) => g.etiquetas))].sort(), [granitos])
@@ -152,12 +204,19 @@ function TabMateriales({ granitos, catalogo, piezaElegida, onPieza }: Props) {
       </Box>
       {visibles.length === 0 && <Typography variant="body2" color="text.secondary">Ningún granito coincide con el filtro.</Typography>}
 
+      <SelectorColor
+        etiqueta={pieza === 'mueble' ? 'Color del mueble' : 'Color liso'}
+        paleta={paleta}
+        valor={colorLiso}
+        onCambiar={(hex) => {
+          setColorLiso(hex)
+          cambiar(asignarMaterial(materiales, pieza, muebleEnDiseno, { colorHex: hex }))
+        }}
+      />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 14, flex: 1 }}>
-          Color liso
-          <input type="color" value={colorLiso} onChange={(e) => setColorLiso(e.target.value)} style={{ width: 44, height: 36, border: 0, padding: 0, background: 'none' }} />
-        </Box>
-        <Button variant="outlined" onClick={() => cambiar(asignarMaterial(materiales, pieza, muebleEnDiseno, { colorHex: colorLiso }))}>Aplicar color</Button>
+        <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+          {pieza === 'mueble' ? 'Sin material asignado, el mueble usa su foto o el color del catálogo.' : 'Toca un color para aplicarlo.'}
+        </Typography>
         <Button color="inherit" disabled={actual === undefined} onClick={() => cambiar(quitarMaterial(materiales, pieza, muebleEnDiseno))}>Quitar</Button>
       </Box>
     </Box>
@@ -167,11 +226,14 @@ function TabMateriales({ granitos, catalogo, piezaElegida, onPieza }: Props) {
 function TabSugerencias({ granitos }: Props) {
   const { setValue, control } = useFormContext<EntradaDiseno>()
   const forma = useWatch({ control, name: 'forma' })
+  const espacio = useWatch({ control, name: 'espacio' })
   const muebles = useWatch({ control, name: 'muebles' })
   const materiales = useWatch({ control, name: 'materiales' })
   const granitoActualId = buscarMaterial(materiales, 'meson')?.granito
 
-  const consulta = useConsulta(useCallback(() => sugerenciasApi.sugerir({ forma, granitoActualId }), [forma, granitoActualId]))
+  const consulta = useConsulta(
+    useCallback(() => sugerenciasApi.sugerir({ forma, espacio, granitoActualId }), [forma, espacio, granitoActualId]),
+  )
 
   const aplicar = (s: Sugerencia) => {
     let nuevos = asignarMaterial(materiales, 'meson', undefined, { granito: s.granitoId })

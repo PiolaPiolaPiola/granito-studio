@@ -9,10 +9,8 @@ import type { SesionIniciada, Usuario } from '../dominio/usuario'
  * Contratos de acceso a datos (patrón Repository / Puerto-Adaptador).
  *
  * Las pantallas dependen SOLO de estas interfaces (principio de inversión de
- * dependencias). Cada una tiene dos implementaciones intercambiables:
- *   - `api/mock/*`  → datos en memoria (persistidos en localStorage)
- *   - `api/http/*`  → Axios contra el backend real
- * El cambio de una a otra ocurre en un solo archivo: `api/index.ts`.
+ * dependencias). La implementación actual es `api/http/*` (Axios contra el backend);
+ * cambiarla (por ejemplo, por datos de prueba) se hace en un solo archivo: `api/index.ts`.
  */
 
 export interface AuthApi {
@@ -30,11 +28,18 @@ export interface GranitosApi {
   desactivar(id: string): Promise<void>
 }
 
+/** Cambios de la foto al editar un mueble: una nueva, o quitar la actual. */
+export interface CambiosFotoMueble {
+  imagen?: File
+  quitarImagen?: boolean
+}
+
 export interface MueblesApi {
   listar(filtros: FiltrosMuebles): Promise<Pagina<Mueble>>
   obtener(id: string): Promise<Mueble>
-  crear(datos: EntradaMueble): Promise<Mueble>
-  actualizar(id: string, datos: Partial<EntradaMueble>): Promise<Mueble>
+  /** La foto es opcional: sin foto, el mueble se dibuja con su material y color. */
+  crear(datos: EntradaMueble, imagen?: File): Promise<Mueble>
+  actualizar(id: string, datos: Partial<EntradaMueble>, foto?: CambiosFotoMueble): Promise<Mueble>
   desactivar(id: string): Promise<void>
 }
 

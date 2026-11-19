@@ -1,30 +1,40 @@
-import type { FormaCocina, MedidasM } from '../dominio/diseno'
-import type { Mueble } from '../dominio/mueble'
+import type { FormaCocina, MedidasM, MedidasPieza, Rotacion, Ubicacion } from '../dominio/diseno'
+import type { Mueble, TipoMueble } from '../dominio/mueble'
 
 /**
- * Distribución de los muebles en la cocina: función PURA (datos → posiciones 3D),
+ * Distribución de los muebles en el espacio: función PURA (datos → posiciones 3D),
  * sin React ni three.js, para poder probarla y razonarla por separado.
  *
  * Sistema de coordenadas (metros): X a la derecha, Y arriba, Z hacia el espectador.
- * La cocina está centrada en el origen; la pared del fondo está en z = -fondo/2.
+ * El espacio está centrado en el origen; la pared del fondo está en z = -fondo/2.
  *
- * Idea: cada forma define "tramos" (paredes por donde corre una hilera). Los
- * muebles, en orden de `posicion`, se colocan uno tras otro en su hilera y pasan
- * al siguiente tramo cuando ya no caben.
+ * Formas con plantilla: cada forma define "tramos" (paredes por donde corre una hilera).
+ * Los muebles, en orden de `posicion`, se colocan uno tras otro y pasan al siguiente tramo
+ * cuando ya no caben. Forma libre: cada mueble va donde diga su `ubicacion`; los que aún
+ * no tienen una se colocan como en la forma lineal (y desde ahí se pueden arrastrar).
  */
 
 export const PROFUNDIDAD_BASE = 0.6
 export const ALTURA_SUPERIORES = 1.4
 export const ALTURA_PARED = 2.6
 
+/** Altura del borde inferior de las piezas que cuelgan de la pared. */
+const ALTURA_COLGADO: Partial<Record<TipoMueble, number>> = {
+  superior: ALTURA_SUPERIORES,
+  gabinete_bano: 1.2,
+  repisa: 1.5,
+}
+
 export type Capa = 'suelo' | 'alto' | 'isla'
-export type Muro = 'fondo' | 'derecha' | 'izquierda' | 'isla'
+export type Muro = 'fondo' | 'derecha' | 'izquierda' | 'isla' | 'libre'
 
 export interface MuebleResuelto {
   /** `_id` del mueble dentro del diseño (no el del catálogo). */
   _id: string
   posicion: number
   mueble: Mueble
+  medidasCm?: MedidasPieza
+  ubicacion?: Ubicacion
 }
 
 export interface Colocacion {
@@ -34,12 +44,12 @@ export interface Colocacion {
   muro: Muro
   /** Centro del mueble. */
   centro: [number, number, number]
-  /** Giro sobre Y, de modo que el frente mire hacia dentro de la cocina. */
+  /** Giro sobre Y, de modo que el frente mire hacia dentro del espacio. */
   rotY: number
   ancho: number
   alto: number
   fondo: number
-  /** true si el mueble no cabe en la pared y se sale del espacio. */
+  /** true si el mueble no cabe en la pared o se sale del espacio. */
   desborda: boolean
 }
 
@@ -70,10 +80,31 @@ export function tramosPara(forma: FormaCocina, { ancho, fondo }: MedidasM): Tram
   }
 }
 
-function capaDe(mueble: Mueble): Capa {
-  if (mueble.tipo === 'superior') return 'alto'
-  if (mueble.tipo === 'isla') return 'isla'
+export function capaDe(tipo: TipoMueble): Capa {
+  if (tipo in ALTURA_COLGADO) return 'alto'
+  if (tipo === 'isla' || tipo === 'barra') return 'isla'
   return 'suelo'
+}
+
+/** Medidas finales en metros: las propias de la pieza o, si no hay, las del catálogo. */
+export function medidasDe({ mueble, medidasCm }: Pick<MuebleResuelto, 'mueble' | 'medidasCm'>) {
+  return {
+    ancho: (medidasCm?.ancho ?? mueble.anchoCm) / 100,
+    alto: (medidasCm?.alto ?? mueble.altoCm) / 100,
+    fondo: (medidasCm?.fondo ?? mueble.fondoCm) / 100,
+  }
+}
+
+function alturaCentro(tipo: TipoMueble, alto: number): number {
+  return (ALTURA_COLGADO[tipo] ?? 0) + alto / 2
+}
+
+export const gradosARadianes = (r: Rotacion) => (r * Math.PI) / 180
+
+/** Giro en Y (radianes) → rotación permitida más cercana (0, 90, 180, 270). */
+export function rotacionDe(rotY: number): Rotacion {
+  const grados = ((((rotY * 180) / Math.PI) % 360) + 360) % 360
+  return ((Math.round(grados / 90) * 90) % 360) as Rotacion
 }
 
 export interface ResultadoDistribucion {
@@ -82,22 +113,63 @@ export interface ResultadoDistribucion {
 }
 
 export function distribuir(forma: FormaCocina, medidas: MedidasM, muebles: MuebleResuelto[]): ResultadoDistribucion {
+  const ordenados = [...muebles].sort((a, b) => a.posicion - b.posicion)
+
+  if (forma === 'libre') {
+    // Los que no tienen ubicación se reparten como en la forma lineal.
+    const automaticos = distribuirConTramos('lineal', medidas, ordenados.filter((m) => m.ubicacion === undefined))
+    const porId = new Map(automaticos.map((c) => [c.id, c]))
+    const colocaciones = ordenados.flatMap((item) => {
+      if (item.ubicacion !== undefined) return [colocacionLibre(item, item.ubicacion, medidas)]
+      const automatica = porId.get(item._id)
+      return automatica === undefined ? [] : [automatica]
+    })
+    return { colocaciones, desbordados: colocaciones.filter((c) => c.desborda) }
+  }
+
+  const colocaciones = distribuirConTramos(forma, medidas, ordenados)
+  return { colocaciones, desbordados: colocaciones.filter((c) => c.desborda) }
+}
+
+function colocacionLibre(item: MuebleResuelto, { x, z, rotacion }: Ubicacion, medidas: MedidasM): Colocacion {
+  const { ancho, alto, fondo } = medidasDe(item)
+  // Con giros de 90/270 el mueble ocupa su fondo a lo ancho.
+  const girado = rotacion === 90 || rotacion === 270
+  const mitadX = (girado ? fondo : ancho) / 2
+  const mitadZ = (girado ? ancho : fondo) / 2
+  const margen = 1e-6
+  const desborda =
+    x - mitadX < -medidas.ancho / 2 - margen ||
+    x + mitadX > medidas.ancho / 2 + margen ||
+    z - mitadZ < -medidas.fondo / 2 - margen ||
+    z + mitadZ > medidas.fondo / 2 + margen
+  return {
+    id: item._id,
+    mueble: item.mueble,
+    capa: capaDe(item.mueble.tipo),
+    muro: 'libre',
+    centro: [x, alturaCentro(item.mueble.tipo, alto), z],
+    rotY: gradosARadianes(rotacion),
+    ancho,
+    alto,
+    fondo,
+    desborda,
+  }
+}
+
+function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: MuebleResuelto[]): Colocacion[] {
   const tramos = tramosPara(forma, medidas)
   const cursores = { suelo: { tramo: 0, usado: 0 }, alto: { tramo: 0, usado: 0 } }
   const colocaciones: Colocacion[] = []
   const islas: MuebleResuelto[] = []
 
-  const ordenados = [...muebles].sort((a, b) => a.posicion - b.posicion)
-
   for (const item of ordenados) {
-    const capa = capaDe(item.mueble)
+    const capa = capaDe(item.mueble.tipo)
     if (capa === 'isla') {
       islas.push(item)
       continue
     }
-    const ancho = item.mueble.anchoCm / 100
-    const alto = item.mueble.altoCm / 100
-    const fondo = item.mueble.fondoCm / 100
+    const { ancho, alto, fondo } = medidasDe(item)
     const cursor = cursores[capa]
 
     // Si no cabe en lo que queda de esta pared, pasa a la siguiente.
@@ -116,7 +188,7 @@ export function distribuir(forma: FormaCocina, medidas: MedidasM, muebles: Muebl
       muro: tramo.muro,
       centro: [
         tramo.origen[0] + tramo.direccion[0] * avance + (tramo.normal[0] * fondo) / 2,
-        capa === 'alto' ? ALTURA_SUPERIORES + alto / 2 : alto / 2,
+        alturaCentro(item.mueble.tipo, alto),
         tramo.origen[1] + tramo.direccion[1] * avance + (tramo.normal[1] * fondo) / 2,
       ],
       rotY: Math.atan2(tramo.normal[0], tramo.normal[1]),
@@ -128,17 +200,17 @@ export function distribuir(forma: FormaCocina, medidas: MedidasM, muebles: Muebl
     cursor.usado += ancho
   }
 
-  // Islas: una hilera centrada, separada de la pared de trabajo.
+  // Islas y barras: una hilera centrada, separada de la pared de trabajo.
   if (islas.length > 0) {
-    const total = islas.reduce((suma, i) => suma + i.mueble.anchoCm / 100, 0)
-    const fondoMax = Math.max(...islas.map((i) => i.mueble.fondoCm / 100))
+    const tamanos = islas.map((i) => medidasDe(i))
+    const total = tamanos.reduce((suma, t) => suma + t.ancho, 0)
+    const fondoMax = Math.max(...tamanos.map((t) => t.fondo))
     const desborda = total > medidas.ancho - 0.2
     const zIdeal = -medidas.fondo / 2 + PROFUNDIDAD_BASE + 1 + fondoMax / 2
     const z = Math.min(zIdeal, medidas.fondo / 2 - fondoMax / 2)
     let usado = 0
-    for (const item of islas) {
-      const ancho = item.mueble.anchoCm / 100
-      const alto = item.mueble.altoCm / 100
+    islas.forEach((item, i) => {
+      const { ancho, alto, fondo } = tamanos[i]
       colocaciones.push({
         id: item._id,
         mueble: item.mueble,
@@ -148,12 +220,12 @@ export function distribuir(forma: FormaCocina, medidas: MedidasM, muebles: Muebl
         rotY: Math.PI,
         ancho,
         alto,
-        fondo: item.mueble.fondoCm / 100,
+        fondo,
         desborda,
       })
       usado += ancho
-    }
+    })
   }
 
-  return { colocaciones, desbordados: colocaciones.filter((c) => c.desborda) }
+  return colocaciones
 }

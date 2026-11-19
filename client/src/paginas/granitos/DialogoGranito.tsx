@@ -31,6 +31,7 @@ import {
 } from '../../dominio/granito'
 import { crearEsquemaGranito, type FormularioGranito } from '../../esquemas/granito.esquemas'
 import { aplicarErroresApi } from '../../formularios/erroresApi'
+import { AnalizarFoto } from '../../ia/AnalizarFoto'
 
 interface Props {
   abierto: boolean
@@ -59,6 +60,7 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
     control,
     handleSubmit,
     setValue,
+    getValues,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<FormularioGranito>({
@@ -68,6 +70,7 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
       tipo: granito?.tipo ?? 'granito',
       acabado: granito?.acabado ?? 'brillante',
       etiquetasTexto: granito?.etiquetas.join(', ') ?? '',
+      precioTexto: granito?.precioM2?.toString() ?? '',
     },
   })
 
@@ -77,7 +80,14 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
   }
 
   const enviar = handleSubmit(async (datos) => {
-    const entrada = { nombre: datos.nombre, tipo: datos.tipo, acabado: datos.acabado, etiquetas: parsearEtiquetas(datos.etiquetasTexto) }
+    const precio = datos.precioTexto.trim()
+    const entrada = {
+      nombre: datos.nombre,
+      tipo: datos.tipo,
+      acabado: datos.acabado,
+      etiquetas: parsearEtiquetas(datos.etiquetasTexto),
+      ...(precio === '' ? {} : { precioM2: Number(precio) }),
+    }
     try {
       if (granito === null) await granitosApi.crear(entrada, datos.imagen as File)
       else await granitosApi.actualizar(granito._id, entrada, datos.imagen)
@@ -116,6 +126,19 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
           />
         </Box>
         {errors.imagen && <FormHelperText error>{errors.imagen.message}</FormHelperText>}
+        <AnalizarFoto
+          tipo="granito"
+          obtenerArchivo={() => getValues('imagen')}
+          onSugerencia={(s) => {
+            if (s.nombre !== undefined && getValues('nombre').trim() === '') setValue('nombre', s.nombre, { shouldValidate: true })
+            if (s.tipo !== undefined) setValue('tipo', s.tipo)
+            if (s.acabado !== undefined) setValue('acabado', s.acabado)
+            if (s.etiquetas !== undefined) {
+              const actuales = parsearEtiquetas(getValues('etiquetasTexto'))
+              setValue('etiquetasTexto', [...new Set([...actuales, ...s.etiquetas])].join(', '), { shouldValidate: true })
+            }
+          }}
+        />
 
         <TextField label="Nombre" required error={errors.nombre !== undefined} helperText={errors.nombre?.message} {...register('nombre')} />
         <Controller
@@ -143,6 +166,14 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
             )}
           />
         </FormControl>
+        <TextField
+          label="Precio por m² instalado (opcional)"
+          type="number"
+          slotProps={{ htmlInput: { min: 0, step: 1000 }, input: { startAdornment: <Typography sx={{ mr: 0.5 }}>$</Typography> } }}
+          error={errors.precioTexto !== undefined}
+          helperText={errors.precioTexto?.message ?? 'Se usa en la cotización del diseño'}
+          {...register('precioTexto')}
+        />
         <TextField
           label="Etiquetas (separadas por comas)"
           placeholder="negro, moderno, elegante"

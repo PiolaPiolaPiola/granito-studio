@@ -1,6 +1,7 @@
 import AutorenewOutlined from '@mui/icons-material/AutorenewOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import RestartAltOutlined from '@mui/icons-material/RestartAltOutlined'
+import ViewInArOutlined from '@mui/icons-material/ViewInArOutlined'
 import ZoomInOutlined from '@mui/icons-material/ZoomInOutlined'
 import ZoomOutOutlined from '@mui/icons-material/ZoomOutOutlined'
 import Alert from '@mui/material/Alert'
@@ -10,33 +11,46 @@ import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Paper from '@mui/material/Paper'
 import ToggleButton from '@mui/material/ToggleButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import type { FormaCocina, MaterialAsignado, MedidasM } from '../../dominio/diseno'
+import type { Scene } from 'three'
+import type { AcabadosMeson, FormaCocina, MaterialAsignado, MedidasM } from '../../dominio/diseno'
 import type { Granito } from '../../dominio/granito'
 import { puntoDeVista, type ComandoCamara, type Vista } from '../../escena/camara'
 import { ControlCamara } from '../../escena/ControlCamara'
-import { distribuir, type MuebleResuelto } from '../../escena/distribucion'
+import type { Colocacion } from '../../escena/distribucion'
 import { EscenaCocina } from '../../escena/EscenaCocina'
+import { descargarImagen, descargarModelo3D } from '../../exportar/exportar'
 
 interface Props {
   forma: FormaCocina
   medidas: MedidasM
-  muebles: MuebleResuelto[]
+  acabados: AcabadosMeson
+  /** Distribución ya calculada por el editor (la comparten la cotización y el panel de la pieza). */
+  colocaciones: Colocacion[]
+  desbordados: Colocacion[]
   materiales: MaterialAsignado[]
   granitos: Granito[]
   nombreArchivo: string
+  seleccionado: string | null
+  onSeleccionar: (id: string) => void
+  onMover: (id: string, x: number, z: number) => void
+  /** El lienzo, para que la cotización pueda incluir una foto del diseño. */
+  onLienzo?: (lienzo: HTMLCanvasElement) => void
 }
 
-export function VistaPrevia3D({ forma, medidas, muebles, materiales, granitos, nombreArchivo }: Props) {
+export function VistaPrevia3D(props: Props) {
+  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo } = props
   const [vista, setVista] = useState<Vista>('frontal')
   const [comando, setComando] = useState<ComandoCamara | null>(null)
   const [autoRotar, setAutoRotar] = useState(false)
+  const [arrastrando, setArrastrando] = useState(false)
   const lienzo = useRef<HTMLCanvasElement | null>(null)
+  const escena = useRef<Scene | null>(null)
   const contador = useRef(0)
 
-  const { colocaciones, desbordados } = useMemo(() => distribuir(forma, medidas, muebles), [forma, medidas, muebles])
   const inicial = useMemo(() => puntoDeVista('inicial', medidas), [medidas])
 
   const enviar = useCallback((orden: DistributivoOmit) => {
@@ -50,43 +64,50 @@ export function VistaPrevia3D({ forma, medidas, muebles, materiales, granitos, n
     enviar({ tipo: 'vista', vista: siguiente })
   }
 
-  const exportar = () => {
-    const el = lienzo.current
-    if (el === null) return
-    const enlace = document.createElement('a')
-    enlace.download = `${nombreArchivo || 'diseno'}.png`
-    enlace.href = el.toDataURL('image/png')
-    enlace.click()
-  }
+  const nombre = nombreArchivo || 'diseno'
 
   return (
     <Box
       component="section"
       aria-label="Vista 3D"
-      sx={{ position: 'relative', height: 'max(520px, calc(100dvh - 150px))', borderRadius: 2, overflow: 'hidden', background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)', border: 1, borderColor: 'divider' }}
+      sx={{ position: 'relative', height: 'max(520px, calc(100dvh - 150px))', borderRadius: 2, overflow: 'hidden', background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)', border: 1, borderColor: 'divider', touchAction: 'none' }}
     >
       <Canvas
         shadows="percentage"
         camera={{ position: inicial.posicion, fov: 45, near: 0.1, far: 100 }}
         gl={{ preserveDrawingBuffer: true }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene }) => {
           lienzo.current = gl.domElement
+          escena.current = scene
+          onLienzo?.(gl.domElement)
         }}
-        aria-label="Cocina en 3D"
+        aria-label="Diseño en 3D"
       >
-        <EscenaCocina forma={forma} medidas={medidas} colocaciones={colocaciones} materiales={materiales} granitos={granitos} />
-        <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} />
+        <EscenaCocina
+          forma={forma}
+          medidas={medidas}
+          acabados={acabados}
+          colocaciones={colocaciones}
+          materiales={materiales}
+          granitos={granitos}
+          seleccionado={seleccionado}
+          onSeleccionar={onSeleccionar}
+          onMover={onMover}
+          onArrastrando={setArrastrando}
+        />
+        <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} />
       </Canvas>
 
       <Typography
         variant="caption"
         sx={{ position: 'absolute', top: 12, left: 12, px: 1.5, py: 0.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.85)', color: 'text.primary' }}
       >
-        {medidas.ancho} × {medidas.fondo} m · {muebles.length} muebles
+        {medidas.ancho} × {medidas.fondo} m · {colocaciones.length} muebles
+        {forma === 'libre' && ' · arrastra los muebles para moverlos'}
       </Typography>
       {desbordados.length > 0 && (
         <Alert severity="warning" sx={{ position: 'absolute', top: 12, right: 12, maxWidth: 320 }}>
-          {desbordados.length === 1 ? '1 mueble no cabe' : `${desbordados.length} muebles no caben`} en la cocina. Agranda las medidas o quita alguno.
+          {desbordados.length === 1 ? '1 mueble no cabe' : `${desbordados.length} muebles no caben`} en el espacio. Agranda las medidas, mueve o quita alguno.
         </Alert>
       )}
 
@@ -94,7 +115,7 @@ export function VistaPrevia3D({ forma, medidas, muebles, materiales, granitos, n
         role="toolbar"
         aria-label="Controles de cámara"
         elevation={3}
-        sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 0.25, px: 1, borderRadius: 6, maxWidth: 'calc(100% - 16px)' }}
+        sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 0.25, px: 1, borderRadius: 6, maxWidth: 'calc(100% - 16px)', overflowX: 'auto' }}
       >
         <ToggleButton value="rotar" selected={autoRotar} onChange={() => setAutoRotar((v) => !v)} aria-label="Rotar vista automáticamente" sx={{ border: 0, borderRadius: '50%', width: 44, height: 44 }}>
           <AutorenewOutlined />
@@ -107,7 +128,12 @@ export function VistaPrevia3D({ forma, medidas, muebles, materiales, granitos, n
         </Button>
         <IconButton aria-label="Restablecer cámara" onClick={() => { setVista('frontal'); enviar({ tipo: 'reiniciar' }) }}><RestartAltOutlined /></IconButton>
         <Divider orientation="vertical" flexItem sx={{ my: 1, mx: 0.5 }} />
-        <IconButton aria-label="Exportar imagen" onClick={exportar}><ImageOutlined /></IconButton>
+        <Tooltip title="Descargar imagen (PNG)">
+          <IconButton aria-label="Descargar imagen" onClick={() => lienzo.current && descargarImagen(lienzo.current, nombre)}><ImageOutlined /></IconButton>
+        </Tooltip>
+        <Tooltip title="Descargar modelo 3D (.glb)">
+          <IconButton aria-label="Descargar modelo 3D" onClick={() => escena.current && void descargarModelo3D(escena.current, nombre)}><ViewInArOutlined /></IconButton>
+        </Tooltip>
       </Paper>
     </Box>
   )
