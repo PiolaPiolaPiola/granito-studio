@@ -7,6 +7,7 @@ import { manejadorErrores } from './middlewares/manejadorErrores.js';
 import { noEncontrado } from './middlewares/noEncontrado.js';
 import { rutasSalud } from './routes/salud.routes.js';
 import { rutasAuth } from './routes/auth.routes.js';
+import { rutasGranitos } from './routes/granito.routes.js';
 
 export const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/health', rutasSalud);
 app.use('/api/auth', rutasAuth);
+app.use('/api/granitos', rutasGranitos);
 
 app.use(noEncontrado);
 app.use(manejadorErrores);
