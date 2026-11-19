@@ -7,7 +7,6 @@ import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
-import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import type { MedidasM, Rotacion } from '../../dominio/diseno'
 import type { Espacio } from '../../dominio/mueble'
@@ -39,8 +38,7 @@ export function PanelObjetos({ objetos, espacio, medidas, seleccionado, onSelecc
   const quitar = (id: string) => onCambiar(objetos.filter((o) => o._id !== id))
 
   return (
-    <Paper component="section" aria-label="Objetos de referencia" variant="outlined" sx={{ p: 2 }}>
-      <Typography component="h2" variant="h2">Objetos de referencia</Typography>
+    <Box sx={{ px: 2, pb: 2 }}>
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mb: 1 }}>
         Dan escala para elegir colores. No se cotizan. Arrástralos en el 3D.
       </Typography>
@@ -64,6 +62,6 @@ export function PanelObjetos({ objetos, espacio, medidas, seleccionado, onSelecc
       <Button size="small" startIcon={<RestartAltOutlined />} onClick={() => onCambiar(objetosPorDefecto(espacio, medidas))} sx={{ mt: 0.5 }}>
         Poner los de {espacio === 'bano' ? 'un baño' : espacio === 'sala' ? 'una sala' : 'una cocina'}
       </Button>
-    </Paper>
+    </Box>
   )
 }

@@ -34,6 +34,7 @@ import { PanelCatalogoMuebles } from './PanelCatalogoMuebles'
 import { PanelConfiguracion, type Pestana } from './PanelConfiguracion'
 import { PanelMueblesEnCocina } from './PanelMueblesEnCocina'
 import { PanelObjetos } from './PanelObjetos'
+import { Seccion } from './Seccion'
 import { PanelPieza } from './PanelPieza'
 import { VistaPrevia3D } from './VistaPrevia3D'
 
@@ -60,6 +61,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
   const [pestana, setPestana] = useState<Pestana>('materiales')
   const [pieza, setPieza] = useState('meson')
   const [seleccionado, setSeleccionado] = useState<string | null>(null)
+  const [seccion, setSeccion] = useState<'diseno' | 'objetos' | null>('diseno')
   const lienzo = useRef<HTMLCanvasElement | null>(null)
   const [fondoUrl, setFondoUrl] = useState(fondoInicial)
   /** Foto del lienzo al abrir la cotización (null = cerrada). */
@@ -216,7 +218,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
         )}
 
         <Box sx={{ display: 'grid', gap: 2, p: 2, gridTemplateColumns: { xs: '1fr', lg: '280px minmax(0, 1fr) 360px' }, alignItems: 'start' }}>
-          <Box sx={{ order: { xs: 3, lg: 1 } }}>
+          <Box sx={{ order: { xs: 3, lg: 1 }, position: { lg: 'sticky' }, top: { lg: 16 }, maxHeight: { lg: 'calc(100dvh - 140px)' }, overflowY: { lg: 'auto' } }}>
             <PanelCatalogoMuebles
               muebles={catalogoLista}
               espacio={espacio}
@@ -238,7 +240,10 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               key={fondoUrl ?? 'sin-foto'}
               nombreArchivo={nombre}
               seleccionado={seleccionado}
-              onSeleccionar={setSeleccionado}
+              onSeleccionar={(idSel) => {
+                setSeleccionado(idSel)
+                if (idSel.startsWith('obj:')) setSeccion('objetos')
+              }}
               onMover={moverEnEscena}
               onLienzo={(l) => { lienzo.current = l }}
             />
@@ -255,7 +260,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               />
             </Box>
           </Box>
-          <Box sx={{ order: { xs: 2, lg: 3 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ order: { xs: 2, lg: 3 }, display: 'flex', flexDirection: 'column', gap: 1.5, position: { lg: 'sticky' }, top: { lg: 16 }, maxHeight: { lg: 'calc(100dvh - 140px)' }, overflowY: { lg: 'auto' }, pr: { lg: 0.5 } }}>
             {piezaSeleccionada !== undefined && muebleSeleccionado !== undefined && (
               <PanelPieza
                 key={piezaSeleccionada._id}
@@ -265,19 +270,24 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
                 forma={forma}
                 onMedidas={(m) => cambiarMuebles(cambiarMedidasPieza(mueblesDiseno, piezaSeleccionada._id, m))}
                 onUbicar={(u) => cambiarMuebles(ubicarMueble(mueblesDiseno, piezaSeleccionada._id, u, medidas))}
-                onMaterial={() => { setPieza(`mueble:${piezaSeleccionada._id}`); setPestana('materiales') }}
+                onMaterial={() => { setPieza(`mueble:${piezaSeleccionada._id}`); setPestana('materiales'); setSeccion('diseno') }}
                 onCerrar={() => setSeleccionado(null)}
               />
             )}
-            <PanelObjetos
-              objetos={objetos}
-              espacio={espacio}
-              medidas={medidas}
-              seleccionado={seleccionado}
-              onSeleccionar={setSeleccionado}
-              onCambiar={(lista) => setValue('objetos', lista, { shouldDirty: true })}
-            />
-            <PanelConfiguracion granitos={granitos} catalogo={catalogo} pestana={pestana} onPestana={setPestana} piezaElegida={pieza} onPieza={setPieza} />
+            {/* Acordeón: abrir una sección cierra la otra (menos scroll). */}
+            <Seccion titulo="Diseño" detalle="Forma, materiales y sugerencias" abierta={seccion === 'diseno'} onAbrir={() => setSeccion(seccion === 'diseno' ? null : 'diseno')}>
+              <PanelConfiguracion granitos={granitos} catalogo={catalogo} pestana={pestana} onPestana={setPestana} piezaElegida={pieza} onPieza={setPieza} />
+            </Seccion>
+            <Seccion titulo="Objetos de referencia" detalle={`${String(objetos.length)} en el espacio`} abierta={seccion === 'objetos'} onAbrir={() => setSeccion(seccion === 'objetos' ? null : 'objetos')}>
+              <PanelObjetos
+                objetos={objetos}
+                espacio={espacio}
+                medidas={medidas}
+                seleccionado={seleccionado}
+                onSeleccionar={setSeleccionado}
+                onCambiar={(lista) => setValue('objetos', lista, { shouldDirty: true })}
+              />
+            </Seccion>
           </Box>
         </Box>
       </Box>

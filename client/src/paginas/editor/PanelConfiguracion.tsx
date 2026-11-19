@@ -1,6 +1,10 @@
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined'
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined'
 import Box from '@mui/material/Box'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
 import MenuItem from '@mui/material/MenuItem'
@@ -52,7 +56,7 @@ interface Props {
 export function PanelConfiguracion(props: Props) {
   const { pestana, onPestana } = props
   return (
-    <Paper component="section" aria-label="Configuración del diseño" variant="outlined" sx={{ overflow: 'hidden' }}>
+    <Box component="section" aria-label="Configuración del diseño" sx={{ borderTop: 1, borderColor: 'divider' }}>
       <Tabs value={pestana} onChange={(_, v: Pestana) => onPestana(v)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tab value="forma" label="Forma" sx={{ minHeight: 48 }} />
         <Tab value="materiales" label="Materiales" sx={{ minHeight: 48 }} />
@@ -63,7 +67,7 @@ export function PanelConfiguracion(props: Props) {
         {pestana === 'materiales' && <TabMateriales {...props} />}
         {pestana === 'sugerencias' && <TabSugerencias {...props} />}
       </Box>
-    </Paper>
+    </Box>
   )
 }
 
@@ -101,55 +105,121 @@ function TabForma() {
         <TextField label="Ancho (m)" type="number" slotProps={{ htmlInput: { step: 0.1, min: 0.5, max: 20 } }} error={errors.medidasM?.ancho !== undefined} helperText={errors.medidasM?.ancho?.message} {...register('medidasM.ancho', { valueAsNumber: true })} />
         <TextField label="Fondo (m)" type="number" slotProps={{ htmlInput: { step: 0.1, min: 0.5, max: 20 } }} error={errors.medidasM?.fondo !== undefined} helperText={errors.medidasM?.fondo?.message} {...register('medidasM.fondo', { valueAsNumber: true })} />
       </Box>
-      <Typography variant="body2" color="text.secondary">
-        La forma define la distribución: los muebles se colocan por su posición, pared por pared.
-        En <strong>Libre</strong> no hay plantilla: arrastra cada mueble en la vista 3D o escribe su posición.
+      <Typography variant="caption" color="text.secondary">
+        En <strong>Libre</strong> no hay plantilla: arrastra cada mueble en la vista 3D.
       </Typography>
 
-      <Typography component="h3" sx={{ fontWeight: 600, mt: 1 }}>Mesón</Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <TextField
-          label="Espesor (cm)"
-          type="number"
-          slotProps={{ htmlInput: { step: 0.5, min: 1, max: 10 } }}
-          error={errors.acabados?.espesorCm !== undefined}
-          helperText={errors.acabados?.espesorCm?.message}
-          {...register('acabados.espesorCm', { valueAsNumber: true })}
-        />
-        <Controller
-          control={control}
-          name="acabados.salpicadero"
-          render={({ field }) => (
-            <TextField select label="Salpicadero" {...field} sx={{ minWidth: 170 }}>
-              {SALPICADEROS.map((s) => <MenuItem key={s} value={s}>{ETIQUETA_SALPICADERO[s]}</MenuItem>)}
-            </TextField>
-          )}
-        />
-      </Box>
-      <Controller
-        control={control}
-        name="acabados.cascada"
-        render={({ field }) => (
-          <FormControlLabel
-            control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-            label="Caída en cascada en islas y barras (la piedra baja hasta el piso)"
-          />
-        )}
-      />
-
-      <Typography component="h3" sx={{ fontWeight: 600, mt: 1 }}>Colores del espacio</Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: -1.5 }}>
-        Para ver si los muebles y la piedra combinan con el entorno.
-      </Typography>
-      {([['entorno.pared', 'Pared', PALETA_PAREDES], ['entorno.piso', 'Piso', PALETA_PISOS], ['entorno.techo', 'Techo', PALETA_TECHOS]] as const).map(([campo, etiqueta, paleta]) => (
-        <Controller
-          key={campo}
-          control={control}
-          name={campo}
-          render={({ field }) => <SelectorColor etiqueta={etiqueta} paleta={paleta} valor={field.value} onCambiar={field.onChange} />}
-        />
-      ))}
+      <ResumenMeson />
+      <ResumenColores />
     </Box>
+  )
+}
+
+/** Fila compacta con un resumen y un botón que abre un modal (ahorra espacio vertical). */
+function FilaResumen({ titulo, children, onCambiar }: { titulo: string; children: React.ReactNode; onCambiar: () => void }) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.25, borderRadius: 2, bgcolor: '#F7F4EF' }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>{titulo}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', color: 'text.secondary', fontSize: 13 }}>{children}</Box>
+      </Box>
+      <Button size="small" variant="outlined" onClick={onCambiar}>Cambiar</Button>
+    </Box>
+  )
+}
+
+function ResumenMeson() {
+  const { control, register, formState: { errors } } = useFormContext<EntradaDiseno>()
+  const acabados = useWatch({ control, name: 'acabados' })
+  const [abierto, setAbierto] = useState(false)
+  return (
+    <>
+      <FilaResumen titulo="Mesón" onCambiar={() => setAbierto(true)}>
+        {acabados.espesorCm} cm · {ETIQUETA_SALPICADERO[acabados.salpicadero].toLowerCase()}
+        {acabados.cascada ? ' · con cascada' : ''}
+      </FilaResumen>
+      <Dialog open={abierto} onClose={() => setAbierto(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Mesón</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
+          <TextField
+            label="Espesor (cm)"
+            type="number"
+            slotProps={{ htmlInput: { step: 0.5, min: 1, max: 10 } }}
+            error={errors.acabados?.espesorCm !== undefined}
+            helperText={errors.acabados?.espesorCm?.message}
+            {...register('acabados.espesorCm', { valueAsNumber: true })}
+          />
+          <Controller
+            control={control}
+            name="acabados.salpicadero"
+            render={({ field }) => (
+              <TextField select label="Salpicadero" {...field}>
+                {SALPICADEROS.map((s) => <MenuItem key={s} value={s}>{ETIQUETA_SALPICADERO[s]}</MenuItem>)}
+              </TextField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="acabados.cascada"
+            render={({ field }) => (
+              <FormControlLabel
+                control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                label="Caída en cascada en islas y barras (la piedra baja hasta el piso)"
+              />
+            )}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="contained" onClick={() => setAbierto(false)}>Listo</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
+const CAMPOS_ENTORNO = [
+  ['entorno.pared', 'Pared', PALETA_PAREDES],
+  ['entorno.piso', 'Piso', PALETA_PISOS],
+  ['entorno.techo', 'Techo', PALETA_TECHOS],
+] as const
+
+function ResumenColores() {
+  const { control } = useFormContext<EntradaDiseno>()
+  const entorno = useWatch({ control, name: 'entorno' })
+  const [abierto, setAbierto] = useState(false)
+  const muestra = (hex: string, nombre: string) => (
+    <Box component="span" title={nombre} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+      <Box component="span" sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: hex, border: 1, borderColor: 'divider' }} />
+      {nombre}
+    </Box>
+  )
+  return (
+    <>
+      <FilaResumen titulo="Colores del espacio" onCambiar={() => setAbierto(true)}>
+        {muestra(entorno.pared, 'pared')}
+        {muestra(entorno.piso, 'piso')}
+        {muestra(entorno.techo, 'techo')}
+      </FilaResumen>
+      <Dialog open={abierto} onClose={() => setAbierto(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Colores del espacio</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            Para ver si los muebles y la piedra combinan con el entorno. Los cambios se ven al instante en el 3D.
+          </Typography>
+          {CAMPOS_ENTORNO.map(([campo, etiqueta, paleta]) => (
+            <Controller
+              key={campo}
+              control={control}
+              name={campo}
+              render={({ field }) => <SelectorColor etiqueta={etiqueta} paleta={paleta} valor={field.value} onCambiar={field.onChange} />}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="contained" onClick={() => setAbierto(false)}>Listo</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }
 
@@ -196,7 +266,7 @@ function TabMateriales({ granitos, catalogo, piezaElegida, onPieza }: Props) {
         </TextField>
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.5, maxHeight: 300, overflowY: 'auto', pr: 0.5 }}>
         {visibles.map((g) => {
           const activo = actual?.granito === g._id
           return (
