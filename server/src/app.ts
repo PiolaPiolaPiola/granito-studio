@@ -2,6 +2,7 @@ import './config/zod.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import express from 'express';
+import path from 'node:path';
 import { env } from './config/env.js';
 import { manejadorErrores } from './middlewares/manejadorErrores.js';
 import { noEncontrado } from './middlewares/noEncontrado.js';
@@ -14,6 +15,21 @@ export const app = express();
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json({ limit: '1mb' }));
+
+// Los nombres de archivo son UUID que nunca cambian: el navegador puede cachearlos sin revalidar.
+app.use(
+  '/uploads',
+  express.static(path.resolve(env.UPLOADS_DIR), {
+    index: false,
+    dotfiles: 'deny',
+    maxAge: '30d',
+    immutable: true,
+    setHeaders: (res) => {
+      // Helmet pone same-origin; same-site deja usar la imagen desde el front en otro puerto.
+      res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    },
+  }),
+);
 
 app.use('/api/health', rutasSalud);
 app.use('/api/auth', rutasAuth);

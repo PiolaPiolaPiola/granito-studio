@@ -50,7 +50,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ### B6 · Subida de imágenes (~2 h 30 min) 🧩 📐
 - [x] **B6.1** Multer: validar tipo y tamaño de imagen — 40 min
 - [x] **B6.2** Interfaz `AlmacenamientoArchivos` + implementación local (después, una en la nube) — 1 h 🧩 Adapter/Strategy · 📐 DIP
-- [ ] **B6.3** Servir las imágenes como estáticos — 20 min
+- [x] **B6.3** Servir las imágenes como estáticos — 20 min
 - [ ] **B6.4** Asociar la imagen al crear o editar un granito — 30 min
 
 ### B7 · CRUD de muebles (~1 h 30 min)
