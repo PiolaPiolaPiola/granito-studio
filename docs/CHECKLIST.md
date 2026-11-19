@@ -83,7 +83,16 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [ ] **F1** Integrar el código de Kimi en `client/` con los ajustes de la revisión
 - [ ] **F2** Prototipo 3D del mesón con textura (paso 1 original)
 - [x] **F3** Conectar las pantallas a la API
-- [ ] **F4** Escena 3D completa: forma de cocina, muebles y materiales
+- [x] **F4** Escena 3D completa: forma de cocina, muebles y materiales
+
+## Funciones nuevas (pedidas el 2026-11-19, con las fotos del taller)
+- [x] **P2** Muebles con foto, material (madera, metal, lacado) y espacio (cocina, sala, baño); tipos nuevos
+- [x] **P3** Catálogo por defecto con las piedras, acabados y colores de las fotos (seed + paleta)
+- [x] **P4** Medidas propias por pieza y acabados del mesón (espesor, salpicadero, cascada)
+- [x] **P5** Forma libre: arrastrar y ubicar muebles sin plantilla
+- [x] **P6** Exportar PNG y modelo 3D (.glb) + cotización imprimible con precios por m²
+- [x] **P7** IA gratuita en cadena (Gemini → Groq → OpenRouter) con caché, y análisis de color sin IA
+- [x] **P8** Diseñar hablando: dictado, notas de voz e intérprete de comandos en español
 
 ## Cierre
 - [ ] **D1** Express sirve el build de React (monolito)
