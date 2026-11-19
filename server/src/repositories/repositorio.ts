@@ -8,3 +8,13 @@ export interface Repositorio<T, TCrear, TActualizar> {
   crear(datos: TCrear): Promise<ConId<T>>;
   actualizar(id: string, cambiosActualizar: TActualizar): Promise<ConId<T> | null>;
 }
+
+export interface Paginacion {
+  pagina: number;
+  porPagina: number;
+}
+
+export interface Pagina<T> {
+  elementos: T[];
+  total: number;
+}

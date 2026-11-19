@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { ACABADOS, TIPOS_PIEDRA } from '../models/granito.model.js';
-import { alMenosUnCampo, MENSAJE_SIN_CAMPOS, nombre, urlArchivo } from './comunes.js';
+import {
+  alMenosUnCampo,
+  MENSAJE_SIN_CAMPOS,
+  nombre,
+  urlArchivo,
+  esquemaPaginacion,
+} from './comunes.js';
 
 const etiquetas = z
   .array(z.string().trim().toLowerCase().min(1).max(30))
@@ -27,3 +33,13 @@ export const esquemaActualizarGranito = z
 
 export type CrearGranito = z.infer<typeof esquemaCrearGranito>;
 export type ActualizarGranito = z.infer<typeof esquemaActualizarGranito>;
+
+export const esquemaListarGranitos = esquemaPaginacion.extend({
+  busqueda: z.string().trim().min(1).max(80).optional(),
+  tipo: z.enum(TIPOS_PIEDRA).optional(),
+  acabado: z.enum(ACABADOS).optional(),
+  etiqueta: z.string().trim().toLowerCase().min(1).max(30).optional(),
+});
+
+export type ListarGranitos = z.infer<typeof esquemaListarGranitos>;
+export type FiltrosGranitos = Omit<ListarGranitos, 'pagina' | 'porPagina'>;

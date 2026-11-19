@@ -44,7 +44,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B5.1** Repository (acceso a datos) — 40 min 🧩 Repository
 - [x] **B5.2** Service (reglas de negocio) — 40 min
 - [x] **B5.3** Controller + rutas REST — 40 min 🔌
-- [ ] **B5.4** Paginación, búsqueda por nombre y filtros por tipo, acabado y etiqueta — 40 min 🗄️ índices
+- [x] **B5.4** Paginación, búsqueda por nombre y filtros por tipo, acabado y etiqueta — 40 min 🗄️ índices
 - [ ] **B5.5** Inactivar en lugar de borrar (soft delete) — 20 min
 
 ### B6 · Subida de imágenes (~2 h 30 min) 🧩 📐

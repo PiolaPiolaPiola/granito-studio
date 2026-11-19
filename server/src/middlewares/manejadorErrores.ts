@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler } from 'express';
 import { AppError } from '../errors/AppError.js';
 import { ErrorValidacion } from '../errors/ErrorValidacion.js';
+import { mongo } from 'mongoose';
 
 function esErrorDeCliente(error: unknown): boolean {
   return (
@@ -31,6 +32,11 @@ export const manejadorErrores: ErrorRequestHandler = (error: unknown, _req, res,
   if (esErrorDeCliente(error)) {
     const { status } = error as Error & { status: number };
     res.status(status).json({ mensaje: 'La solicitud no es válida' });
+    return;
+  }
+
+  if (error instanceof mongo.MongoServerError && error.code === 11000) {
+    res.status(409).json({ mensaje: 'Ya existe un registro con esos datos' });
     return;
   }
 

@@ -3,13 +3,24 @@ import {
   repositorioGranitos,
   type RepositorioGranitos,
 } from '../repositories/granito.repository.js';
-import type { ActualizarGranito, CrearGranito } from '../schemas/granito.schemas.js';
+import type {
+  ActualizarGranito,
+  CrearGranito,
+  ListarGranitos,
+} from '../schemas/granito.schemas.js';
 
 export class ServicioGranitos {
   constructor(private readonly repositorio: RepositorioGranitos) {}
 
-  listar() {
-    return this.repositorio.listar();
+  async listar({ pagina, porPagina, ...filtros }: ListarGranitos) {
+    const { elementos, total } = await this.repositorio.buscar(filtros, { pagina, porPagina });
+    return {
+      granitos: elementos,
+      pagina,
+      porPagina,
+      total,
+      totalPaginas: Math.ceil(total / porPagina),
+    };
   }
 
   async obtener(id: string) {

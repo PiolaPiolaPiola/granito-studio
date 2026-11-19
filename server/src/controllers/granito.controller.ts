@@ -1,14 +1,17 @@
 import type { RequestHandler } from 'express';
-import type { ActualizarGranito, CrearGranito } from '../schemas/granito.schemas.js';
+import type {
+  ActualizarGranito,
+  CrearGranito,
+  ListarGranitos,
+} from '../schemas/granito.schemas.js';
 import { servicioGranitos } from '../services/granito.service.js';
 
 type ConParamId = RequestHandler<{ id: string }>;
 
-export const listarGranitos: RequestHandler = async (_req, res) => {
-  const granitos = await servicioGranitos.listar();
-  res.json({ granitos });
+export const listarGranitos: RequestHandler = async (req, res) => {
+  const resultado = await servicioGranitos.listar(req.query as unknown as ListarGranitos);
+  res.json(resultado);
 };
-
 export const obtenerGranito: ConParamId = async (req, res) => {
   const granito = await servicioGranitos.obtener(req.params.id);
   res.json({ granito });

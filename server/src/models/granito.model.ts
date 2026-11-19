@@ -32,4 +32,8 @@ const esquemaGranito = new Schema<Granito>(
   },
 );
 
+esquemaGranito.index({ nombre: 1 }, { unique: true, collation: { locale: 'es', strength: 1 } });
+esquemaGranito.index({ tipo: 1, acabado: 1, creationAt: -1 });
+esquemaGranito.index({ etiquetas: 1 });
+
 export const GranitoModelo = model<Granito>('Granito', esquemaGranito);

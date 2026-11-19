@@ -19,3 +19,8 @@ export function alMenosUnCampo(datos: object): boolean {
 }
 
 export const MENSAJE_SIN_CAMPOS = 'Envía al menos un campo para actualizar';
+
+export const esquemaPaginacion = z.strictObject({
+  pagina: z.coerce.number().int().min(1).default(1),
+  porPagina: z.coerce.number().int().min(1).max(100).default(20),
+});
