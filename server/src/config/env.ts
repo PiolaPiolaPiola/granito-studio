@@ -19,6 +19,7 @@ const esquemaEnv = z.object({
     .default('8h')
     .transform((valor) => valor as DurationJwt),
   CORS_ORIGIN: z.url(),
+  UPLOADS_DIR: z.string().min(1).default('uploads'),
 });
 
 const resultado = esquemaEnv.safeParse(process.env);
