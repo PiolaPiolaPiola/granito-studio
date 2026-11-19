@@ -72,7 +72,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 ### B11 · Datos y documentación (~2 h 30 min) 🔌
 - [x] **B11.1** Seed con granitos y muebles de ejemplo (los de Kimi) — 30 min
 - [x] **B11.2** Documentación OpenAPI/Swagger en `/api/docs` — 1 h
-- [ ] **B11.3** Colección de Postman en `postman/` — 30 min
+- [x] **B11.3** Colección de Postman en `postman/` — 30 min
 - [ ] **B11.4** README: cómo levantar el proyecto y credenciales de prueba — 30 min
 
 **Total backend: ~25 h** (unas 6 o 7 sesiones de 4 horas)
