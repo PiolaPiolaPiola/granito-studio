@@ -33,4 +33,6 @@ const esquemaMueble = new Schema<Mueble>(
   },
 );
 
+esquemaMueble.index({ tipo: 1, creationAt: -1 });
+
 export const MuebleModelo = model<Mueble>('Mueble', esquemaMueble);

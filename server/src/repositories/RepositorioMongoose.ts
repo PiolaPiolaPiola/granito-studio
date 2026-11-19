@@ -1,5 +1,5 @@
-import { isValidObjectId, type Model } from 'mongoose';
-import type { ConId, Repositorio } from './repositorio.js';
+import { isValidObjectId, type Model, type QueryFilter } from 'mongoose';
+import type { ConId, Pagina, Paginacion, Repositorio } from './repositorio.js';
 
 export class RepositorioMongoose<
   T,
@@ -39,5 +39,24 @@ export class RepositorioMongoose<
       .findByIdAndUpdate(id, { active: false }, { returnDocument: 'after' })
       .lean<ConId<T>>()
       .exec();
+  }
+
+  /** Página de resultados (más recientes primero) y total de coincidencias, en paralelo. */
+  protected async paginar(
+    filtro: QueryFilter<T>,
+    { pagina, porPagina }: Paginacion,
+  ): Promise<Pagina<ConId<T>>> {
+    const [elementos, total] = await Promise.all([
+      this.modelo
+        .find(filtro)
+        .sort({ creationAt: -1, _id: -1 })
+        .skip((pagina - 1) * porPagina)
+        .limit(porPagina)
+        .lean<ConId<T>[]>()
+        .exec(),
+      this.modelo.countDocuments(filtro).exec(),
+    ]);
+
+    return { elementos, total };
   }
 }

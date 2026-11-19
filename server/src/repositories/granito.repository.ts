@@ -24,7 +24,7 @@ class RepositorioGranitosMongoose
 
   async buscar(
     { busqueda, tipo, acabado, etiqueta, incluirInactivos }: FiltrosGranitos,
-    { pagina, porPagina }: Paginacion,
+    paginacion: Paginacion,
   ): Promise<Pagina<ConId<Granito>>> {
     const filtro: QueryFilter<Granito> = {};
     if (!incluirInactivos) filtro.active = true;
@@ -33,18 +33,7 @@ class RepositorioGranitosMongoose
     if (acabado) filtro.acabado = acabado;
     if (etiqueta) filtro.etiquetas = etiqueta;
 
-    const [elementos, total] = await Promise.all([
-      this.modelo
-        .find(filtro)
-        .sort({ creationAt: -1, _id: -1 })
-        .skip((pagina - 1) * porPagina)
-        .limit(porPagina)
-        .lean<ConId<Granito>[]>()
-        .exec(),
-      this.modelo.countDocuments(filtro).exec(),
-    ]);
-
-    return { elementos, total };
+    return this.paginar(filtro, paginacion);
   }
 }
 

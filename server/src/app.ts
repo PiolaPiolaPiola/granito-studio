@@ -9,6 +9,7 @@ import { noEncontrado } from './middlewares/noEncontrado.js';
 import { rutasSalud } from './routes/salud.routes.js';
 import { rutasAuth } from './routes/auth.routes.js';
 import { rutasGranitos } from './routes/granito.routes.js';
+import { rutasMuebles } from './routes/mueble.routes.js';
 
 export const app = express();
 
@@ -34,6 +35,7 @@ app.use(
 app.use('/api/health', rutasSalud);
 app.use('/api/auth', rutasAuth);
 app.use('/api/granitos', rutasGranitos);
+app.use('/api/muebles', rutasMuebles);
 
 app.use(noEncontrado);
 app.use(manejadorErrores);

@@ -3,12 +3,13 @@ import {
   type AlmacenamientoArchivos,
   type ArchivoImagen,
 } from '../almacenamiento/index.js';
-import { AppError } from '../errors/AppError.js';
+import { AppError, existeOFallar } from '../errors/AppError.js';
 import {
   repositorioGranitos,
   type RepositorioGranitos,
 } from '../repositories/granito.repository.js';
 import { MENSAJE_SIN_CAMPOS } from '../schemas/comunes.js';
+import { metadatosPagina } from '../utils/paginacion.js';
 import type {
   ActualizarGranito,
   CambiosGranito,
@@ -17,6 +18,7 @@ import type {
 } from '../schemas/granito.schemas.js';
 
 const CARPETA_IMAGENES = 'granitos';
+const NO_EXISTE = 'No existe un granito con ese id';
 
 export class ServicioGranitos {
   constructor(
@@ -29,22 +31,11 @@ export class ServicioGranitos {
       { ...filtros, incluirInactivos: filtros.incluirInactivos && esAdmin },
       { pagina, porPagina },
     );
-    return {
-      granitos: elementos,
-      pagina,
-      porPagina,
-      total,
-      totalPaginas: Math.ceil(total / porPagina),
-    };
+    return { granitos: elementos, ...metadatosPagina(total, { pagina, porPagina }) };
   }
 
   async obtener(id: string) {
-    const granito = await this.repositorio.buscarPorId(id);
-
-    if (!granito) {
-      throw new AppError(404, 'No existe un granito con ese id');
-    }
-    return granito;
+    return existeOFallar(await this.repositorio.buscarPorId(id), NO_EXISTE);
   }
 
   async crear(datos: CrearGranito, imagen: ArchivoImagen) {
@@ -88,18 +79,11 @@ export class ServicioGranitos {
   }
 
   async inactivar(id: string) {
-    const granito = await this.repositorio.inactivar(id);
-    if (!granito) {
-      throw new AppError(404, 'No existe un granito con ese id');
-    }
+    existeOFallar(await this.repositorio.inactivar(id), NO_EXISTE);
   }
 
   private async actualizarOFallar(id: string, cambios: CambiosGranito) {
-    const granito = await this.repositorio.actualizar(id, cambios);
-    if (!granito) {
-      throw new AppError(404, 'No existe un granito con ese id');
-    }
-    return granito;
+    return existeOFallar(await this.repositorio.actualizar(id, cambios), NO_EXISTE);
   }
 
   /** La imagen vieja ya no se usa: si no se puede borrar, se registra y la petición sigue. */

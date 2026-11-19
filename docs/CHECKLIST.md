@@ -54,7 +54,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B6.4** Asociar la imagen al crear o editar un granito — 30 min
 
 ### B7 · CRUD de muebles (~1 h 30 min)
-- [ ] **B7.1** Repository, service, controller y rutas reutilizando el patrón de B5 — 1 h 30 min 📐 DRY
+- [x] **B7.1** Repository, service, controller y rutas reutilizando el patrón de B5 — 1 h 30 min 📐 DRY
 
 ### B8 · CRUD de diseños (~2 h 30 min) 🗄️
 - [ ] **B8.1** Crear, listar, ver, actualizar y eliminar — 1 h 30 min
