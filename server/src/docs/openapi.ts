@@ -15,6 +15,7 @@ import {
   esquemaCrearMueble,
   esquemaListarMuebles,
 } from '../schemas/mueble.schemas.js';
+import { esquemaAnalizarFoto, esquemaInterpretar } from '../schemas/ia.schemas.js';
 import { esquemaPedirSugerencias } from '../schemas/sugerencia.schemas.js';
 
 /*
@@ -66,7 +67,11 @@ const errores = {
   404: respuestaError('No existe un recurso con ese id'),
   409: respuestaError('Ya existe un registro con esos datos'),
   413: respuestaError('La imagen pesa más de 5 MB'),
-  415: respuestaError('El archivo no es una imagen JPG, PNG o WEBP'),
+  415: respuestaError('El archivo no es una imagen JPG, PNG o WEBP (o no es un audio)'),
+  422: respuestaError('No se entendió nada en el audio'),
+  429: respuestaError('Demasiadas peticiones seguidas'),
+  502: respuestaError('La IA respondió algo que no se pudo usar'),
+  503: respuestaError('IA no configurada o sin cuota en este momento'),
 };
 
 const conErrores = (...codigos: (keyof typeof errores)[]) =>
@@ -129,9 +134,14 @@ export const documentoOpenApi = {
     { name: 'Salud' },
     { name: 'Autenticación' },
     { name: 'Granitos', description: 'Catálogo de piedras con imagen' },
-    { name: 'Muebles', description: 'Catálogo de módulos de cocina' },
-    { name: 'Diseños', description: 'Cocinas armadas con muebles y materiales' },
+    { name: 'Muebles', description: 'Catálogo de muebles para cocina, baño y sala' },
+    { name: 'Diseños', description: 'Espacios armados con muebles y materiales' },
     { name: 'Sugerencias', description: 'Combinaciones granito + color de muebles' },
+    {
+      name: 'IA',
+      description:
+        'Opcional. Proveedores gratuitos en cadena (Gemini → Groq → OpenRouter) con caché. Sin claves responde 503.',
+    },
   ],
   components: {
     securitySchemes: { bearer: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } },
@@ -523,6 +533,75 @@ export const documentoOpenApi = {
             }),
           },
           ...conErrores(400, 401),
+        },
+      },
+    },
+    '/api/ia/estado': {
+      get: {
+        tags: ['IA'],
+        summary: 'Qué proveedores de IA hay configurados',
+        security: seguridad,
+        responses: {
+          200: {
+            description: 'Estado',
+            content: json({
+              type: 'object',
+              properties: {
+                disponible: { type: 'boolean' },
+                proveedores: { type: 'array', items: { type: 'string' } },
+                transcribeAudio: { type: 'boolean' },
+              },
+            }),
+          },
+          ...conErrores(401),
+        },
+      },
+    },
+    '/api/ia/analizar-foto': {
+      post: {
+        tags: ['IA'],
+        summary: 'Propone los campos de un mueble o una piedra a partir de una foto',
+        description: 'La misma foto no se vuelve a enviar a la IA: la respuesta sale de la caché.',
+        security: seguridad,
+        requestBody: { required: true, content: multipart(esquemaAnalizarFoto, true) },
+        responses: {
+          200: { description: '`{ sugerencia, proveedor, desdeCache }`' },
+          ...conErrores(400, 401, 413, 415, 429, 502, 503),
+        },
+      },
+    },
+    '/api/ia/interpretar': {
+      post: {
+        tags: ['IA'],
+        summary: 'Convierte un comando de voz en acciones del editor',
+        security: seguridad,
+        requestBody: { required: true, content: json(entrada(esquemaInterpretar)) },
+        responses: {
+          200: { description: '`{ acciones: [...], proveedor, desdeCache }`' },
+          ...conErrores(400, 401, 429, 502, 503),
+        },
+      },
+    },
+    '/api/ia/transcribir': {
+      post: {
+        tags: ['IA'],
+        summary: 'Transcribe una nota de voz (Groq Whisper)',
+        security: seguridad,
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['audio'],
+                properties: { audio: { type: 'string', format: 'binary' } },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: '`{ texto, proveedor }`' },
+          ...conErrores(400, 401, 413, 415, 422, 429, 503),
         },
       },
     },

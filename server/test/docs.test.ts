@@ -9,7 +9,12 @@ describe('documentación OpenAPI', () => {
     expect(respuesta.status).toBe(200);
     expect(respuesta.body).toMatchObject({ openapi: '3.1.0' });
     expect(Object.keys((respuesta.body as { paths: object }).paths)).toEqual(
-      expect.arrayContaining(['/api/granitos', '/api/disenos/{id}/duplicar', '/api/sugerencias']),
+      expect.arrayContaining([
+        '/api/granitos',
+        '/api/disenos/{id}/duplicar',
+        '/api/sugerencias',
+        '/api/ia/analizar-foto',
+      ]),
     );
   });
 
