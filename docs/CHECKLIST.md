@@ -35,13 +35,13 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B3.2** Middleware `autenticar` y `autorizar(rol)` — 30 min 📐
 - [x] **B3.3** `GET /api/auth/me` — 15 min
 - [x] **B3.4** Script que crea el usuario del tío (sin registro público) — 20 min
-- [ ] **B3.5** Límite de intentos en el login (rate limit) — 15 min
+- [x] **B3.5** Límite de intentos en el login (rate limit) — 15 min
 
 ### B4 · Validación de entrada (~1 h)
 - [x] **B4.1** Esquemas zod por recurso + middleware `validar(schema)` — 1 h 🧩
 
 ### B5 · CRUD de granitos por capas (~3 h) 🏛️ 📐 🧩
-- [ ] **B5.1** Repository (acceso a datos) — 40 min 🧩 Repository
+- [x] **B5.1** Repository (acceso a datos) — 40 min 🧩 Repository
 - [ ] **B5.2** Service (reglas de negocio) — 40 min
 - [ ] **B5.3** Controller + rutas REST — 40 min 🔌
 - [ ] **B5.4** Paginación, búsqueda por nombre y filtros por tipo, acabado y etiqueta — 40 min 🗄️ índices
