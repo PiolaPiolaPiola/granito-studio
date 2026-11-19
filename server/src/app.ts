@@ -11,6 +11,7 @@ import { rutasAuth } from './routes/auth.routes.js';
 import { rutasGranitos } from './routes/granito.routes.js';
 import { rutasMuebles } from './routes/mueble.routes.js';
 import { rutasDisenos } from './routes/diseno.routes.js';
+import { rutasSugerencias } from './routes/sugerencia.routes.js';
 
 export const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/auth', rutasAuth);
 app.use('/api/granitos', rutasGranitos);
 app.use('/api/muebles', rutasMuebles);
 app.use('/api/disenos', rutasDisenos);
+app.use('/api/sugerencias', rutasSugerencias);
 
 app.use(noEncontrado);
 app.use(manejadorErrores);

@@ -62,7 +62,7 @@ Leyenda de temas de estudio: 🏛️ Arquitectura · 🧩 Patrones · 📐 SOLID
 - [x] **B8.3** `POST /api/disenos/:id/duplicar` — 30 min
 
 ### B9 · Sugerencias de combinación (~1 h)
-- [ ] **B9.1** Endpoint con reglas por etiquetas (punto de partida para IA más adelante) — 1 h 🧩 Strategy · 🤖
+- [x] **B9.1** Endpoint con reglas por etiquetas (punto de partida para IA más adelante) — 1 h 🧩 Strategy · 🤖
 
 ### B10 · Pruebas (~3 h)
 - [ ] **B10.1** Vitest + supertest + mongodb-memory-server — 40 min
