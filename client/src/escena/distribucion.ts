@@ -95,6 +95,21 @@ export function medidasDe({ mueble, medidasCm }: Pick<MuebleResuelto, 'mueble' |
   }
 }
 
+/** Altura desde la que cuelgan las piezas de pared más bajas (gabinete de baño). */
+const ALTURA_COLGADO_MINIMA = Math.min(...Object.values(ALTURA_COLGADO))
+
+interface Cursor {
+  tramo: number
+  usado: number
+}
+
+/** Lleva los dos cursores a la posición del que vaya más adelante en la pared. */
+function igualarAlMasAvanzado(a: Cursor, b: Cursor) {
+  const adelante = a.tramo > b.tramo || (a.tramo === b.tramo && a.usado >= b.usado) ? a : b
+  Object.assign(a, adelante)
+  Object.assign(b, { ...adelante })
+}
+
 function alturaCentro(tipo: TipoMueble, alto: number): number {
   return (ALTURA_COLGADO[tipo] ?? 0) + alto / 2
 }
@@ -171,6 +186,10 @@ function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: M
     }
     const { ancho, alto, fondo } = medidasDe(item)
     const cursor = cursores[capa]
+    // Un mueble de piso alto (alacena, biblioteca, torre) ocupa también la hilera de arriba:
+    // empieza donde terminen las dos hileras y, al final, las deja a ambas después de él.
+    const esAlto = capa === 'suelo' && alto > ALTURA_COLGADO_MINIMA
+    if (esAlto) igualarAlMasAvanzado(cursores.suelo, cursores.alto)
 
     // Si no cabe en lo que queda de esta pared, pasa a la siguiente.
     while (cursor.tramo < tramos.length - 1 && cursor.usado + ancho > tramos[cursor.tramo].longitud + 1e-6) {
@@ -198,6 +217,7 @@ function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: M
       desborda,
     })
     cursor.usado += ancho
+    if (esAlto) Object.assign(cursores.alto, cursores.suelo)
   }
 
   // Islas y barras: una hilera centrada, separada de la pared de trabajo.
