@@ -55,7 +55,7 @@ const medidaCm = { type: Number, required: true, min: 1, max: 500 };
 
 const esquemaMueble = new Schema<Mueble>(
   {
-    nombre: { type: String, required: true, trim: true, maxlength: 80 },
+    nombre: { type: String, required: true, trim: true, maxlength: 50 },
     espacio: { type: String, enum: ESPACIOS, required: true, default: 'cocina' },
     tipo: { type: String, enum: TIPOS_MUEBLE, required: true },
     material: { type: String, enum: MATERIALES_MUEBLE, required: true, default: 'madera' },

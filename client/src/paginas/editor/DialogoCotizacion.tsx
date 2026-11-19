@@ -83,7 +83,7 @@ export function DialogoCotizacion(props: Props) {
           </Box>
 
           {imagen !== null && (
-            <Box component="img" src={imagen} alt={`Vista 3D de ${nombre}`} sx={{ width: '100%', maxHeight: 320, objectFit: 'contain', borderRadius: 2, bgcolor: '#EDEAE4' }} />
+            <Box component="img" src={imagen} alt={`Vista 3D de ${nombre}`} sx={{ width: '100%', maxHeight: 320, objectFit: 'contain', borderRadius: 2, bgcolor: 'suave' }} />
           )}
 
           <Typography component="h3" sx={{ fontWeight: 600 }}>Piedra</Typography>
@@ -168,7 +168,7 @@ export function DialogoCotizacion(props: Props) {
 
 function Dato({ titulo, valor }: { titulo: string; valor: string }) {
   return (
-    <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: '#F4F1EC' }}>
+    <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'suave' }}>
       <Typography variant="caption" color="text.secondary">{titulo}</Typography>
       <Typography sx={{ fontWeight: 600 }}>{valor}</Typography>
     </Box>

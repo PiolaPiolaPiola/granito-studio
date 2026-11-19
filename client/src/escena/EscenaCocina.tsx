@@ -184,15 +184,15 @@ function Cotas({ ancho, fondo }: { ancho: number; fondo: number }) {
       <Line points={[[-ancho / 2, y, zFrente], [ancho / 2, y, zFrente]]} color={color} lineWidth={1.5} />
       <Line points={[[-ancho / 2, y, zFrente - 0.08], [-ancho / 2, y, zFrente + 0.08]]} color={color} lineWidth={1.5} />
       <Line points={[[ancho / 2, y, zFrente - 0.08], [ancho / 2, y, zFrente + 0.08]]} color={color} lineWidth={1.5} />
-      <Html position={[0, y, zFrente]} center>{etiqueta(`${ancho.toLocaleString('es-CO')} m`)}</Html>
+      <Html position={[0, y, zFrente]} center zIndexRange={[3, 0]}>{etiqueta(`${ancho.toLocaleString('es-CO')} m`)}</Html>
 
       <Line points={[[xLado, y, -fondo / 2], [xLado, y, fondo / 2]]} color={color} lineWidth={1.5} />
       <Line points={[[xLado - 0.08, y, -fondo / 2], [xLado + 0.08, y, -fondo / 2]]} color={color} lineWidth={1.5} />
       <Line points={[[xLado - 0.08, y, fondo / 2], [xLado + 0.08, y, fondo / 2]]} color={color} lineWidth={1.5} />
-      <Html position={[xLado, y, 0]} center>{etiqueta(`${fondo.toLocaleString('es-CO')} m`)}</Html>
+      <Html position={[xLado, y, 0]} center zIndexRange={[3, 0]}>{etiqueta(`${fondo.toLocaleString('es-CO')} m`)}</Html>
 
       <Line points={[[-ancho / 2 - 0.25, 0, -fondo / 2], [-ancho / 2 - 0.25, ALTURA_PARED, -fondo / 2]]} color={color} lineWidth={1} />
-      <Html position={[-ancho / 2 - 0.25, ALTURA_PARED / 2, -fondo / 2]} center>{etiqueta(`${ALTURA_PARED.toLocaleString('es-CO')} m de alto`)}</Html>
+      <Html position={[-ancho / 2 - 0.25, ALTURA_PARED / 2, -fondo / 2]} center zIndexRange={[3, 0]}>{etiqueta(`${ALTURA_PARED.toLocaleString('es-CO')} m de alto`)}</Html>
     </group>
   )
 }

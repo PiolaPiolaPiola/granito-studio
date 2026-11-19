@@ -110,7 +110,7 @@ function Formulario({ granito, onCerrar, onGuardado }: Omit<Props, 'abierto'>) {
           component="label"
           sx={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 3, cursor: 'pointer',
-            border: 2, borderStyle: 'dashed', borderColor: errors.imagen ? 'error.main' : 'divider', borderRadius: 2, bgcolor: '#FAF8F4', color: 'primary.main',
+            border: 2, borderStyle: 'dashed', borderColor: errors.imagen ? 'error.main' : 'divider', borderRadius: 2, bgcolor: 'suave', color: 'primary.main',
             '&:focus-within': { outline: '2px solid', outlineColor: 'primary.main' },
           }}
         >

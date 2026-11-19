@@ -5,6 +5,7 @@ import SaveOutlined from '@mui/icons-material/SaveOutlined'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { ConAyuda } from '../../componentes/ConAyuda'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import { useCallback, useMemo, useRef, useState } from 'react'
@@ -64,6 +65,8 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
   const [seccion, setSeccion] = useState<'diseno' | 'objetos' | null>('diseno')
   const lienzo = useRef<HTMLCanvasElement | null>(null)
   const [fondoUrl, setFondoUrl] = useState(fondoInicial)
+  /** Mensaje mientras la IA trabaja (se muestra una animación sobre el 3D). */
+  const [iaTrabajando, setIaTrabajando] = useState<string | null>(null)
   /** Foto del lienzo al abrir la cotización (null = cerrada). */
   const [cotizacion, setCotizacion] = useState<{ imagen: string | null } | null>(null)
 
@@ -201,6 +204,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
             catalogo={catalogoLista}
             granitos={granitos}
             onAplicar={aplicarDiseno}
+            onTrabajando={setIaTrabajando}
           />
           <BotonFotoEspacio
             idDiseno={id}
@@ -210,19 +214,26 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
             catalogo={catalogoLista}
             granitos={granitos}
             onAplicar={aplicarDiseno}
+            onTrabajando={setIaTrabajando}
           />
           {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} destacadoInicial={destacado} />}
-          <Button
+          <ConAyuda titulo="Ver los metros de piedra, el canto y el total para imprimir o guardar en PDF">
+<Button
             variant="outlined"
             startIcon={<RequestQuoteOutlined />}
             onClick={() => setCotizacion({ imagen: lienzo.current?.toDataURL('image/png') ?? null })}
           >
             Cotización
           </Button>
-          <Button type="submit" variant="contained" startIcon={<SaveOutlined />} disabled={formState.isSubmitting}>
+</ConAyuda>
+          <ConAyuda titulo="Guardar los cambios del diseño">
+<Button type="submit" variant="contained" startIcon={<SaveOutlined />} disabled={formState.isSubmitting}>
             {formState.isSubmitting ? 'Guardando…' : 'Guardar'}
           </Button>
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navegar('/disenos/nuevo')}>Nuevo diseño</Button>
+</ConAyuda>
+          <ConAyuda titulo="Empezar un diseño nuevo en blanco">
+<Button variant="outlined" startIcon={<AddIcon />} onClick={() => navegar('/disenos/nuevo')}>Nuevo diseño</Button>
+</ConAyuda>
         </Paper>
 
         {mensajesError.length > 0 && (
@@ -231,7 +242,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
           </Alert>
         )}
 
-        <Box sx={{ display: 'grid', gap: 2, p: 2, gridTemplateColumns: { xs: '1fr', lg: '280px minmax(0, 1fr) 360px' }, alignItems: 'start' }}>
+        <Box sx={{ display: 'grid', gap: 2, p: 2, gridTemplateColumns: { xs: '1fr', lg: '300px minmax(0, 1fr) 360px' }, alignItems: 'start' }}>
           <Box sx={{ order: { xs: 3, lg: 1 }, position: { lg: 'sticky' }, top: { lg: 16 }, maxHeight: { lg: 'calc(100dvh - 140px)' }, overflowY: { lg: 'auto' } }}>
             <PanelCatalogoMuebles
               muebles={catalogoLista}
@@ -251,6 +262,7 @@ export function EditorFormulario({ id, inicial, codigoPublico, destacado = false
               objetos={objetos}
               entorno={entorno}
               fondoUrl={fondoUrl}
+              trabajando={iaTrabajando}
               key={fondoUrl ?? 'sin-foto'}
               nombreArchivo={nombre}
               seleccionado={seleccionado}

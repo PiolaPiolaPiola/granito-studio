@@ -5,12 +5,12 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import Typography from '@mui/material/Typography'
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'
 import { useCallback, useState } from 'react'
-import { Link as EnlaceRouter } from 'react-router'
+import { Link as EnlaceRouter, useNavigate } from 'react-router'
 import { disenosApi } from '../../api'
 import { aErrorApi } from '../../api/errores'
 import { useAviso } from '../../componentes/aviso/AvisoContext'
@@ -20,15 +20,8 @@ import { ETIQUETA_FORMA, type Diseno } from '../../dominio/diseno'
 import { ETIQUETA_ESPACIO } from '../../dominio/mueble'
 import { useConsulta } from '../../hooks/useConsulta'
 
-const FONDO_FORMA: Record<Diseno['forma'], string> = {
-  lineal: 'linear-gradient(135deg, #d6d0c3 0%, #b3ab9c 100%)',
-  L: 'linear-gradient(135deg, #cfc8ba 0%, #a89f91 100%)',
-  U: 'linear-gradient(135deg, #cbc4b6 0%, #9d9486 100%)',
-  isla: 'linear-gradient(135deg, #d2ccbf 0%, #8f8578 100%)',
-  libre: 'linear-gradient(135deg, #d9d3c8 0%, #b9ae9d 100%)',
-}
-
 export function Disenos() {
+  const navegar = useNavigate()
   const aviso = useAviso()
   const consulta = useConsulta(useCallback(() => disenosApi.listar(), []))
   const [aEliminar, setAEliminar] = useState<Diseno | null>(null)
@@ -69,8 +62,8 @@ export function Disenos() {
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 2 }}>
         {disenos?.map((d) => (
           <Card key={d._id} component="article" sx={{ overflow: 'hidden' }}>
-            <Box sx={{ height: 130, display: 'grid', placeItems: 'center', background: FONDO_FORMA[d.forma] }}>
-              <Typography sx={{ fontSize: 20, fontWeight: 700, color: 'rgba(38,35,32,0.7)', textAlign: 'center' }}>
+            <Box sx={{ height: 130, display: 'grid', placeItems: 'center', background: 'var(--portada-forma)' }}>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, color: 'text.primary', textAlign: 'center' }}>
                 {ETIQUETA_ESPACIO[d.espacio ?? 'cocina']}
                 <br />
                 <Box component="span" sx={{ fontSize: 15, fontWeight: 500 }}>{ETIQUETA_FORMA[d.forma]}</Box>
@@ -82,7 +75,7 @@ export function Disenos() {
                 {dayjs(d.updatedAt).locale('es').format('D [de] MMMM [de] YYYY')} · {d.muebles.length} muebles
               </Typography>
               <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                <IconButton component={EnlaceRouter} to={`/disenos/${d._id}`} aria-label={`Abrir ${d.nombre} en el editor`}><FolderOpenOutlined /></IconButton>
+                <IconButton onClick={() => navegar(`/disenos/${d._id}`)} aria-label={`Abrir ${d.nombre} en el editor`}><FolderOpenOutlined /></IconButton>
                 <IconButton aria-label={`Duplicar ${d.nombre}`} onClick={() => duplicar(d)}><ContentCopyOutlined /></IconButton>
                 <IconButton aria-label={`Eliminar ${d.nombre}`} color="error" onClick={() => setAEliminar(d)}><DeleteOutlined /></IconButton>
               </Box>

@@ -6,7 +6,7 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import MenuItem from '@mui/material/MenuItem'
 import Pagination from '@mui/material/Pagination'
 import Tab from '@mui/material/Tab'
@@ -114,10 +114,10 @@ export function Muebles() {
               <MiniaturaMueble mueble={m} sx={{ height: 140 }} />
               {esAdmin && (
                 <Box sx={{ position: 'absolute', right: 8, bottom: 8, display: 'flex', gap: 0.5 }}>
-                  <IconButton aria-label={`Editar ${m.nombre}`} onClick={() => setDialogo({ mueble: m })} sx={{ bgcolor: 'rgba(255,255,255,0.88)', '&:hover': { bgcolor: '#fff' } }}>
+                  <IconButton aria-label={`Editar ${m.nombre}`} onClick={() => setDialogo({ mueble: m })} sx={{ bgcolor: 'vidrio', '&:hover': { bgcolor: 'background.paper' } }}>
                     <EditOutlined fontSize="small" />
                   </IconButton>
-                  <IconButton aria-label={`Inactivar ${m.nombre}`} color="error" onClick={() => setAInactivar(m)} sx={{ bgcolor: 'rgba(255,255,255,0.88)', '&:hover': { bgcolor: '#fff' } }}>
+                  <IconButton aria-label={`Inactivar ${m.nombre}`} color="error" onClick={() => setAInactivar(m)} sx={{ bgcolor: 'vidrio', '&:hover': { bgcolor: 'background.paper' } }}>
                     <DeleteOutlined fontSize="small" />
                   </IconButton>
                 </Box>

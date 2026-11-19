@@ -5,6 +5,7 @@ import InfoRounded from '@mui/icons-material/InfoRounded'
 import WarningRounded from '@mui/icons-material/WarningRounded'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { keyframes } from '@mui/material/styles'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
@@ -20,10 +21,10 @@ interface Aviso extends OpcionesAviso {
 const DURACION_MS: Record<Severidad, number> = { success: 3500, info: 5000, warning: 6500, error: 9000 }
 
 const ESTILO: Record<Severidad, { color: string; fondo: string; icono: ReactNode; titulo: string }> = {
-  success: { color: '#2E7D4F', fondo: '#EEF7F1', icono: <CheckCircleRounded />, titulo: 'Listo' },
-  info: { color: '#8F7042', fondo: '#F7F2EA', icono: <InfoRounded />, titulo: 'Para tener en cuenta' },
-  warning: { color: '#A35F00', fondo: '#FFF6E8', icono: <WarningRounded />, titulo: 'Atención' },
-  error: { color: '#B3261E', fondo: '#FDEEEC', icono: <ErrorRounded />, titulo: 'No se pudo' },
+  success: { color: 'success.main', fondo: 'action.hover', icono: <CheckCircleRounded />, titulo: 'Listo' },
+  info: { color: 'primary.main', fondo: 'action.hover', icono: <InfoRounded />, titulo: 'Para tener en cuenta' },
+  warning: { color: 'warning.main', fondo: 'action.hover', icono: <WarningRounded />, titulo: 'Atención' },
+  error: { color: 'error.main', fondo: 'action.hover', icono: <ErrorRounded />, titulo: 'No se pudo' },
 }
 
 const entrar = keyframes`from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: none; }`
@@ -88,7 +89,7 @@ function Tarjeta({ aviso, onCerrar }: { aviso: Aviso; onCerrar: (id: number) => 
       onMouseLeave={() => setPausado(false)}
       sx={{
         position: 'relative', overflow: 'hidden', display: 'flex', gap: 1.5, alignItems: 'flex-start', p: 1.75, pr: 1,
-        bgcolor: '#FFFFFF', borderRadius: 3, borderLeft: `4px solid ${estilo.color}`,
+        bgcolor: 'background.paper', borderRadius: 3, borderLeft: 4, borderLeftColor: estilo.color,
         boxShadow: '0 10px 30px rgba(38,35,32,0.16), 0 2px 6px rgba(38,35,32,0.08)', animation: `${entrar} 180ms ease-out`,
       }}
     >
@@ -104,9 +105,11 @@ function Tarjeta({ aviso, onCerrar }: { aviso: Aviso; onCerrar: (id: number) => 
           </Box>
         )}
       </Box>
-      <IconButton aria-label="Cerrar aviso" size="small" onClick={() => onCerrar(aviso.id)} sx={{ width: 32, height: 32 }}>
-        <CloseRounded fontSize="small" />
-      </IconButton>
+      <Tooltip title="Cerrar aviso">
+        <IconButton aria-label="Cerrar aviso" size="small" onClick={() => onCerrar(aviso.id)} sx={{ width: 32, height: 32 }}>
+          <CloseRounded fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Box
         aria-hidden="true"
         sx={{

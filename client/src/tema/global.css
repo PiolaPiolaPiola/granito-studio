@@ -1,0 +1,14 @@
+/*
+ * Colores que no son de la paleta de MUI (degradados), por modo. MUI pone la clase
+ * `.light` o `.dark` en <html> según el modo elegido (colorSchemeSelector: 'class').
+ */
+:root,
+.light {
+  --lienzo-3d: linear-gradient(145deg, #edeae4 0%, #d8d4cc 100%);
+  --portada-forma: linear-gradient(135deg, #d6d0c3 0%, #a89f91 100%);
+}
+
+.dark {
+  --lienzo-3d: linear-gradient(145deg, #2b2724 0%, #1c1a17 100%);
+  --portada-forma: linear-gradient(135deg, #3a352f 0%, #24211d 100%);
+}

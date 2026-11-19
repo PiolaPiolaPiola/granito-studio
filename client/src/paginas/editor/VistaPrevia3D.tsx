@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import Paper from '@mui/material/Paper'
 import ToggleButton from '@mui/material/ToggleButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -24,6 +24,7 @@ import type { ObjetoReferencia } from '../../dominio/objetos'
 import { puntoDeVista, type ComandoCamara, type Vista } from '../../escena/camara'
 import { ControlCamara } from '../../escena/ControlCamara'
 import type { Colocacion } from '../../escena/distribucion'
+import { CargandoIa } from '../../escena/CargandoIa'
 import { EscenaCocina } from '../../escena/EscenaCocina'
 import { descargarImagen, descargarModelo3D } from '../../exportar/exportar'
 
@@ -38,6 +39,8 @@ interface Props {
   granitos: Granito[]
   objetos?: ObjetoReferencia[]
   entorno?: Entorno
+  /** Mensaje mientras la IA trabaja: se muestra una animación encima de la vista. */
+  trabajando?: string | null
   /** Foto del espacio real: se puede ver el diseño encima. */
   fondoUrl?: string
   nombreArchivo: string
@@ -52,7 +55,7 @@ interface Props {
 }
 
 export function VistaPrevia3D(props: Props) {
-  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl, entorno } = props
+  const { forma, medidas, acabados, colocaciones, desbordados, materiales, granitos, nombreArchivo, seleccionado, onSeleccionar, onMover, onLienzo, zoomConRueda = true, objetos, fondoUrl, entorno, trabajando } = props
   const [cotas, setCotas] = useState(onMover !== undefined)
   // Arranca en el modelo 3D; la foto de fondo se activa con su botón.
   const [sobreFoto, setSobreFoto] = useState(false)
@@ -86,7 +89,7 @@ export function VistaPrevia3D(props: Props) {
       aria-label="Vista 3D"
       sx={{
         position: 'relative', height: 'max(440px, calc(100dvh - 330px))', borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider', touchAction: 'none',
-        background: verFoto ? `center / cover no-repeat url("${fondoUrl}")` : 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)',
+        background: verFoto ? `center / cover no-repeat url("${fondoUrl}")` : 'var(--lienzo-3d)',
       }}
     >
       <Canvas
@@ -119,9 +122,11 @@ export function VistaPrevia3D(props: Props) {
         <ControlCamara comando={comando} medidas={medidas} autoRotar={autoRotar} bloqueada={arrastrando} zoomConRueda={zoomConRueda} />
       </Canvas>
 
+      {trabajando != null && trabajando !== '' && <CargandoIa mensaje={trabajando} />}
+
       <Typography
         variant="caption"
-        sx={{ position: 'absolute', top: 12, left: 12, px: 1.5, py: 0.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.85)', color: 'text.primary' }}
+        sx={{ position: 'absolute', top: 12, left: 12, px: 1.5, py: 0.5, borderRadius: 2, bgcolor: 'vidrio', color: 'text.primary' }}
       >
         {medidas.ancho} × {medidas.fondo} m · {colocaciones.length} muebles
         {onMover !== undefined && ' · arrastra un mueble para moverlo'}
@@ -138,16 +143,20 @@ export function VistaPrevia3D(props: Props) {
         elevation={3}
         sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 0.25, px: 1, borderRadius: 6, maxWidth: 'calc(100% - 16px)', overflowX: 'auto' }}
       >
+        <Tooltip title={autoRotar ? 'Detener el giro automático' : 'Girar la vista automáticamente'}>
         <ToggleButton value="rotar" selected={autoRotar} onChange={() => setAutoRotar((v) => !v)} aria-label="Rotar vista automáticamente" sx={{ border: 0, borderRadius: '50%', width: 44, height: 44 }}>
           <AutorenewOutlined />
         </ToggleButton>
+        </Tooltip>
         <IconButton aria-label="Acercar" onClick={() => enviar({ tipo: 'zoom', factor: 0.8 })}><ZoomInOutlined /></IconButton>
         <IconButton aria-label="Alejar" onClick={() => enviar({ tipo: 'zoom', factor: 1.25 })}><ZoomOutOutlined /></IconButton>
         <Divider orientation="vertical" flexItem sx={{ my: 1, mx: 0.5 }} />
+        <Tooltip title="Cambiar entre vista frontal y desde arriba">
         <Button onClick={alternarVista} sx={{ minWidth: 96, minHeight: 44, borderRadius: 6 }}>
           {vista === 'frontal' ? 'Frontal' : 'Superior'}
         </Button>
-        <IconButton aria-label="Restablecer cámara" onClick={() => { setVista('frontal'); enviar({ tipo: 'reiniciar' }) }}><RestartAltOutlined /></IconButton>
+        </Tooltip>
+        <IconButton aria-label="Volver a la vista inicial" onClick={() => { setVista('frontal'); enviar({ tipo: 'reiniciar' }) }}><RestartAltOutlined /></IconButton>
         <Divider orientation="vertical" flexItem sx={{ my: 1, mx: 0.5 }} />
         <Tooltip title={cotas ? 'Ocultar medidas' : 'Mostrar medidas del espacio'}>
           <ToggleButton value="cotas" selected={cotas} onChange={() => setCotas((v) => !v)} aria-label="Medidas del espacio" sx={{ border: 0, borderRadius: '50%', width: 44, height: 44 }}>
@@ -161,12 +170,8 @@ export function VistaPrevia3D(props: Props) {
             </ToggleButton>
           </Tooltip>
         )}
-        <Tooltip title="Descargar imagen (PNG)">
-          <IconButton aria-label="Descargar imagen" onClick={() => lienzo.current && void descargarImagen(lienzo.current, nombre, verFoto ? fondoUrl : undefined)}><ImageOutlined /></IconButton>
-        </Tooltip>
-        <Tooltip title="Descargar modelo 3D (.glb)">
-          <IconButton aria-label="Descargar modelo 3D" onClick={() => escena.current && void descargarModelo3D(escena.current, nombre)}><ViewInArOutlined /></IconButton>
-        </Tooltip>
+        <IconButton aria-label="Descargar imagen (PNG)" onClick={() => lienzo.current && void descargarImagen(lienzo.current, nombre, verFoto ? fondoUrl : undefined)}><ImageOutlined /></IconButton>
+        <IconButton aria-label="Descargar modelo 3D (.glb)" onClick={() => escena.current && void descargarModelo3D(escena.current, nombre)}><ViewInArOutlined /></IconButton>
       </Paper>
     </Box>
   )

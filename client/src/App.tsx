@@ -8,7 +8,7 @@ import { tema } from './tema/tema'
 
 export default function App() {
   return (
-    <ThemeProvider theme={tema}>
+    <ThemeProvider theme={tema} defaultMode="system">
       <CssBaseline />
       <AvisoProvider>
         <AuthProvider>

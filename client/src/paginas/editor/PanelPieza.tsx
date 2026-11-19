@@ -6,7 +6,7 @@ import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import Rotate90DegreesCwOutlined from '@mui/icons-material/Rotate90DegreesCwOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -67,7 +67,7 @@ export function PanelPieza({ pieza, mueble, colocacion, forma, onMedidas, onUbic
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
         <MiniaturaMueble mueble={mueble} sx={{ width: 40, height: 40, borderRadius: 1.5, flexShrink: 0 }} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontWeight: 600 }} noWrap>{pieza.posicion}. {mueble.nombre}</Typography>
+          <Typography sx={{ fontWeight: 600, overflowWrap: 'anywhere', lineHeight: 1.3 }}>{pieza.posicion}. {mueble.nombre}</Typography>
           <Typography variant="caption" color="text.secondary">{ETIQUETA_TIPO_MUEBLE[mueble.tipo]}</Typography>
         </Box>
         <IconButton aria-label="Cerrar pieza" onClick={onCerrar}><CloseOutlined /></IconButton>

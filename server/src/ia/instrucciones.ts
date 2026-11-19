@@ -17,7 +17,14 @@ const opcional = <T extends z.ZodType>(esquema: T) => esquema.optional().catch(u
 const medidaCm = opcional(z.coerce.number().min(1).max(500).transform(Math.round));
 
 export const esquemaSugerenciaMueble = z.object({
-  nombre: opcional(z.string().trim().min(1).max(80)),
+  // Se recorta a 50 (el límite de los nombres de muebles) en vez de descartarlo.
+  nombre: opcional(
+    z
+      .string()
+      .trim()
+      .min(1)
+      .transform((n) => n.slice(0, 50)),
+  ),
   espacio: opcional(z.enum(ESPACIOS)),
   tipo: opcional(z.enum(TIPOS_MUEBLE)),
   material: opcional(z.enum(MATERIALES_MUEBLE)),

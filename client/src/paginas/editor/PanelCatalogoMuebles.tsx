@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { MiniaturaMueble } from '../../componentes/MiniaturaMueble'
@@ -41,7 +41,7 @@ export function PanelCatalogoMuebles({ muebles, espacio, onAgregar }: Props) {
               <Box key={m._id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: 1, borderColor: 'divider' }}>
                 <MiniaturaMueble mueble={m} sx={{ width: 44, height: 44, flexShrink: 0, borderRadius: 2 }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>{m.nombre}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: 'anywhere', lineHeight: 1.3 }}>{m.nombre}</Typography>
                   <Typography variant="caption" color="text.secondary">{describirMedidas(m)}</Typography>
                 </Box>
                 <IconButton color="primary" aria-label={`Agregar ${m.nombre}`} onClick={() => onAgregar(m)}>

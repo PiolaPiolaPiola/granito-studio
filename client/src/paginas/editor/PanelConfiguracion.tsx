@@ -118,7 +118,7 @@ function TabForma() {
 /** Fila compacta con un resumen y un botón que abre un modal (ahorra espacio vertical). */
 function FilaResumen({ titulo, children, onCambiar }: { titulo: string; children: React.ReactNode; onCambiar: () => void }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.25, borderRadius: 2, bgcolor: '#F7F4EF' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.25, borderRadius: 2, bgcolor: 'suave' }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>{titulo}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', color: 'text.secondary', fontSize: 13 }}>{children}</Box>
@@ -338,7 +338,7 @@ function TabSugerencias({ granitos }: Props) {
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{s.descripcion}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-              <Typography variant="caption" sx={{ px: 1.25, py: 0.25, borderRadius: 3, bgcolor: '#EFEAE2' }}>{s.estilo}</Typography>
+              <Typography variant="caption" sx={{ px: 1.25, py: 0.25, borderRadius: 3, bgcolor: 'action.selected' }}>{s.estilo}</Typography>
               {granito && <MuestraGranito imagenUrl={granito.imagenUrl} sx={{ width: 20, height: 20, borderRadius: '50%' }} />}
               <Box aria-hidden="true" sx={{ width: 20, height: 20, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: s.colorMueblesHex }} />
             </Box>

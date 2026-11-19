@@ -7,13 +7,16 @@ import {
   type Espacio,
   type TipoMueble,
 } from '../models/mueble.model.js';
-import { booleanoFlexible, colorHex, esquemaPaginacion, nombre } from './comunes.js';
+import { booleanoFlexible, colorHex, esquemaPaginacion } from './comunes.js';
 
 /** `coerce`: en multipart las medidas llegan como texto ("80"). */
 const medidaCm = z.coerce.number().min(1).max(500);
 
+/** Los nombres de muebles van en tarjetas angostas: 50 caracteres como máximo. */
+export const LARGO_NOMBRE_MUEBLE = 50;
+
 const camposMueble = {
-  nombre,
+  nombre: z.string().trim().min(1).max(LARGO_NOMBRE_MUEBLE),
   espacio: z.enum(ESPACIOS),
   tipo: z.enum(TIPOS_MUEBLE),
   material: z.enum(MATERIALES_MUEBLE),

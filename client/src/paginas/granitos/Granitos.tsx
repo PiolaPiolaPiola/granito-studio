@@ -7,7 +7,7 @@ import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import MenuItem from '@mui/material/MenuItem'
 import Pagination from '@mui/material/Pagination'
 import TextField from '@mui/material/TextField'
@@ -139,7 +139,7 @@ export function Granitos() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{pesos(g.precioM2)} por m²</Typography>
               )}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1 }}>
-                <Chip size="small" label={ETIQUETA_TIPO_PIEDRA[g.tipo]} sx={{ bgcolor: '#EFEAE2' }} />
+                <Chip size="small" label={ETIQUETA_TIPO_PIEDRA[g.tipo]} sx={{ bgcolor: 'action.selected' }} />
                 <Chip size="small" variant="outlined" label={ETIQUETA_ACABADO[g.acabado]} />
               </Box>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

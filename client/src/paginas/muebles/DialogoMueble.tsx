@@ -140,7 +140,7 @@ function Formulario({ mueble, espacioInicial, onCerrar, onGuardado }: Omit<Props
             component="label"
             sx={{
               flex: '1 1 200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1, p: 2,
-              cursor: 'pointer', border: 2, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 2, bgcolor: '#FAF8F4', color: 'primary.main',
+              cursor: 'pointer', border: 2, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 2, bgcolor: 'suave', color: 'primary.main',
               '&:focus-within': { outline: '2px solid', outlineColor: 'primary.main' },
             }}
           >
@@ -165,7 +165,7 @@ function Formulario({ mueble, espacioInicial, onCerrar, onGuardado }: Omit<Props
               tipo="mueble"
               obtenerArchivo={() => getValues('imagen')}
               onSugerencia={(s) => {
-                if (s.nombre) setValue('nombre', s.nombre, { shouldValidate: true })
+                if (s.nombre) setValue('nombre', s.nombre.slice(0, 50), { shouldValidate: true })
                 if (s.espacio) cambiarEspacio(s.espacio)
                 if (s.tipo && TIPOS_POR_ESPACIO[getValues('espacio')].includes(s.tipo)) cambiarTipo(s.tipo)
                 if (s.material) setValue('material', s.material)
@@ -191,7 +191,7 @@ function Formulario({ mueble, espacioInicial, onCerrar, onGuardado }: Omit<Props
           </Box>
         </Box>
 
-        <TextField label="Nombre" required error={errors.nombre !== undefined} helperText={errors.nombre?.message} {...register('nombre')} />
+        <TextField label="Nombre" required error={errors.nombre !== undefined} helperText={errors.nombre?.message ?? 'Máximo 50 caracteres'} slotProps={{ htmlInput: { maxLength: 50 } }} {...register('nombre')} />
 
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <TextField select label="Espacio" value={espacio} onChange={(e) => cambiarEspacio(e.target.value as Espacio)} sx={{ flex: '1 1 140px' }}>

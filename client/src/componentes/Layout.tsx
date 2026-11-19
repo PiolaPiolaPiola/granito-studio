@@ -10,12 +10,14 @@ import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
+import { BotonTema } from '../tema/BotonTema'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
 import { useState, type ReactNode } from 'react'
@@ -56,7 +58,10 @@ export function Layout() {
 
   const menu = (
     <Box component="nav" aria-label="Navegación principal" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Typography sx={{ px: 3, py: 2.5, fontSize: 20, fontWeight: 700, color: 'primary.main' }}>Granito Studio</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', pl: 3, pr: 1, py: 1.5 }}>
+        <Typography sx={{ flex: 1, fontSize: 20, fontWeight: 700, color: 'primary.main' }}>Granito Studio</Typography>
+        <BotonTema />
+      </Box>
       <Divider />
       <List sx={{ px: 1, py: 1.5, flex: 1 }}>
         {[...ENLACES, ...ENLACES_DEV].map((e) => (
@@ -102,10 +107,13 @@ export function Layout() {
         <>
           <AppBar position="fixed" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Toolbar>
-              <IconButton edge="start" aria-label="Abrir menú" onClick={() => setAbierto(true)}>
-                <MenuIcon />
-              </IconButton>
-              <Typography sx={{ ml: 1, fontWeight: 700, color: 'primary.main' }}>Granito Studio</Typography>
+              <Tooltip title="Abrir menú">
+                <IconButton edge="start" aria-label="Abrir menú" onClick={() => setAbierto(true)}>
+                  <MenuIcon />
+                </IconButton>
+              </Tooltip>
+              <Typography sx={{ ml: 1, flex: 1, fontWeight: 700, color: 'primary.main' }}>Granito Studio</Typography>
+              <BotonTema />
             </Toolbar>
           </AppBar>
           <Drawer open={abierto} onClose={() => setAbierto(false)} sx={{ '& .MuiDrawer-paper': { width: ANCHO_MENU } }}>

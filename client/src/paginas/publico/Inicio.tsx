@@ -13,6 +13,7 @@ import { useCallback, useState } from 'react'
 import { Link as EnlaceRouter } from 'react-router'
 import { publicoApi } from '../../api'
 import { useAuth } from '../../auth/useAuth'
+import { BotonTema } from '../../tema/BotonTema'
 import { MuestraGranito } from '../../componentes/MuestraGranito'
 import { ETIQUETA_FORMA } from '../../dominio/diseno'
 import { ETIQUETA_TIPO_PIEDRA, TIPOS_PIEDRA, type TipoPiedra } from '../../dominio/granito'
@@ -55,7 +56,7 @@ export function Inicio() {
       {/* Barra superior */}
       <Box
         component="header"
-        sx={{ position: 'sticky', top: 0, zIndex: 10, display: 'flex', alignItems: 'center', gap: 2, px: { xs: 2, md: 5 }, py: 1.5, bgcolor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', borderBottom: 1, borderColor: 'divider' }}
+        sx={{ position: 'sticky', top: 0, zIndex: 10, display: 'flex', alignItems: 'center', gap: 2, px: { xs: 2, md: 5 }, py: 1.5, bgcolor: 'vidrio', backdropFilter: 'blur(8px)', borderBottom: 1, borderColor: 'divider' }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'primary.main' }}>
           <DiamondOutlined />
@@ -67,6 +68,7 @@ export function Inicio() {
           <Button color="inherit" href="#trabajos">Trabajos</Button>
         </Box>
         <Box sx={{ flex: 1 }} />
+        <BotonTema />
         {usuario === null ? (
           <Button component={EnlaceRouter} to="/login" variant="contained">Ingresar</Button>
         ) : (
@@ -94,7 +96,7 @@ export function Inicio() {
         {portada !== undefined ? (
           <Box component="img" src={portada} alt="Trabajo terminado del taller" sx={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'cover', borderRadius: 4, boxShadow: '0 20px 50px rgba(38,35,32,0.18)' }} />
         ) : (
-          <Box sx={{ width: '100%', aspectRatio: '4 / 3', borderRadius: 4, background: 'linear-gradient(145deg, #EDEAE4 0%, #D8D4CC 100%)' }} />
+          <Box sx={{ width: '100%', aspectRatio: '4 / 3', borderRadius: 4, background: 'var(--lienzo-3d)' }} />
         )}
       </Box>
 

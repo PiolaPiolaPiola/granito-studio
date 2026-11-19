@@ -1,5 +1,6 @@
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined'
 import Button from '@mui/material/Button'
+import { ConAyuda } from '../../componentes/ConAyuda'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useRef, useState } from 'react'
@@ -23,6 +24,8 @@ interface Props {
   catalogo: Mueble[]
   granitos: Granito[]
   onAplicar: (diseno: EntradaDiseno) => void
+  /** Avisa al editor que la IA está trabajando (muestra la animación sobre el 3D). */
+  onTrabajando?: (mensaje: string | null) => void
 }
 
 /**
@@ -32,7 +35,7 @@ interface Props {
  *   objetos y arma el diseño con el catálogo. Sin IA, toma solo los colores de pared y piso.
  * Es privada: no sale en el enlace público.
  */
-export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, catalogo, granitos, onAplicar }: Props) {
+export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, catalogo, granitos, onAplicar, onTrabajando }: Props) {
   const aviso = useAviso()
   const entrada = useRef<HTMLInputElement>(null)
   const [menu, setMenu] = useState<HTMLElement | null>(null)
@@ -57,6 +60,7 @@ export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, 
   const generar = async (url: string) => {
     setPreguntar(null)
     setTrabajando('Analizando la foto…')
+    onTrabajando?.('La IA está leyendo la foto del espacio…')
     try {
       const actual = obtenerDiseno()
       const blob = await (await fetch(url)).blob()
@@ -97,6 +101,7 @@ export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, 
       aviso.mostrar(aErrorApi(e).mensaje, 'error')
     } finally {
       setTrabajando(null)
+      onTrabajando?.(null)
     }
   }
 
@@ -123,9 +128,11 @@ export function BotonFotoEspacio({ idDiseno, fondoUrl, onCambio, obtenerDiseno, 
 
   return (
     <>
-      <Button variant="outlined" startIcon={<AddPhotoAlternateOutlined />} onClick={abrir} disabled={trabajando !== null}>
+      <ConAyuda titulo="Subir una foto del espacio real para ver el diseño encima o generarlo con IA">
+<Button variant="outlined" startIcon={<AddPhotoAlternateOutlined />} onClick={abrir} disabled={trabajando !== null}>
         {trabajando ?? 'Foto del espacio'}
       </Button>
+</ConAyuda>
       <input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => void subir(e.target.files?.[0])} />
       <Menu anchorEl={menu} open={menu !== null} onClose={() => setMenu(null)}>
         <MenuItem onClick={() => { setMenu(null); if (fondoUrl !== undefined) setPreguntar(fondoUrl) }}>Generar el diseño desde la foto</MenuItem>

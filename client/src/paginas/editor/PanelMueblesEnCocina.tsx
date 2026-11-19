@@ -3,7 +3,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward'
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined'
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
-import IconButton from '@mui/material/IconButton'
+import IconButton from '../../componentes/BotonIcono'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { MiniaturaMueble } from '../../componentes/MiniaturaMueble'
@@ -48,7 +48,7 @@ export function PanelMueblesEnCocina({ muebles, catalogo, materiales, granitos, 
               component="li"
               key={m._id}
               sx={{
-                flex: '0 0 168px', scrollSnapAlign: 'start', borderRadius: 2, border: 1, overflow: 'hidden', bgcolor: 'background.paper',
+                flex: '0 0 196px', scrollSnapAlign: 'start', borderRadius: 2, border: 1, overflow: 'hidden', bgcolor: 'background.paper',
                 borderColor: activo ? 'primary.main' : 'divider', boxShadow: activo ? '0 0 0 2px rgba(143,112,66,0.3)' : 'none',
               }}
             >
@@ -59,8 +59,8 @@ export function PanelMueblesEnCocina({ muebles, catalogo, materiales, granitos, 
                 sx={{ display: 'block', width: '100%', textAlign: 'left' }}
               >
                 <Box sx={{ position: 'relative' }}>
-                  {mueble !== undefined ? <MiniaturaMueble mueble={mueble} sx={{ height: 64 }} /> : <Box sx={{ height: 64, bgcolor: '#E4DFD6' }} />}
-                  <Typography sx={{ position: 'absolute', top: 4, left: 6, fontSize: 12, fontWeight: 700, bgcolor: 'rgba(255,255,255,0.9)', borderRadius: 1, px: 0.75 }}>
+                  {mueble !== undefined ? <MiniaturaMueble mueble={mueble} sx={{ height: 64 }} /> : <Box sx={{ height: 64, bgcolor: 'action.selected' }} />}
+                  <Typography sx={{ position: 'absolute', top: 4, left: 6, fontSize: 12, fontWeight: 700, bgcolor: 'vidrio', borderRadius: 1, px: 0.75 }}>
                     {m.posicion}
                   </Typography>
                   {(granito !== undefined || material?.colorHex !== undefined) && (
@@ -72,7 +72,7 @@ export function PanelMueblesEnCocina({ muebles, catalogo, materiales, granitos, 
                   )}
                 </Box>
                 <Box sx={{ px: 1, pt: 0.75 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>{mueble?.nombre ?? 'Mueble inactivo'}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: 'anywhere', lineHeight: 1.3 }}>{mueble?.nombre ?? 'Mueble inactivo'}</Typography>
                   <Typography variant="caption" color="text.secondary" noWrap component="p">
                     {m.medidasCm !== undefined ? 'Medidas propias' : (granito?.nombre ?? (material?.colorHex !== undefined ? 'Color propio' : 'Material del catálogo'))}
                   </Typography>

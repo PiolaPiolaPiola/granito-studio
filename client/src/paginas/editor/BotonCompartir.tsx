@@ -3,6 +3,7 @@ import LinkOffOutlined from '@mui/icons-material/LinkOffOutlined'
 import ShareOutlined from '@mui/icons-material/ShareOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { ConAyuda } from '../../componentes/ConAyuda'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -75,9 +76,11 @@ export function BotonCompartir({ idDiseno, codigoInicial, destacadoInicial }: Pr
 
   return (
     <>
-      <Button variant="outlined" startIcon={<ShareOutlined />} onClick={() => setAbierto(true)}>
+      <ConAyuda titulo="Crear un enlace de solo lectura para el cliente">
+<Button variant="outlined" startIcon={<ShareOutlined />} onClick={() => setAbierto(true)}>
         Compartir
       </Button>
+</ConAyuda>
       <Dialog open={abierto} onClose={() => setAbierto(false)} fullWidth maxWidth="sm">
         <DialogTitle>Compartir con el cliente</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

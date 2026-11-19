@@ -9,7 +9,7 @@ const medidaCm = z
 /** Espejo de `server/src/schemas/mueble.schemas.ts` (más la foto, que viaja como archivo). */
 export const esquemaMueble = z
   .object({
-    nombre: z.string().trim().min(1, 'El nombre es obligatorio').max(80, 'Máximo 80 caracteres'),
+    nombre: z.string().trim().min(1, 'El nombre es obligatorio').max(50, 'Máximo 50 caracteres'),
     espacio: z.enum(ESPACIOS),
     tipo: z.enum(TIPOS_MUEBLE),
     material: z.enum(MATERIALES_MUEBLE),

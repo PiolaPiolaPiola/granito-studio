@@ -4,6 +4,7 @@ import UploadFileOutlined from '@mui/icons-material/UploadFileOutlined'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { ConAyuda } from '../componentes/ConAyuda'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -27,6 +28,8 @@ interface Props {
   catalogo: Mueble[]
   granitos: Granito[]
   onAplicar: (diseno: EntradaDiseno) => void
+  /** Avisa al editor que la IA está trabajando (muestra la animación sobre el 3D). */
+  onTrabajando?: (mensaje: string | null) => void
 }
 
 const EJEMPLOS = [
@@ -41,7 +44,7 @@ const EJEMPLOS = [
  * Primero se intenta con las reglas locales; si quedan partes sin entender y el servidor
  * tiene IA, se le pregunta a la IA por la frase completa.
  */
-export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props) {
+export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar, onTrabajando }: Props) {
   const aviso = useAviso()
   const [abierto, setAbierto] = useState(false)
   const [texto, setTexto] = useState('')
@@ -74,6 +77,8 @@ export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props
       let fuente = 'Entendido sin IA'
       if (local.sinEntender.length > 0 && estadoIa?.disponible === true) {
         try {
+          setAbierto(false)
+          onTrabajando?.('La IA está aplicando lo que pediste…')
           const respuesta = await iaApi.interpretar(texto, ctx)
           if (respuesta.acciones.length > 0) {
             acciones = respuesta.acciones
@@ -97,9 +102,11 @@ export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props
         })
       } else {
         setResultado({ hechas, fallidas: problemas.length > 0 ? problemas : ['No encontré nada para cambiar en esa frase'], fuente })
+        setAbierto(true)
       }
     } finally {
       setTrabajando(false)
+      onTrabajando?.(null)
     }
   }
 
@@ -118,9 +125,11 @@ export function BotonVoz({ obtenerDiseno, catalogo, granitos, onAplicar }: Props
 
   return (
     <>
-      <Button variant="outlined" startIcon={<KeyboardVoiceOutlined />} onClick={() => setAbierto(true)}>
+      <ConAyuda titulo="Diseñar hablando, escribiendo o con una nota de voz">
+<Button variant="outlined" startIcon={<KeyboardVoiceOutlined />} onClick={() => setAbierto(true)}>
         Voz
       </Button>
+</ConAyuda>
       <Dialog open={abierto} onClose={() => setAbierto(false)} fullWidth maxWidth="sm">
         <DialogTitle>Diseñar hablando</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

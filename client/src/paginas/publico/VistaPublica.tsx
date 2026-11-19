@@ -75,7 +75,7 @@ export function VistaPublica() {
                 {granito !== undefined ? (
                   <MuestraGranito imagenUrl={granito.imagenUrl} sx={{ width: 48, height: 48, borderRadius: 2, flexShrink: 0 }} />
                 ) : (
-                  <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: '#E4DFD6', flexShrink: 0 }} />
+                  <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: 'action.selected', flexShrink: 0 }} />
                 )}
                 <Box>
                   <Typography variant="caption" color="text.secondary">{titulo}</Typography>
@@ -103,7 +103,7 @@ export function VistaPublica() {
               <Box key={c.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75 }}>
                 <MiniaturaMueble mueble={c.mueble} sx={{ width: 36, height: 36, borderRadius: 1.5, flexShrink: 0 }} />
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>{c.mueble.nombre}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500, overflowWrap: 'anywhere', lineHeight: 1.3 }}>{c.mueble.nombre}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {ETIQUETA_TIPO_MUEBLE[c.mueble.tipo]} · {Math.round(c.ancho * 100)} × {Math.round(c.alto * 100)} × {Math.round(c.fondo * 100)} cm
                   </Typography>
