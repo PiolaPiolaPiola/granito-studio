@@ -77,7 +77,8 @@ npm --prefix server run usuario:crear -- --email correo@empresa.com --rol admin
 | | `POST` (multipart con `imagen`) · `PATCH /:id` · `DELETE /:id` (inactiva) | Admin |
 | Muebles | `GET /api/muebles` (filtros por espacio, tipo y material) · `GET /:id` | Con sesión |
 | | `POST` · `PATCH /:id` (JSON o multipart con foto opcional) · `DELETE /:id` (inactiva) | Admin |
-| Diseños | `GET` · `POST` · `GET /:id` · `PUT /:id` · `DELETE /:id` · `POST /:id/duplicar` | Con sesión |
+| Diseños | `GET` · `POST` · `GET /:id` · `PUT /:id` · `DELETE /:id` · `POST /:id/duplicar` · `POST`/`DELETE /:id/compartir` | Con sesión |
+| Diseño compartido | `GET /api/publico/disenos/:codigo` (la página es `/ver/:codigo`) | Público, sin precios |
 | Sugerencias | `GET /api/sugerencias?forma=L&espacio=cocina&granitoActualId=…` | Con sesión |
 | IA (opcional) | `GET /api/ia/estado` · `POST /analizar-foto` · `POST /interpretar` · `POST /transcribir` | Con sesión |
 | Imágenes | `GET /uploads/granitos/<uuid>.png` | Público |

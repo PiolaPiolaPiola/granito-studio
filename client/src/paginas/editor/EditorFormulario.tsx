@@ -27,6 +27,7 @@ import { distribuir, rotacionDe, type MuebleResuelto } from '../../escena/distri
 import { esquemaDiseno } from '../../esquemas/diseno.esquemas'
 import { aplicarErroresApi, listarMensajes } from '../../formularios/erroresApi'
 import { BotonVoz } from '../../voz/BotonVoz'
+import { BotonCompartir } from './BotonCompartir'
 import { DialogoCotizacion } from './DialogoCotizacion'
 import { PanelCatalogoMuebles } from './PanelCatalogoMuebles'
 import { PanelConfiguracion, type Pestana } from './PanelConfiguracion'
@@ -37,6 +38,8 @@ import { VistaPrevia3D } from './VistaPrevia3D'
 interface Props {
   id?: string
   inicial: EntradaDiseno
+  /** Si el diseño guardado ya está compartido. */
+  codigoPublico?: string
   muebles: Mueble[]
   granitos: Granito[]
 }
@@ -45,7 +48,7 @@ interface Props {
 const medidaSegura = (valor: number) => (Number.isFinite(valor) ? Math.min(20, Math.max(0.5, valor)) : 3)
 const espesorSeguro = (valor: number) => (Number.isFinite(valor) ? Math.min(10, Math.max(1, valor)) : 3)
 
-export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos }: Props) {
+export function EditorFormulario({ id, inicial, codigoPublico, muebles: catalogoLista, granitos }: Props) {
   const navegar = useNavigate()
   const aviso = useAviso()
   const [pestana, setPestana] = useState<Pestana>('materiales')
@@ -159,6 +162,7 @@ export function EditorFormulario({ id, inicial, muebles: catalogoLista, granitos
               setValue('materiales', nuevo.materiales, opciones)
             }}
           />
+          {id !== undefined && <BotonCompartir idDiseno={id} codigoInicial={codigoPublico} />}
           <Button
             variant="outlined"
             startIcon={<RequestQuoteOutlined />}

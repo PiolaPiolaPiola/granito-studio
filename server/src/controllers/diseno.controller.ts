@@ -29,6 +29,21 @@ export const eliminarDiseno: ConParamId = async (req, res) => {
   res.status(204).end();
 };
 
+export const compartirDiseno: ConParamId = async (req, res) => {
+  const codigoPublico = await servicioDisenos.compartir(req.params.id);
+  res.json({ codigoPublico });
+};
+
+export const dejarDeCompartirDiseno: ConParamId = async (req, res) => {
+  await servicioDisenos.dejarDeCompartir(req.params.id);
+  res.status(204).end();
+};
+
+/** Público, sin sesión: `GET /api/publico/disenos/:codigo`. */
+export const verDisenoPublico: RequestHandler<{ codigo: string }> = async (req, res) => {
+  res.json(await servicioDisenos.obtenerPublico(req.params.codigo));
+};
+
 export const duplicarDiseno: ConParamId = async (req, res) => {
   const diseno = await servicioDisenos.duplicar(req.params.id);
   res.status(201).location(`/api/disenos/${diseno._id.toString()}`).json({ diseno });

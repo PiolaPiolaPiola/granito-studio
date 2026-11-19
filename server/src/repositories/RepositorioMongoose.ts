@@ -45,6 +45,15 @@ export class RepositorioMongoose<
       .exec();
   }
 
+  async buscarPorIds(ids: string[]): Promise<ConId<T>[]> {
+    const validos = [...new Set(ids)].filter(isValidObjectId);
+    if (validos.length === 0) return [];
+    return this.modelo
+      .find({ _id: { $in: validos } } as QueryFilter<T>)
+      .lean<ConId<T>[]>()
+      .exec();
+  }
+
   async idsExistentes(ids: string[]): Promise<Set<string>> {
     const validos = [...new Set(ids.map((id) => id.toLowerCase()))].filter(isValidObjectId);
     if (validos.length === 0) return new Set();

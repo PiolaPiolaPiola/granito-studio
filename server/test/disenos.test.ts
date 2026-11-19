@@ -100,3 +100,42 @@ describe('diseños', () => {
     expect(copia.materiales[1]?.muebleEnDiseno).toBe(muebleCopia?._id);
   });
 });
+
+describe('enlace público de un diseño', () => {
+  it('se comparte, se ve sin sesión y deja de verse al dejar de compartir', async () => {
+    const diseno = await crearDiseno();
+    await GranitoModelo.updateMany({}, { precioM2: 900000 });
+
+    const compartido = await request(app)
+      .post(`/api/disenos/${diseno._id}/compartir`)
+      .set(vendedor);
+    const { codigoPublico } = compartido.body as { codigoPublico: string };
+    expect(compartido.status).toBe(200);
+    expect(codigoPublico).toMatch(/^[\w-]{22}$/);
+
+    // Compartir dos veces devuelve el mismo enlace.
+    const otraVez = await request(app).post(`/api/disenos/${diseno._id}/compartir`).set(vendedor);
+    expect((otraVez.body as { codigoPublico: string }).codigoPublico).toBe(codigoPublico);
+
+    const publico = await request(app).get(`/api/publico/disenos/${codigoPublico}`);
+    const cuerpo = publico.body as {
+      diseno: Record<string, unknown>;
+      muebles: Record<string, unknown>[];
+      granitos: Record<string, unknown>[];
+    };
+    expect(publico.status).toBe(200);
+    expect(cuerpo.diseno).toMatchObject({ nombre: 'Cocina Pérez' });
+    expect(cuerpo.diseno).not.toHaveProperty('codigoPublico');
+    expect(cuerpo.muebles).toHaveLength(1);
+    expect(cuerpo.granitos).toHaveLength(1);
+    expect(cuerpo.granitos[0]).not.toHaveProperty('precioM2'); // los precios no son públicos
+
+    const quitado = await request(app).delete(`/api/disenos/${diseno._id}/compartir`).set(vendedor);
+    expect(quitado.status).toBe(204);
+    expect((await request(app).get(`/api/publico/disenos/${codigoPublico}`)).status).toBe(404);
+  });
+
+  it('rechaza códigos con formato raro', async () => {
+    expect((await request(app).get('/api/publico/disenos/abc')).status).toBe(400);
+  });
+});

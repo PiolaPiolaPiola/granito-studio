@@ -8,6 +8,8 @@ export interface Repositorio<T, TCrear, TActualizar> {
   crear(datos: TCrear): Promise<ConId<T>>;
   actualizar(id: string, cambiosActualizar: TActualizar): Promise<ConId<T> | null>;
   inactivar(id: string): Promise<ConId<T> | null>;
+  /** Los documentos de esos ids que existan (activos o no). */
+  buscarPorIds(ids: string[]): Promise<ConId<T>[]>;
   /** De los ids dados, los que sí existen (en minúsculas). */
   idsExistentes(ids: string[]): Promise<Set<string>>;
 }

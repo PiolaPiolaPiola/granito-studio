@@ -37,5 +37,14 @@ export function EditorPagina() {
     )
   }
 
-  return <EditorFormulario key={id ?? 'nuevo'} id={id} inicial={inicial} muebles={muebles.datos.items} granitos={granitos.datos.items} />
+  return (
+    <EditorFormulario
+      key={id ?? 'nuevo'}
+      id={id}
+      inicial={inicial}
+      codigoPublico={diseno.datos?.codigoPublico}
+      muebles={muebles.datos.items}
+      granitos={granitos.datos.items}
+    />
+  )
 }

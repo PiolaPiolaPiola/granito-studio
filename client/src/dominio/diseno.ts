@@ -90,6 +90,8 @@ export interface EntradaDiseno {
 export interface Diseno extends ConTiempos, Omit<EntradaDiseno, 'espacio' | 'acabados'> {
   espacio?: Espacio
   acabados?: Partial<AcabadosMeson>
+  /** Código del enlace público de solo lectura, si el diseño está compartido. */
+  codigoPublico?: string
 }
 
 export function disenoVacio(espacio: Espacio = 'cocina'): EntradaDiseno {

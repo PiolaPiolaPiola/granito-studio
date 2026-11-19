@@ -518,6 +518,38 @@ export const documentoOpenApi = {
         },
       },
     },
+    '/api/disenos/{id}/compartir': {
+      parameters: [parametroId],
+      post: {
+        tags: ['Diseños'],
+        summary: 'Crea (o devuelve) el enlace público de solo lectura',
+        security: seguridad,
+        responses: {
+          200: {
+            description: 'Código del enlace: el cliente lo abre en /ver/{codigo}',
+            content: json({ type: 'object', properties: { codigoPublico: { type: 'string' } } }),
+          },
+          ...conErrores(400, 401, 404),
+        },
+      },
+      delete: {
+        tags: ['Diseños'],
+        summary: 'Deja de compartir: el enlace anterior ya no funciona',
+        security: seguridad,
+        responses: { 204: { description: 'Ya no se comparte' }, ...conErrores(400, 401, 404) },
+      },
+    },
+    '/api/publico/disenos/{codigo}': {
+      parameters: [{ name: 'codigo', in: 'path', required: true, schema: { type: 'string' } }],
+      get: {
+        tags: ['Diseños'],
+        summary: 'Diseño compartido, SIN sesión (solo lectura, sin precios)',
+        responses: {
+          200: { description: '`{ diseno, muebles, granitos }` con lo necesario para dibujarlo' },
+          ...conErrores(400, 404, 429),
+        },
+      },
+    },
     '/api/sugerencias': {
       get: {
         tags: ['Sugerencias'],

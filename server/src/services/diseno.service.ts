@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { Types } from 'mongoose';
 import { AppError, existeOFallar } from '../errors/AppError.js';
 import { ErrorValidacion, type DetalleValidacion } from '../errors/ErrorValidacion.js';
@@ -79,6 +80,79 @@ export class ServicioDisenos {
       muebles,
       materiales,
     });
+  }
+
+  /**
+   * Crea (o devuelve, si ya existe) el código del enlace público. Es aleatorio y largo
+   * (128 bits): no se puede adivinar ni recorrer como un id de Mongo.
+   */
+  async compartir(id: string) {
+    const diseno = await this.obtener(id);
+    if (diseno.codigoPublico) return diseno.codigoPublico;
+    const codigo = randomBytes(16).toString('base64url');
+    existeOFallar(await this.repositorio.cambiarCodigo(id, codigo), NO_EXISTE);
+    return codigo;
+  }
+
+  /** El enlace anterior deja de funcionar. Si se vuelve a compartir, el código es otro. */
+  async dejarDeCompartir(id: string) {
+    existeOFallar(await this.repositorio.cambiarCodigo(id, null), NO_EXISTE);
+  }
+
+  /**
+   * Lo que ve un cliente sin sesión: el diseño y solo los muebles y piedras que usa, con
+   * los campos necesarios para dibujarlo (sin precios ni datos internos).
+   */
+  async obtenerPublico(codigo: string) {
+    const diseno = await this.repositorio.buscarPorCodigo(codigo);
+    if (!diseno) throw new AppError(404, 'Este enlace no existe o ya no está compartido');
+
+    const [muebles, granitos] = await Promise.all([
+      this.muebles.buscarPorIds(diseno.muebles.map(({ mueble }) => mueble.toString())),
+      this.granitos.buscarPorIds(
+        diseno.materiales.flatMap(({ granito }) => (granito ? [granito.toString()] : [])),
+      ),
+    ]);
+
+    const publico = { ...diseno };
+    delete publico.codigoPublico;
+    return {
+      diseno: publico,
+      muebles: muebles.map(
+        ({
+          _id,
+          nombre,
+          espacio,
+          tipo,
+          material,
+          colorHex,
+          anchoCm,
+          altoCm,
+          fondoCm,
+          imagenUrl,
+        }) => ({
+          _id,
+          nombre,
+          espacio,
+          tipo,
+          material,
+          colorHex,
+          anchoCm,
+          altoCm,
+          fondoCm,
+          imagenUrl,
+        }),
+      ),
+      granitos: granitos.map(({ _id, nombre, tipo, acabado, imagenUrl, fotoUrl, etiquetas }) => ({
+        _id,
+        nombre,
+        tipo,
+        acabado,
+        imagenUrl,
+        fotoUrl,
+        etiquetas,
+      })),
+    };
   }
 
   async eliminar(id: string) {

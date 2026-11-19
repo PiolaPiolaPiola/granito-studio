@@ -14,6 +14,7 @@ import { rutasDisenos } from './routes/diseno.routes.js';
 import { rutasSugerencias } from './routes/sugerencia.routes.js';
 import { rutasDocs } from './routes/docs.routes.js';
 import { rutasIa } from './routes/ia.routes.js';
+import { rutasPublicas } from './routes/publico.routes.js';
 
 export const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/muebles', rutasMuebles);
 app.use('/api/disenos', rutasDisenos);
 app.use('/api/sugerencias', rutasSugerencias);
 app.use('/api/ia', rutasIa);
+app.use('/api/publico', rutasPublicas);
 app.use('/api/docs', rutasDocs);
 
 app.use(noEncontrado);

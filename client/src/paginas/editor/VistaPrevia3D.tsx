@@ -34,9 +34,10 @@ interface Props {
   materiales: MaterialAsignado[]
   granitos: Granito[]
   nombreArchivo: string
-  seleccionado: string | null
-  onSeleccionar: (id: string) => void
-  onMover: (id: string, x: number, z: number) => void
+  /** Sin estos tres la vista es de solo lectura (enlace público). */
+  seleccionado?: string | null
+  onSeleccionar?: (id: string) => void
+  onMover?: (id: string, x: number, z: number) => void
   /** El lienzo, para que la cotización pueda incluir una foto del diseño. */
   onLienzo?: (lienzo: HTMLCanvasElement) => void
 }
@@ -90,7 +91,7 @@ export function VistaPrevia3D(props: Props) {
           colocaciones={colocaciones}
           materiales={materiales}
           granitos={granitos}
-          seleccionado={seleccionado}
+          seleccionado={seleccionado ?? null}
           onSeleccionar={onSeleccionar}
           onMover={onMover}
           onArrastrando={setArrastrando}

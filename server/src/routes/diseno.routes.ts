@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
+  compartirDiseno,
   crearDiseno,
+  dejarDeCompartirDiseno,
   duplicarDiseno,
   eliminarDiseno,
   listarDisenos,
@@ -27,3 +29,5 @@ rutasDisenos.put(
 );
 rutasDisenos.post('/:id/duplicar', validar({ params: esquemaParamsId }), duplicarDiseno);
 rutasDisenos.delete('/:id', validar({ params: esquemaParamsId }), eliminarDiseno);
+rutasDisenos.post('/:id/compartir', validar({ params: esquemaParamsId }), compartirDiseno);
+rutasDisenos.delete('/:id/compartir', validar({ params: esquemaParamsId }), dejarDeCompartirDiseno);

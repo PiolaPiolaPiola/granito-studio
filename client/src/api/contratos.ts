@@ -59,6 +59,18 @@ export interface DisenosApi {
   reemplazar(id: string, datos: EntradaDiseno): Promise<Diseno>
   eliminar(id: string): Promise<void>
   duplicar(id: string): Promise<Diseno>
+  /** Crea (o devuelve) el código del enlace público. */
+  compartir(id: string): Promise<string>
+  dejarDeCompartir(id: string): Promise<void>
+  /** Sin sesión: lo que ve el cliente con el enlace. */
+  verPublico(codigo: string): Promise<DisenoPublico>
+}
+
+/** Un diseño compartido con lo justo para dibujarlo (sin precios ni datos internos). */
+export interface DisenoPublico {
+  diseno: Diseno
+  muebles: Mueble[]
+  granitos: Granito[]
 }
 
 export interface SugerenciasApi {

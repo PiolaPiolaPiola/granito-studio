@@ -1,6 +1,11 @@
 import type { AxiosInstance } from 'axios'
 import type { Diseno, EntradaDiseno } from '../../dominio/diseno'
-import type { DisenosApi } from '../contratos'
+import type { Granito } from '../../dominio/granito'
+import type { Mueble } from '../../dominio/mueble'
+import type { DisenoPublico, DisenosApi } from '../contratos'
+
+/** La respuesta pública trae menos campos: se completan los que la escena no usa. */
+const completar = <T extends object>(x: T) => ({ active: true, creationAt: '', updatedAt: '', ...x })
 
 export class DisenosApiHttp implements DisenosApi {
   private readonly http: AxiosInstance
@@ -31,6 +36,24 @@ export class DisenosApiHttp implements DisenosApi {
 
   async eliminar(id: string): Promise<void> {
     await this.http.delete(`/disenos/${id}`)
+  }
+
+  async compartir(id: string): Promise<string> {
+    const { data } = await this.http.post<{ codigoPublico: string }>(`/disenos/${id}/compartir`)
+    return data.codigoPublico
+  }
+
+  async dejarDeCompartir(id: string): Promise<void> {
+    await this.http.delete(`/disenos/${id}/compartir`)
+  }
+
+  async verPublico(codigo: string): Promise<DisenoPublico> {
+    const { data } = await this.http.get<DisenoPublico>(`/publico/disenos/${encodeURIComponent(codigo)}`)
+    return {
+      diseno: data.diseno,
+      muebles: data.muebles.map((m) => completar(m) as Mueble),
+      granitos: data.granitos.map((g) => completar(g) as Granito),
+    }
   }
 
   async duplicar(id: string): Promise<Diseno> {

@@ -13,9 +13,12 @@ import { NoEncontrada } from './paginas/NoEncontrada'
  */
 const editor = () => import('./paginas/editor/EditorPagina').then((m) => ({ Component: m.EditorPagina }))
 const prototipo = () => import('./paginas/PrototipoMeson').then((m) => ({ Component: m.PrototipoMeson }))
+const vistaPublica = () => import('./paginas/publico/VistaPublica').then((m) => ({ Component: m.VistaPublica }))
 
 export const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
+  // Pública, sin sesión: el cliente abre el diseño que le compartió el vendedor.
+  { path: '/ver/:codigo', lazy: vistaPublica, hydrateFallbackElement: <></> },
   {
     element: <RutaProtegida />,
     // Se muestra mientras carga el chunk de una página `lazy` en la primera visita.
