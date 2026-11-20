@@ -21,6 +21,10 @@ process.env.UPLOADS_DIR = dirUploads;
 process.env.IA_GEMINI_API_KEY = '';
 process.env.IA_GROQ_API_KEY = '';
 process.env.IA_OPENROUTER_API_KEY = '';
+// Igual con Cloudinary: las imágenes de las pruebas van a una carpeta temporal, nunca a la nube.
+process.env.CLOUDINARY_CLOUD_NAME = '';
+process.env.CLOUDINARY_API_KEY = '';
+process.env.CLOUDINARY_API_SECRET = '';
 
 const { default: mongoose } = await import('mongoose');
 

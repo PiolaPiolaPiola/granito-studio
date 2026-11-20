@@ -6,6 +6,7 @@ import path from 'node:path';
 import { env } from './config/env.js';
 import { manejadorErrores } from './middlewares/manejadorErrores.js';
 import { noEncontrado } from './middlewares/noEncontrado.js';
+import { servirCliente } from './middlewares/servirCliente.js';
 import { rutasSalud } from './routes/salud.routes.js';
 import { rutasAuth } from './routes/auth.routes.js';
 import { rutasGranitos } from './routes/granito.routes.js';
@@ -18,7 +19,24 @@ import { rutasPublicas } from './routes/publico.routes.js';
 
 export const app = express();
 
-app.use(helmet());
+// En Render (y cualquier hosting con proxy) la IP real llega en X-Forwarded-For: sin esto,
+// el límite de intentos de login vería a todos los usuarios como una sola IP.
+if (env.NODE_ENV === 'production') app.set('trust proxy', 1);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        // Fotos subidas a Cloudinary, vistas previas locales (blob:) y texturas en data:.
+        'img-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+        // Audio grabado para los comandos de voz y el modelo .glb que se descarga.
+        'media-src': ["'self'", 'blob:'],
+        'connect-src': ["'self'", 'data:', 'blob:'],
+        'worker-src': ["'self'", 'blob:'],
+      },
+    },
+  }),
+);
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json({ limit: '1mb' }));
 
@@ -46,6 +64,9 @@ app.use('/api/sugerencias', rutasSugerencias);
 app.use('/api/ia', rutasIa);
 app.use('/api/publico', rutasPublicas);
 app.use('/api/docs', rutasDocs);
+
+// Producción: el mismo servidor entrega la app de React (en desarrollo la sirve Vite).
+app.use(servirCliente(path.resolve(import.meta.dirname, '../../client/dist')));
 
 app.use(noEncontrado);
 app.use(manejadorErrores);

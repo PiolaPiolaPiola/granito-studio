@@ -34,6 +34,8 @@ import { texturaPng, type EstiloTextura } from './texturas.js';
  *      npm run seed -- --reiniciar       → borra catálogo y diseños y los vuelve a crear
  *      npm run seed -- --fotos <carpeta> → carpeta con las fotos del taller
  *                                           (por defecto `semilla-fotos/`, que no se versiona)
+ *      npm run seed -- --sin-usuarios    → sin los usuarios de prueba (el único modo que se
+ *                                           permite con NODE_ENV=production)
  *
  * Las texturas 3D se generan por código con los colores de cada foto. Si la carpeta de fotos
  * existe, cada piedra guarda además la foto del trabajo real (se ve en el catálogo).
@@ -474,11 +476,22 @@ const { values } = parseArgs({
   options: {
     reiniciar: { type: 'boolean', default: false },
     fotos: { type: 'string', default: 'semilla-fotos' },
+    'sin-usuarios': { type: 'boolean', default: false },
   },
 });
 
-if (env.NODE_ENV === 'production') {
-  console.error('El seed es solo para desarrollo: crea usuarios con contraseñas conocidas.');
+// Los usuarios de prueba tienen contraseñas conocidas: nunca en producción. Con --sin-usuarios
+// solo se carga el catálogo y los diseños de ejemplo (así se llena la base de Render).
+if (env.NODE_ENV === 'production' && !values['sin-usuarios']) {
+  console.error(
+    'En producción el seed solo corre con --sin-usuarios (los de prueba tienen contraseñas conocidas).',
+  );
+  process.exit(1);
+}
+if (env.NODE_ENV === 'production' && values.reiniciar) {
+  console.error(
+    'En producción no se permite --reiniciar: borraría el catálogo y los diseños reales.',
+  );
   process.exit(1);
 }
 
@@ -492,7 +505,7 @@ try {
   await mongoose.connection.syncIndexes();
   if (values.reiniciar) await reiniciar();
 
-  await sembrarUsuarios();
+  if (!values['sin-usuarios']) await sembrarUsuarios();
   const granitos = await sembrarGranitos(carpetaFotos);
   const muebles = await sembrarMuebles();
   await sembrarDisenos(granitos, muebles);
