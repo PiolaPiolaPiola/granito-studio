@@ -193,10 +193,29 @@ function cuotasPorTramo(tramos: Tramo[], ordenados: MuebleResuelto[]): Record<'s
   return { suelo: cuota('suelo'), alto: cuota('alto') }
 }
 
+/** Muebles que pueden formar la isla (los altos, como una alacena, se quedan en la pared). */
+const PARA_ISLA: TipoMueble[] = ['inferior']
+
+/**
+ * Forma "con isla" sin una pieza de isla o barra en el diseño: los últimos muebles bajos
+ * (cerca de un tercio, al menos uno) salen de la pared y forman la isla. Siempre queda al
+ * menos uno en la pared. Si ya hay una isla o una barra, no se mueve nada.
+ */
+function elegirParaIsla(ordenados: MuebleResuelto[]): Set<string> {
+  if (ordenados.some((m) => capaDe(m.mueble.tipo) === 'isla')) return new Set()
+  const candidatos = ordenados.filter(
+    (m) => PARA_ISLA.includes(m.mueble.tipo) && medidasDe(m).alto <= ALTURA_COLGADO_MINIMA,
+  )
+  if (candidatos.length < 2) return new Set()
+  const cuantos = Math.max(1, Math.round(candidatos.length / 3))
+  return new Set(candidatos.slice(-cuantos).map((m) => m._id))
+}
+
 function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: MuebleResuelto[]): Colocacion[] {
   const tramos = tramosPara(forma, medidas)
   const cursores = { suelo: { tramo: 0, usado: 0 }, alto: { tramo: 0, usado: 0 } }
-  const cuotas = cuotasPorTramo(tramos, ordenados)
+  const aIsla = forma === 'isla' ? elegirParaIsla(ordenados) : new Set<string>()
+  const cuotas = cuotasPorTramo(tramos, ordenados.filter((m) => !aIsla.has(m._id)))
   const colocaciones: Colocacion[] = []
   const islas: MuebleResuelto[] = []
   // Dónde quedó cada mueble (pared e hilera) y hasta dónde llega cada hilera en cada pared.
@@ -205,7 +224,7 @@ function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: M
 
   for (const item of ordenados) {
     const capa = capaDe(item.mueble.tipo)
-    if (capa === 'isla') {
+    if (capa === 'isla' || aIsla.has(item._id)) {
       islas.push(item)
       continue
     }
