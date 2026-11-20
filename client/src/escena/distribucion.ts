@@ -59,6 +59,8 @@ interface Tramo {
   direccion: [number, number]
   normal: [number, number]
   longitud: number
+  /** Los muebles de esta pared se corren hasta su final (la esquina con la pared siguiente). */
+  pegarAlFinal?: boolean
 }
 
 export function tramosPara(forma: FormaCocina, { ancho, fondo }: MedidasM): Tramo[] {
@@ -72,7 +74,8 @@ export function tramosPara(forma: FormaCocina, { ancho, fondo }: MedidasM): Tram
 
   switch (forma) {
     case 'L':
-      return [paredFondo(0, ancho - p), paredDerecha]
+      // El fondo se pega a la esquina para que la L sea una hilera continua.
+      return [{ ...paredFondo(0, ancho - p), pegarAlFinal: true }, paredDerecha]
     case 'U':
       return [paredFondo(p, ancho - 2 * p), paredDerecha, paredIzquierda]
     default:
@@ -172,11 +175,33 @@ function colocacionLibre(item: MuebleResuelto, { x, z, rotacion }: Ubicacion, me
   }
 }
 
+/**
+ * Cuánto ancho de muebles le toca a cada pared, por hilera: el total se reparte en proporción
+ * al largo de cada pared. Los muebles de piso altos cuentan en las dos hileras.
+ */
+function cuotasPorTramo(tramos: Tramo[], ordenados: MuebleResuelto[]): Record<'suelo' | 'alto', number[]> {
+  const total = { suelo: 0, alto: 0 }
+  for (const item of ordenados) {
+    const capa = capaDe(item.mueble.tipo)
+    if (capa === 'isla') continue
+    const { ancho, alto } = medidasDe(item)
+    total[capa] += ancho
+    if (capa === 'suelo' && alto > ALTURA_COLGADO_MINIMA) total.alto += ancho
+  }
+  const largoTotal = tramos.reduce((suma, t) => suma + t.longitud, 0)
+  const cuota = (capa: 'suelo' | 'alto') => tramos.map((t) => (total[capa] * t.longitud) / largoTotal)
+  return { suelo: cuota('suelo'), alto: cuota('alto') }
+}
+
 function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: MuebleResuelto[]): Colocacion[] {
   const tramos = tramosPara(forma, medidas)
   const cursores = { suelo: { tramo: 0, usado: 0 }, alto: { tramo: 0, usado: 0 } }
+  const cuotas = cuotasPorTramo(tramos, ordenados)
   const colocaciones: Colocacion[] = []
   const islas: MuebleResuelto[] = []
+  // Dónde quedó cada mueble (pared e hilera) y hasta dónde llega cada hilera en cada pared.
+  const lugares: { colocacion: Colocacion; tramo: number; fila: 'suelo' | 'alto' }[] = []
+  const fin = { suelo: tramos.map(() => 0), alto: tramos.map(() => 0) }
 
   for (const item of ordenados) {
     const capa = capaDe(item.mueble.tipo)
@@ -191,8 +216,13 @@ function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: M
     const esAlto = capa === 'suelo' && alto > ALTURA_COLGADO_MINIMA
     if (esAlto) igualarAlMasAvanzado(cursores.suelo, cursores.alto)
 
-    // Si no cabe en lo que queda de esta pared, pasa a la siguiente.
-    while (cursor.tramo < tramos.length - 1 && cursor.usado + ancho > tramos[cursor.tramo].longitud + 1e-6) {
+    // Pasa a la siguiente pared si no cabe en lo que queda de esta, o si esta ya tiene su
+    // parte del total (así en L y U los muebles se reparten por todas las paredes).
+    while (
+      cursor.tramo < tramos.length - 1 &&
+      (cursor.usado + ancho > tramos[cursor.tramo].longitud + 1e-6 ||
+        (cursor.usado > 0 && cursor.usado + ancho / 2 > cuotas[capa][cursor.tramo] + 1e-6))
+    ) {
       cursor.tramo += 1
       cursor.usado = 0
     }
@@ -216,8 +246,22 @@ function distribuirConTramos(forma: FormaCocina, medidas: MedidasM, ordenados: M
       fondo,
       desborda,
     })
+    lugares.push({ colocacion: colocaciones[colocaciones.length - 1], tramo: cursor.tramo, fila: capa })
     cursor.usado += ancho
-    if (esAlto) Object.assign(cursores.alto, cursores.suelo)
+    fin[capa][cursor.tramo] = Math.max(fin[capa][cursor.tramo], cursor.usado)
+    if (esAlto) {
+      Object.assign(cursores.alto, cursores.suelo)
+      fin.alto[cursor.tramo] = Math.max(fin.alto[cursor.tramo], cursor.usado)
+    }
+  }
+
+  // Paredes que se pegan a la esquina: corre cada hilera lo que le sobre hasta el final.
+  for (const { colocacion, tramo: indice, fila } of lugares) {
+    const tramo = tramos[indice]
+    if (tramo.pegarAlFinal !== true || colocacion.desborda) continue
+    const sobra = Math.max(0, tramo.longitud - fin[fila][indice])
+    colocacion.centro[0] += tramo.direccion[0] * sobra
+    colocacion.centro[2] += tramo.direccion[1] * sobra
   }
 
   // Islas y barras: una hilera centrada, separada de la pared de trabajo.
