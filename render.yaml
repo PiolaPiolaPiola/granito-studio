@@ -1,0 +1,42 @@
+# Blueprint de Render: en render.com → New → Blueprint → este repositorio.
+# Un solo servicio web: el servidor Express sirve la API (/api) y la app de React compilada.
+# Guía completa: docs/despliegue-render.md
+services:
+  - type: web
+    name: granito-studio
+    runtime: node
+    plan: free
+    # Virginia (EE. UU. este) es la región de Render más cercana a Colombia.
+    # Crea el cluster de MongoDB Atlas en AWS us-east-1 para que queden cerca.
+    region: virginia
+    branch: master
+    autoDeploy: true
+    # --include=dev: TypeScript y Vite son dependencias de desarrollo y hacen falta para compilar
+    # (con NODE_ENV=production, npm las saltaría).
+    buildCommand: >-
+      npm --prefix client ci --include=dev &&
+      npm --prefix client run build &&
+      npm --prefix server ci --include=dev &&
+      npm --prefix server run build
+    startCommand: npm --prefix server start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      # Render genera un valor largo y aleatorio la primera vez.
+      - key: JWT_SECRET
+        generateValue: true
+      # sync: false → Render los pide al crear el Blueprint; nunca se guardan en el repositorio.
+      - key: MONGODB_URI
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: IA_GEMINI_API_KEY
+        sync: false
+      # CORS_ORIGIN no hace falta: si no está, el servidor usa la URL pública del servicio.

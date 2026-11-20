@@ -62,6 +62,11 @@ No hay registro público. En producción, el usuario real se crea con una contra
 npm --prefix server run usuario:crear -- --email correo@empresa.com --rol admin
 ```
 
+## Despliegue
+
+Gratis en Render + MongoDB Atlas + Cloudinary, con el Blueprint [`render.yaml`](render.yaml).
+Paso a paso en [`docs/despliegue-render.md`](docs/despliegue-render.md).
+
 ## Documentación de la API
 
 - **Swagger UI:** <http://localhost:4000/api/docs>. Inicia sesión en `POST /api/auth/login`, copia el
